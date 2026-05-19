@@ -56,6 +56,8 @@ CREATE TABLE public.profiles (
 );
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "read_own"   ON public.profiles FOR SELECT TO authenticated USING (auth.uid() = id);
+CREATE POLICY "admin_select_all" ON public.profiles FOR SELECT TO authenticated
+  USING (auth.uid() = id OR EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
 CREATE POLICY "service_all" ON public.profiles FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- ── Projects ──────────────────────────────────────────────────────────────

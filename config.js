@@ -7,5 +7,5 @@
 // 4. Replace the two values below with your project credentials
 //    (found in Settings > API > Project URL and anon/public key)
 
-const SUPABASE_URL     = 'https://YOUR_PROJECT_ID.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_PUBLIC_KEY_HERE';
+const SUPABASE_URL     = 'https://vcxmazunifyczyemiazm.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_NV123s-7ZTAbwDr2k-Zi3g_WHSbi73i';

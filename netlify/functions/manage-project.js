@@ -22,7 +22,8 @@ exports.handler = async (event) => {
   if (authErr || !user) return { statusCode: 401, body: 'Unauthorized' };
 
   const adminClient = createClient(supabaseUrl, serviceKey);
-  const { data: profile } = await adminClient.from('profiles').select('role').eq('id', user.id).single();
+  const { data: profiles } = await adminClient.from('profiles').select('role').eq('id', user.id);
+  const profile = profiles?.[0];
   if (!profile || profile.role !== 'admin') return { statusCode: 403, body: 'Forbidden' };
 
   const body = JSON.parse(event.body || '{}');

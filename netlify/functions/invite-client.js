@@ -20,8 +20,9 @@ exports.handler = async (event) => {
   if (authErr || !user) return { statusCode: 401, body: 'Unauthorized' };
 
   const adminClient = createClient(supabaseUrl, serviceKey);
-  const { data: profile, error: profileErr } = await adminClient.from('profiles').select('role').eq('id', user.id).single();
-  if (!profile || profile.role !== 'admin') return { statusCode: 403, body: JSON.stringify({ error: 'Forbidden', userId: user.id, profile, profileErr: profileErr?.message }) };
+  const { data: profiles } = await adminClient.from('profiles').select('role').eq('id', user.id);
+  const profile = profiles?.[0];
+  if (!profile || profile.role !== 'admin') return { statusCode: 403, body: 'Forbidden' };
 
   const { email, full_name, company } = JSON.parse(event.body || '{}');
   if (!email) return { statusCode: 400, body: 'Email required' };

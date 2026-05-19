@@ -383,8 +383,8 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Project</th><th>Client</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
-          <tbody id="projects-tbody"><tr><td colspan="5" class="loading-state">Loading…</td></tr></tbody>
+          <thead><tr><th>Project</th><th>Client</th><th>Status</th><th>Project Page</th><th>Updated</th><th>Actions</th></tr></thead>
+          <tbody id="projects-tbody"><tr><td colspan="6" class="loading-state">Loading…</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -423,6 +423,7 @@
     </div>
     <div class="field"><label>Project Name *</label><input type="text" id="proj-name" placeholder="AI Chatbot Implementation" /></div>
     <div class="field"><label>Description</label><textarea id="proj-desc" placeholder="Brief overview of the project…"></textarea></div>
+    <div class="field"><label>Project Page URL</label><input type="url" id="proj-page-url" placeholder="https://jjaiservices.com/lab/LAB-birthday-greetings/" /></div>
     <div class="field">
       <label>Status</label>
       <select id="proj-status">
@@ -681,10 +682,14 @@
       const client = clientMap[p.client_id];
       const date   = new Date(p.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
       const status = p.status || 'planning';
+      const pageLink = p.page_url
+        ? `<a href="${esc(p.page_url)}" target="_blank" rel="noopener" style="color:var(--teal);font-size:.8rem;font-weight:600;">Open ↗</a>`
+        : `<span style="color:var(--muted);font-size:.8rem;">—</span>`;
       return `<tr>
         <td class="name-cell">${esc(p.name)}</td>
         <td>${esc(client?.full_name || client?.email || 'Unknown')}</td>
         <td><span class="status-badge status-${status}">${STATUS_LABELS[status]||status}</span></td>
+        <td>${pageLink}</td>
         <td class="date-cell">${date}</td>
         <td><div class="btn-row">
           <button class="btn-sm edit"   onclick="openProjectModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">Edit</button>
@@ -713,7 +718,8 @@
     document.getElementById('proj-name').value    = project?.name || '';
     document.getElementById('proj-desc').value    = project?.description || '';
     document.getElementById('proj-status').value  = project?.status || 'planning';
-    document.getElementById('proj-notes').value   = project?.notes || '';
+    document.getElementById('proj-notes').value    = project?.notes || '';
+    document.getElementById('proj-page-url').value = project?.page_url || '';
     document.getElementById('proj-client').value  = project?.client_id || '';
     document.getElementById('project-msg').textContent = '';
     document.getElementById('project-save-btn').disabled = false;
@@ -802,6 +808,7 @@
       milestones:  collectMilestones(),
       links:       collectLinks(),
       notes:       document.getElementById('proj-notes').value.trim() || null,
+      page_url:    document.getElementById('proj-page-url').value.trim() || null,
     };
 
     btn.disabled = true; btn.textContent = 'Saving…'; msg.textContent = '';

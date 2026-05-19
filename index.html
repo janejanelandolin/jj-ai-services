@@ -691,12 +691,16 @@
         <option value="unsure">Not sure yet — help me decide</option>
       </select>
       <textarea name="message" placeholder="Tell us a little more (optional)"></textarea>
-      <p style="font-size:.78rem;color:rgba(10,15,44,.45);text-align:center;line-height:1.5;">
-        By clicking Submit you agree to receive text messages and phone calls from JJAIServices.com
-        regarding your enquiry and our services. Message &amp; data rates may apply. Reply STOP to
-        unsubscribe at any time. View our <a href="/privacy.html" style="color:inherit;text-decoration:underline;">Privacy Policy</a>
-        and <a href="/terms.html" style="color:inherit;text-decoration:underline;">Terms &amp; Conditions</a>.
-      </p>
+      <label style="display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;text-align:left;">
+        <input type="checkbox" name="sms_consent" required
+          style="flex-shrink:0;width:18px;height:18px;margin-top:2px;accent-color:#00897b;cursor:pointer;" />
+        <span style="font-size:.82rem;color:rgba(10,15,44,.6);line-height:1.5;">
+          I agree to receive text messages and phone calls from JJAIServices.com about my enquiry and services.
+          Message &amp; data rates may apply. Reply STOP to unsubscribe at any time.
+          View our <a href="/privacy.html" style="color:#00897b;">Privacy Policy</a>
+          and <a href="/terms.html" style="color:#00897b;">Terms &amp; Conditions</a>.
+        </span>
+      </label>
       <p id="form-message" style="min-height:1.4em;font-size:.9rem;text-align:center;font-weight:500;"></p>
       <button type="submit" class="btn-primary">Send My Request &rarr;</button>
     </form>
@@ -738,13 +742,14 @@
     msgEl.textContent = '';
 
     const { error } = await _sb.from('signups').insert({
-      first_name: form.first_name.value.trim(),
-      last_name:  form.last_name.value.trim(),
-      email:      form.email.value.trim(),
-      company:    form.company.value.trim() || null,
-      plan:       form.plan.value || 'unsure',
-      challenge:  form.challenge ? form.challenge.value : null,
-      message:    form.message.value.trim() || null,
+      first_name:  form.first_name.value.trim(),
+      last_name:   form.last_name.value.trim(),
+      email:       form.email.value.trim(),
+      company:     form.company.value.trim() || null,
+      plan:        form.plan.value || 'unsure',
+      challenge:   form.challenge ? form.challenge.value : null,
+      message:     form.message.value.trim() || null,
+      sms_consent: form.sms_consent.checked,
     });
 
     if (error) {

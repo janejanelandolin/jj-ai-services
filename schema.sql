@@ -10,7 +10,8 @@ CREATE TABLE public.signups (
   company     TEXT,
   plan        TEXT        NOT NULL,
   challenge   TEXT,
-  message     TEXT
+  message     TEXT,
+  sms_consent BOOLEAN DEFAULT false
 );
 
 ALTER TABLE public.signups ENABLE ROW LEVEL SECURITY;

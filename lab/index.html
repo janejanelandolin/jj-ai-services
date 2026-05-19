@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Greetings — LAB Wealth Management</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0a0f2c; --cyan: #00bcd4; --teal: #00897b;
+      --white: #ffffff; --off: #f0f4ff; --text: #1c1c2e; --muted: #5c6480;
+      --radius: 14px; --shadow: 0 4px 24px rgba(10,15,44,.09);
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--off); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--white); border-bottom: 1px solid rgba(10,15,44,.08);
+      padding: 1rem 5%; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 8px rgba(10,15,44,.05); position: sticky; top: 0; z-index: 10;
+    }
+    .logo { display: flex; align-items: center; gap: .65rem; text-decoration: none; }
+    .logo-text { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
+    .logo-text span { color: var(--cyan); }
+    .logo-sub { font-size: .6rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .btn-back, .btn-logout {
+      padding: .4rem 1rem; border: 1.5px solid rgba(10,15,44,.12); border-radius: 50px;
+      background: transparent; color: var(--navy); font-size: .82rem; font-weight: 600;
+      text-decoration: none; cursor: pointer; transition: border-color .2s;
+    }
+    .btn-back:hover, .btn-logout:hover { border-color: var(--cyan); color: var(--teal); }
+
+    main { max-width: 1000px; margin: 0 auto; padding: 2.5rem 5% 5rem; }
+
+    .page-header { margin-bottom: 2rem; }
+    .page-header h1 { font-size: 1.7rem; font-weight: 800; color: var(--navy); letter-spacing: -.03em; }
+    .page-header p  { color: var(--muted); font-size: .92rem; margin-top: .35rem; }
+
+    .card {
+      background: var(--white); border-radius: var(--radius);
+      border: 1px solid rgba(10,15,44,.07); box-shadow: var(--shadow);
+      padding: 1.8rem; margin-bottom: 1.4rem;
+    }
+    .card-title {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--cyan); margin-bottom: 1.2rem;
+    }
+
+    /* Tabs */
+    .tabs { display: flex; gap: .5rem; margin-bottom: 1.4rem; }
+    .tab {
+      padding: .5rem 1.2rem; border-radius: 50px; border: 1.5px solid rgba(10,15,44,.12);
+      background: transparent; font-size: .85rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: all .18s;
+    }
+    .tab.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Form */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: .3rem; }
+    .form-group label { font-size: .8rem; font-weight: 600; color: var(--navy); }
+    .form-group input, .form-group textarea {
+      padding: .7rem .9rem; border: 1px solid rgba(10,15,44,.14); border-radius: 8px;
+      font-size: .9rem; font-family: inherit; color: var(--text); outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,188,212,.1);
+    }
+    .hint { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+
+    .btn-primary {
+      padding: .75rem 2rem; border: none; border-radius: 50px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); font-weight: 700; font-size: .9rem;
+      cursor: pointer; transition: opacity .2s, transform .2s;
+      box-shadow: 0 4px 16px rgba(0,188,212,.25); margin-top: .5rem;
+    }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed rgba(10,15,44,.15); border-radius: 10px;
+      padding: 2.5rem; text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s; margin-bottom: 1rem;
+    }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--cyan); background: rgba(0,188,212,.04); }
+    .drop-icon { font-size: 2rem; margin-bottom: .5rem; }
+    .drop-zone p { color: var(--muted); font-size: .9rem; }
+    .file-label { color: var(--teal); font-weight: 600; cursor: pointer; }
+    .file-name { font-size: .82rem; color: var(--navy); font-weight: 600; margin-top: .4rem; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--navy); color: var(--white); padding: .75rem 1.5rem;
+      border-radius: 50px; font-size: .88rem; font-weight: 600;
+      box-shadow: 0 8px 24px rgba(10,15,44,.2); transition: transform .3s, opacity .3s;
+      opacity: 0; pointer-events: none; z-index: 100;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.error { background: #c62828; }
+    .toast.success { background: var(--teal); }
+
+    /* Table */
+    .contacts-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .contacts-header h2 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+    .btn-secondary {
+      padding: .4rem 1rem; border: 1.5px solid rgba(10,15,44,.12); border-radius: 50px;
+      background: transparent; font-size: .82rem; font-weight: 600; color: var(--navy);
+      cursor: pointer; transition: border-color .2s;
+    }
+    .btn-secondary:hover { border-color: var(--cyan); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th { padding: .6rem .9rem; text-align: left; font-size: .7rem; font-weight: 700;
+         text-transform: uppercase; letter-spacing: .07em; color: var(--muted);
+         border-bottom: 2px solid rgba(10,15,44,.07); }
+    td { padding: .75rem .9rem; border-bottom: 1px solid rgba(10,15,44,.05); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    .empty { text-align: center; color: var(--muted); padding: 2.5rem; font-style: italic; }
+    .msg-cell { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .badge { display: inline-block; padding: .2rem .6rem; border-radius: 50px; font-size: .7rem; font-weight: 700; }
+    .badge-scheduled { background: #e3f2fd; color: #1565c0; }
+    .badge-sent      { background: #e8f5e9; color: #2e7d32; }
+    .badge-failed    { background: #ffebee; color: #c62828; }
+    .status-detail   { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+    .status-msg      { font-size: .72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+
+    .send-btn {
+      padding: .3rem .75rem; border-radius: 50px; border: 1.5px solid var(--teal);
+      background: transparent; color: var(--teal); font-size: .75rem; font-weight: 600;
+      cursor: pointer; transition: background .15s, color .15s; margin-right: .3rem;
+    }
+    .send-btn:hover { background: var(--teal); color: var(--white); }
+    .send-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .delete-btn {
+      padding: .3rem .6rem; border-radius: 50px; border: 1.5px solid rgba(10,15,44,.12);
+      background: transparent; color: var(--muted); font-size: .75rem; cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .delete-btn:hover { border-color: #c62828; color: #c62828; }
+    .log-btn {
+      background: none; border: none; color: var(--teal); font-size: .8rem; font-weight: 600; cursor: pointer;
+    }
+    .log-row td { background: #f8feff; padding: .5rem .9rem; }
+    .log-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+    .log-table th { font-size: .68rem; }
+    .log-table td { padding: .4rem .6rem; }
+    .log-success td { background: rgba(46,125,50,.03); }
+    .log-fail    td { background: rgba(198,40,40,.03); }
+    .trigger-badge { padding: .15rem .5rem; border-radius: 50px; font-size: .68rem; font-weight: 700;
+                     background: rgba(10,15,44,.07); color: var(--navy); }
+    .log-sid code { font-size: .72rem; background: var(--off); padding: .1rem .3rem; border-radius: 4px; }
+    .log-empty { color: var(--muted); font-style: italic; padding: .5rem 0; }
+
+    footer {
+      text-align: center; padding: 2rem 5%; font-size: .82rem; color: var(--muted);
+      border-top: 1px solid rgba(10,15,44,.07);
+    }
+    footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">
+    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="100%" stop-color="#00897b"/></linearGradient></defs>
+      <line x1="8" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="8" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <circle cx="20" cy="20" r="5" fill="url(#lg)"/>
+      <circle cx="8" cy="8" r="3" fill="#00bcd4" opacity=".85"/>
+      <circle cx="32" cy="8" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="8" cy="32" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="32" cy="32" r="3" fill="#00bcd4" opacity=".85"/>
+    </svg>
+    <div>
+      <div class="logo-text">JJ <span>AI</span> Services</div>
+      <div class="logo-sub">LAB Wealth Management</div>
+    </div>
+  </a>
+  <div class="header-right">
+    <a class="btn-back" href="/client-portal.html">← My Projects</a>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </div>
+</header>
+
+<main>
+  <div class="page-header">
+    <h1>🎂 Birthday Greetings</h1>
+    <p>Schedule automatic birthday SMS messages to your clients.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="single">Add Contact</button>
+    <button class="tab" data-tab="upload">Spreadsheet Upload</button>
+  </div>
+
+  <!-- Single Entry -->
+  <div id="single" class="tab-panel active">
+    <div class="card">
+      <div class="card-title">New Contact</div>
+      <form id="single-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="first_name" required placeholder="Jane" />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="last_name" required placeholder="Smith" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Birthday</label>
+            <input type="date" id="birthday" required />
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="phone_number" required placeholder="(555) 555-5555" />
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label>Message <span style="font-weight:400;color:var(--muted);">(optional)</span></label>
+          <textarea id="message" rows="3" placeholder="Happy Birthday [First Name]! 🎂 - from your friends at LAB Wealth Management"></textarea>
+          <span class="hint">Leave blank to use the default message</span>
+        </div>
+        <button type="submit" class="btn-primary" id="add-btn">Add Contact</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Upload -->
+  <div id="upload" class="tab-panel">
+    <div class="card">
+      <div class="card-title">Spreadsheet Upload</div>
+      <p style="font-size:.88rem;color:var(--muted);margin-bottom:.75rem;">
+        Upload a <strong>CSV</strong> or <strong>XLSX</strong> file with columns:
+        <code style="background:var(--off);padding:.1rem .4rem;border-radius:4px;font-size:.82rem;">First Name, Last Name, Birthday, Phone Number, Message (optional)</code>
+      </p>
+      <p class="hint" style="margin-bottom:1rem;">Date formats accepted: MM/DD/YYYY, YYYY-MM-DD, MM-DD-YYYY</p>
+      <form id="upload-form">
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-icon">📁</div>
+          <p>Drag & drop your file here, or <label for="file-input" class="file-label">browse</label></p>
+          <input type="file" id="file-input" accept=".csv,.xlsx,.xls" hidden />
+          <p id="file-name" class="file-name"></p>
+        </div>
+        <button type="submit" class="btn-primary" id="upload-btn" disabled>Upload & Schedule</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Contacts table -->
+  <div class="card">
+    <div class="contacts-header">
+      <h2>Scheduled Contacts</h2>
+      <button class="btn-secondary" id="refresh-btn">Refresh</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th><th>Birthday</th><th>Phone</th>
+            <th>Message</th><th>Status</th><th>Log</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="contacts-body">
+          <tr><td colspan="7" class="empty">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2026 <a href="/">JJAIServices.com</a> &nbsp;|&nbsp; Powered by JJ AI Services</p>
+</footer>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

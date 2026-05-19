@@ -87,3 +87,51 @@ CREATE POLICY "admin_all" ON public.projects
 -- Service role (Netlify functions) can do everything
 CREATE POLICY "service_all" ON public.projects
   FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+-- ── Birthday Buddy ────────────────────────────────────────────────────────
+CREATE TABLE public.bb_contacts (
+  id           UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at   TIMESTAMPTZ DEFAULT now(),
+  client_id    UUID        REFERENCES auth.users(id) ON DELETE CASCADE,
+  first_name   TEXT        NOT NULL,
+  last_name    TEXT        NOT NULL,
+  birthday     DATE        NOT NULL,
+  phone_number TEXT        NOT NULL,
+  message      TEXT        NOT NULL
+);
+ALTER TABLE public.bb_contacts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "client_own"  ON public.bb_contacts FOR ALL TO authenticated
+  USING (auth.uid() = client_id) WITH CHECK (auth.uid() = client_id);
+CREATE POLICY "admin_all"   ON public.bb_contacts FOR ALL TO authenticated
+  USING    (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'))
+  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'));
+CREATE POLICY "service_all" ON public.bb_contacts FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+CREATE TABLE public.bb_send_log (
+  id           UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  contact_id   UUID        REFERENCES public.bb_contacts(id) ON DELETE CASCADE,
+  year         INT         NOT NULL,
+  sent_at      TIMESTAMPTZ DEFAULT now(),
+  message_body TEXT,
+  error        TEXT,
+  UNIQUE(contact_id, year)
+);
+ALTER TABLE public.bb_send_log ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service_all" ON public.bb_send_log FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY "client_own"  ON public.bb_send_log FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.bb_contacts WHERE id = contact_id AND client_id = auth.uid()));
+
+CREATE TABLE public.bb_send_attempts (
+  id           UUID        DEFAULT gen_random_uuid() PRIMARY KEY,
+  contact_id   UUID        REFERENCES public.bb_contacts(id) ON DELETE CASCADE,
+  attempted_at TIMESTAMPTZ DEFAULT now(),
+  trigger      TEXT        NOT NULL,
+  success      BOOLEAN     NOT NULL DEFAULT false,
+  message_body TEXT,
+  twilio_sid   TEXT,
+  error        TEXT
+);
+ALTER TABLE public.bb_send_attempts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "service_all" ON public.bb_send_attempts FOR ALL TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY "client_own"  ON public.bb_send_attempts FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.bb_contacts WHERE id = contact_id AND client_id = auth.uid()));

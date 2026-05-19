@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "JJAIServices.com website and serverless functions",
   "dependencies": {
-    "@supabase/supabase-js": "^2.0.0"
+    "@netlify/functions": "^2.0.0",
+    "@supabase/supabase-js": "^2.0.0",
+    "csv-parse": "^6.2.1",
+    "exceljs": "^4.4.0",
+    "twilio": "^6.0.0"
   }
 }

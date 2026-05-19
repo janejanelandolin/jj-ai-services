@@ -3,3 +3,8 @@
 
 [functions]
   node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/lab"
+  to   = "/lab/index.html"
+  status = 200

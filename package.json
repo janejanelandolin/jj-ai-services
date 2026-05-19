@@ -1,0 +1,8 @@
+{
+  "name": "jj-ai-services",
+  "version": "1.0.0",
+  "description": "JJAIServices.com website and serverless functions",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0"
+  }
+}

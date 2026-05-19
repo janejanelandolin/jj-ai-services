@@ -680,8 +680,9 @@
         <input type="text"  name="first_name" placeholder="First name" required />
         <input type="text"  name="last_name"  placeholder="Last name"  required />
       </div>
-      <input type="email"   name="email"    placeholder="Work email" required />
-      <input type="text"    name="company"  placeholder="Company / Organisation" />
+      <input type="email" name="email"   placeholder="Work email" required />
+      <input type="tel"   name="phone"   placeholder="Mobile number (for updates)" />
+      <input type="text"  name="company" placeholder="Company / Organisation" />
       <select name="plan">
         <option value="" disabled selected>Which plan interests you?</option>
         <option value="discovery">Free Discovery Call</option>
@@ -745,6 +746,7 @@
       first_name:  form.first_name.value.trim(),
       last_name:   form.last_name.value.trim(),
       email:       form.email.value.trim(),
+      phone:       form.phone.value.trim() || null,
       company:     form.company.value.trim() || null,
       plan:        form.plan.value || 'unsure',
       challenge:   form.challenge ? form.challenge.value : null,

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — JJ AI Services</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #0a0f2c;
+      --indigo: #1a237e;
+      --blue:   #1565c0;
+      --cyan:   #00bcd4;
+      --teal:   #00897b;
+      --white:  #ffffff;
+      --off:    #f0f4ff;
+      --text:   #1c1c2e;
+      --muted:  #5c6480;
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(10,15,44,.09);
+    }
+
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--off); color: var(--text); min-height: 100vh; }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(160deg, #f0f9ff 0%, #e0f7fa 50%, #f0f4ff 100%);
+    }
+    .login-card {
+      background: var(--white); border-radius: 20px;
+      padding: 2.5rem 2rem; width: 100%; max-width: 380px;
+      box-shadow: 0 12px 48px rgba(10,15,44,.12);
+      border: 1px solid rgba(10,15,44,.07);
+    }
+    .login-logo { display: flex; align-items: center; gap: .65rem; margin-bottom: 1.8rem; justify-content: center; }
+    .login-logo-text { font-size: 1.2rem; font-weight: 800; color: var(--navy); }
+    .login-logo-text span { color: var(--cyan); }
+    .login-card h2 { font-size: 1.3rem; font-weight: 700; color: var(--navy); text-align: center; margin-bottom: .4rem; }
+    .login-card p  { text-align: center; color: var(--muted); font-size: .88rem; margin-bottom: 1.6rem; }
+
+    .field { display: flex; flex-direction: column; gap: .35rem; margin-bottom: 1rem; }
+    .field label { font-size: .82rem; font-weight: 600; color: var(--navy); }
+    .field input {
+      padding: .75rem 1rem; border: 1px solid rgba(10,15,44,.14); border-radius: 10px;
+      font-size: .92rem; color: var(--text); font-family: inherit;
+      outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .field input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,188,212,.12); }
+
+    #login-error { font-size: .85rem; color: #c62828; text-align: center; min-height: 1.2em; margin-bottom: .6rem; }
+
+    .btn-login {
+      width: 100%; padding: .85rem; border: none; border-radius: 50px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); font-weight: 700; font-size: .95rem;
+      cursor: pointer; transition: opacity .2s;
+    }
+    .btn-login:hover { opacity: .88; }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* ── DASHBOARD ── */
+    #dashboard-screen { display: none; }
+
+    header {
+      background: var(--white); border-bottom: 1px solid rgba(10,15,44,.08);
+      padding: 1rem 5%; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 8px rgba(10,15,44,.05);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .header-logo { display: flex; align-items: center; gap: .65rem; }
+    .header-logo-text { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
+    .header-logo-text span { color: var(--cyan); }
+    .header-logo-sub { font-size: .6rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .header-title { font-size: .95rem; font-weight: 600; color: var(--muted); }
+
+    .btn-logout {
+      padding: .45rem 1.1rem; border: 1.5px solid rgba(10,15,44,.15); border-radius: 50px;
+      background: transparent; color: var(--navy); font-size: .85rem; font-weight: 600;
+      cursor: pointer; transition: border-color .2s, background .2s;
+    }
+    .btn-logout:hover { border-color: var(--cyan); background: rgba(0,188,212,.06); }
+
+    main { padding: 2rem 5%; max-width: 1300px; margin: 0 auto; }
+
+    /* Stats */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1.3rem 1.2rem; box-shadow: var(--shadow);
+      border: 1px solid rgba(10,15,44,.06);
+      border-top: 3px solid;
+    }
+    .stat-card:nth-child(1) { border-top-color: #00897b; }
+    .stat-card:nth-child(2) { border-top-color: #1b5e20; }
+    .stat-card:nth-child(3) { border-top-color: #e65100; }
+    .stat-card:nth-child(4) { border-top-color: #311b92; }
+    .stat-card:nth-child(5) { border-top-color: var(--cyan); }
+    .stat-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .4rem; }
+    .stat-value { font-size: 2rem; font-weight: 800; color: var(--navy); line-height: 1; }
+
+    /* Controls */
+    .controls {
+      display: flex; align-items: center; gap: 1rem;
+      flex-wrap: wrap; margin-bottom: 1.2rem; justify-content: space-between;
+    }
+    .filter-tabs { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .tab-btn {
+      padding: .4rem 1rem; border-radius: 50px; border: 1.5px solid rgba(10,15,44,.12);
+      background: var(--white); color: var(--muted); font-size: .82rem; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+    }
+    .tab-btn.active, .tab-btn:hover {
+      border-color: var(--cyan); background: rgba(0,188,212,.08); color: var(--teal);
+    }
+    .tab-btn.active { background: var(--cyan); color: var(--white); border-color: var(--cyan); }
+
+    .right-controls { display: flex; align-items: center; gap: .7rem; }
+    #search-input {
+      padding: .45rem .9rem; border: 1px solid rgba(10,15,44,.14); border-radius: 8px;
+      font-size: .88rem; color: var(--text); outline: none; width: 200px;
+      font-family: inherit; transition: border-color .2s;
+    }
+    #search-input:focus { border-color: var(--cyan); }
+
+    .btn-export {
+      padding: .45rem 1rem; border-radius: 8px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); font-size: .82rem; font-weight: 700;
+      border: none; cursor: pointer; transition: opacity .2s;
+      white-space: nowrap;
+    }
+    .btn-export:hover { opacity: .85; }
+
+    /* Table */
+    .table-wrap {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); border: 1px solid rgba(10,15,44,.06);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      text-align: left; padding: .85rem 1rem;
+      font-size: .75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted);
+      background: var(--off); border-bottom: 1px solid rgba(10,15,44,.07);
+    }
+    tbody tr { border-bottom: 1px solid rgba(10,15,44,.05); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #fafbff; }
+    tbody td { padding: .85rem 1rem; font-size: .88rem; vertical-align: top; }
+    td.date-cell { color: var(--muted); white-space: nowrap; font-size: .82rem; }
+    td.name-cell { font-weight: 600; white-space: nowrap; }
+    td.email-cell { color: var(--blue); }
+    td.msg-cell  { color: var(--muted); max-width: 260px; }
+    td.msg-cell span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .plan-badge {
+      display: inline-block; padding: .2rem .6rem; border-radius: 50px;
+      font-size: .73rem; font-weight: 700; white-space: nowrap;
+    }
+    .badge-discovery  { background: #e0f7fa; color: #006064; }
+    .badge-strategy   { background: #e8f5e9; color: #1b5e20; }
+    .badge-standalone { background: #fff3e0; color: #e65100; }
+    .badge-full       { background: #ede7f6; color: #311b92; }
+    .badge-unsure     { background: #f5f5f5; color: #616161; }
+
+    .empty-state {
+      padding: 3rem; text-align: center; color: var(--muted); font-size: .95rem;
+    }
+    .loading-state { padding: 2rem; text-align: center; color: var(--muted); }
+
+    /* Pagination */
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 1.2rem; border-top: 1px solid rgba(10,15,44,.06);
+      font-size: .85rem; color: var(--muted);
+    }
+    .page-btns { display: flex; gap: .4rem; }
+    .page-btn {
+      padding: .3rem .7rem; border: 1px solid rgba(10,15,44,.12); border-radius: 6px;
+      background: var(--white); color: var(--navy); font-size: .82rem; cursor: pointer;
+      transition: all .15s;
+    }
+    .page-btn:hover:not(:disabled) { border-color: var(--cyan); color: var(--teal); }
+    .page-btn:disabled { opacity: .4; cursor: default; }
+    .page-btn.current { background: var(--cyan); color: var(--white); border-color: var(--cyan); }
+
+    @media (max-width: 700px) {
+      .controls { flex-direction: column; align-items: flex-start; }
+      #search-input { width: 100%; }
+      table { font-size: .8rem; }
+      thead th, tbody td { padding: .6rem .7rem; }
+      td.msg-cell { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg width="34" height="34" viewBox="0 0 40 40" fill="none">
+        <defs><linearGradient id="admlg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="100%" stop-color="#00897b"/></linearGradient></defs>
+        <line x1="8" y1="8" x2="20" y2="20" stroke="url(#admlg)" stroke-width="1.4" opacity=".6"/>
+        <line x1="32" y1="8" x2="20" y2="20" stroke="url(#admlg)" stroke-width="1.4" opacity=".6"/>
+        <line x1="8" y1="32" x2="20" y2="20" stroke="url(#admlg)" stroke-width="1.4" opacity=".6"/>
+        <line x1="32" y1="32" x2="20" y2="20" stroke="url(#admlg)" stroke-width="1.4" opacity=".6"/>
+        <circle cx="20" cy="20" r="5" fill="url(#admlg)"/>
+        <circle cx="8" cy="8" r="3" fill="#00bcd4" opacity=".85"/>
+        <circle cx="32" cy="8" r="3" fill="#00897b" opacity=".85"/>
+        <circle cx="8" cy="32" r="3" fill="#00897b" opacity=".85"/>
+        <circle cx="32" cy="32" r="3" fill="#00bcd4" opacity=".85"/>
+      </svg>
+      <div>
+        <div class="login-logo-text">JJ <span>AI</span> Services</div>
+      </div>
+    </div>
+    <h2>Admin Sign In</h2>
+    <p>Sign in to view and manage signups</p>
+    <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="admin@example.com" /></div>
+    <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" /></div>
+    <p id="login-error"></p>
+    <button class="btn-login" id="login-btn" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- DASHBOARD SCREEN -->
+<div id="dashboard-screen">
+  <header>
+    <div class="header-logo">
+      <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+        <defs><linearGradient id="hdrlg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="100%" stop-color="#00897b"/></linearGradient></defs>
+        <line x1="8" y1="8" x2="20" y2="20" stroke="url(#hdrlg)" stroke-width="1.4" opacity=".6"/>
+        <line x1="32" y1="8" x2="20" y2="20" stroke="url(#hdrlg)" stroke-width="1.4" opacity=".6"/>
+        <line x1="8" y1="32" x2="20" y2="20" stroke="url(#hdrlg)" stroke-width="1.4" opacity=".6"/>
+        <line x1="32" y1="32" x2="20" y2="20" stroke="url(#hdrlg)" stroke-width="1.4" opacity=".6"/>
+        <circle cx="20" cy="20" r="5" fill="url(#hdrlg)"/>
+        <circle cx="8" cy="8" r="3" fill="#00bcd4" opacity=".85"/>
+        <circle cx="32" cy="8" r="3" fill="#00897b" opacity=".85"/>
+        <circle cx="8" cy="32" r="3" fill="#00897b" opacity=".85"/>
+        <circle cx="32" cy="32" r="3" fill="#00bcd4" opacity=".85"/>
+      </svg>
+      <div>
+        <div class="header-logo-text">JJ <span>AI</span> Services</div>
+        <div class="header-logo-sub">Admin Dashboard</div>
+      </div>
+    </div>
+    <span class="header-title" id="admin-email-display"></span>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </header>
+
+  <main>
+    <!-- Stats -->
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="stat-label">Free Discovery</div><div class="stat-value" id="cnt-discovery">—</div></div>
+      <div class="stat-card"><div class="stat-label">Strategy $50</div><div class="stat-value" id="cnt-strategy">—</div></div>
+      <div class="stat-card"><div class="stat-label">Standalone $500</div><div class="stat-value" id="cnt-standalone">—</div></div>
+      <div class="stat-card"><div class="stat-label">Expert Led $5k</div><div class="stat-value" id="cnt-full">—</div></div>
+      <div class="stat-card"><div class="stat-label">Total Signups</div><div class="stat-value" id="cnt-total">—</div></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="filter-tabs">
+        <button class="tab-btn active" data-filter="all"        onclick="setFilter('all',this)">All</button>
+        <button class="tab-btn"        data-filter="discovery"  onclick="setFilter('discovery',this)">Free Discovery</button>
+        <button class="tab-btn"        data-filter="strategy"   onclick="setFilter('strategy',this)">Strategy $50</button>
+        <button class="tab-btn"        data-filter="standalone" onclick="setFilter('standalone',this)">Standalone $500</button>
+        <button class="tab-btn"        data-filter="full"       onclick="setFilter('full',this)">Expert Led $5k</button>
+      </div>
+      <div class="right-controls">
+        <input type="text" id="search-input" placeholder="Search name, email…" oninput="renderTable()" />
+        <button class="btn-export" onclick="exportCSV()">↓ Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Company</th>
+            <th>Plan</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody id="signups-tbody">
+          <tr><td colspan="6" class="loading-state">Loading…</td></tr>
+        </tbody>
+      </table>
+      <div class="pagination" id="pagination" style="display:none;">
+        <span id="page-info"></span>
+        <div class="page-btns" id="page-btns"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const PLAN_LABELS = {
+    discovery:  'Free Discovery Call',
+    strategy:   'Strategy Session',
+    standalone: 'Standalone Project',
+    full:       'Expert Led',
+    unsure:     'Not Sure Yet',
+  };
+
+  let allSignups   = [];
+  let activeFilter = 'all';
+  let currentPage  = 1;
+  const PAGE_SIZE  = 50;
+
+  // ── AUTH ──────────────────────────────────────────────────────
+  _sb.auth.getSession().then(({ data: { session } }) => {
+    if (session) enterDashboard(session.user);
+    else         showLogin();
+  });
+
+  function showLogin() {
+    document.getElementById('login-screen').style.display    = 'flex';
+    document.getElementById('dashboard-screen').style.display = 'none';
+  }
+
+  function enterDashboard(user) {
+    document.getElementById('login-screen').style.display    = 'none';
+    document.getElementById('dashboard-screen').style.display = 'block';
+    document.getElementById('admin-email-display').textContent = user.email;
+    loadData();
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-password').value;
+    const btn   = document.getElementById('login-btn');
+    const err   = document.getElementById('login-error');
+    err.textContent = '';
+    btn.textContent = 'Signing in…'; btn.disabled = true;
+
+    const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
+    if (error) {
+      err.textContent = error.message;
+      btn.textContent = 'Sign In'; btn.disabled = false;
+    } else {
+      enterDashboard(data.user);
+    }
+  }
+
+  document.getElementById('login-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  async function doLogout() {
+    await _sb.auth.signOut();
+    showLogin();
+    allSignups = [];
+  }
+
+  // ── DATA ──────────────────────────────────────────────────────
+  async function loadData() {
+    document.getElementById('signups-tbody').innerHTML =
+      '<tr><td colspan="6" class="loading-state">Loading…</td></tr>';
+
+    const { data, error } = await _sb
+      .from('signups')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      document.getElementById('signups-tbody').innerHTML =
+        `<tr><td colspan="6" class="empty-state">Error loading data: ${error.message}</td></tr>`;
+      return;
+    }
+
+    allSignups = data || [];
+    updateStats();
+    renderTable();
+  }
+
+  function updateStats() {
+    const counts = { discovery: 0, strategy: 0, standalone: 0, full: 0 };
+    allSignups.forEach(r => { if (counts[r.plan] !== undefined) counts[r.plan]++; });
+    document.getElementById('cnt-discovery').textContent  = counts.discovery;
+    document.getElementById('cnt-strategy').textContent   = counts.strategy;
+    document.getElementById('cnt-standalone').textContent = counts.standalone;
+    document.getElementById('cnt-full').textContent       = counts.full;
+    document.getElementById('cnt-total').textContent      = allSignups.length;
+  }
+
+  function setFilter(f, el) {
+    activeFilter = f; currentPage = 1;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderTable();
+  }
+
+  function getFiltered() {
+    const q = document.getElementById('search-input').value.toLowerCase();
+    return allSignups.filter(r => {
+      const matchPlan = activeFilter === 'all' || r.plan === activeFilter;
+      const matchQ    = !q ||
+        (r.first_name + ' ' + r.last_name).toLowerCase().includes(q) ||
+        r.email.toLowerCase().includes(q) ||
+        (r.company || '').toLowerCase().includes(q);
+      return matchPlan && matchQ;
+    });
+  }
+
+  function renderTable() {
+    const rows    = getFiltered();
+    const total   = rows.length;
+    const pages   = Math.ceil(total / PAGE_SIZE);
+    if (currentPage > pages) currentPage = Math.max(1, pages);
+    const slice   = rows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const tbody   = document.getElementById('signups-tbody');
+    const pagDiv  = document.getElementById('pagination');
+
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No signups found.</td></tr>';
+      pagDiv.style.display = 'none';
+      return;
+    }
+
+    tbody.innerHTML = slice.map(r => {
+      const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const plan = r.plan || 'unsure';
+      const label = PLAN_LABELS[plan] || plan;
+      return `<tr>
+        <td class="date-cell">${date}</td>
+        <td class="name-cell">${esc(r.first_name)} ${esc(r.last_name)}</td>
+        <td class="email-cell">${esc(r.email)}</td>
+        <td>${esc(r.company || '—')}</td>
+        <td><span class="plan-badge badge-${plan}">${label}</span></td>
+        <td class="msg-cell"><span title="${esc(r.message || '')}">${esc(r.message || '—')}</span></td>
+      </tr>`;
+    }).join('');
+
+    // Pagination
+    if (pages <= 1) { pagDiv.style.display = 'none'; return; }
+    pagDiv.style.display = 'flex';
+    document.getElementById('page-info').textContent =
+      `Showing ${(currentPage-1)*PAGE_SIZE+1}–${Math.min(currentPage*PAGE_SIZE, total)} of ${total}`;
+    const btns = document.getElementById('page-btns');
+    btns.innerHTML = `
+      <button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹ Prev</button>
+      <button class="page-btn current">${currentPage}</button>
+      <button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>Next ›</button>`;
+  }
+
+  function goPage(p) { currentPage = p; renderTable(); window.scrollTo(0,0); }
+
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── CSV EXPORT ────────────────────────────────────────────────
+  function exportCSV() {
+    const rows  = getFiltered();
+    const header = ['Date','First Name','Last Name','Email','Company','Plan','Challenge','Message'];
+    const lines  = [header.join(',')];
+    rows.forEach(r => {
+      const date = new Date(r.created_at).toLocaleDateString('en-US');
+      lines.push([date, r.first_name, r.last_name, r.email, r.company||'', PLAN_LABELS[r.plan]||r.plan, r.challenge||'', r.message||'']
+        .map(v => `"${String(v).replace(/"/g,'""')}"`)
+        .join(','));
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a'); a.href = url;
+    a.download = `jj-ai-signups-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>

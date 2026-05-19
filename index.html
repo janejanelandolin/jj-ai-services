@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JJ AI Services</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #0a0f2c;
+      --indigo: #1a237e;
+      --blue:   #1565c0;
+      --cyan:   #00bcd4;
+      --teal:   #00897b;
+      --white:  #ffffff;
+      --off:    #f0f4ff;
+      --text:   #1c1c2e;
+      --muted:  #5c6480;
+      --card:   #ffffff;
+      --radius: 16px;
+      --shadow: 0 8px 32px rgba(10,15,44,.10);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--off);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 5%;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(10,15,44,.08);
+      box-shadow: 0 1px 12px rgba(10,15,44,.06);
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .logo-mark { width: 38px; height: 38px; flex-shrink: 0; }
+    .logo-text {
+      font-size: 1.25rem; font-weight: 800; color: var(--navy);
+      letter-spacing: -.02em; line-height: 1.1;
+    }
+    .logo-text span { color: var(--cyan); }
+    .logo-sub {
+      font-size: .62rem; font-weight: 500; color: var(--muted);
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+
+    nav ul { list-style: none; display: flex; gap: 2rem; }
+    nav ul a {
+      text-decoration: none; color: var(--muted);
+      font-size: .92rem; font-weight: 500; transition: color .2s;
+    }
+    nav ul a:hover { color: var(--cyan); }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white) !important; padding: .5rem 1.3rem;
+      border-radius: 50px; font-weight: 700 !important;
+      transition: opacity .2s !important;
+    }
+    .nav-cta:hover { opacity: .85; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(160deg, #f0f9ff 0%, #e0f7fa 50%, #f0f4ff 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 8rem 5% 5rem;
+      position: relative; overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 40%, rgba(0,188,212,.10) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 60%, rgba(0,137,123,.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-network {
+      position: absolute; inset: 0; opacity: .12; pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(0,188,212,.10); border: 1px solid rgba(0,188,212,.3);
+      color: var(--teal); font-size: .8rem; font-weight: 700;
+      padding: .35rem 1rem; border-radius: 50px; margin-bottom: 1.8rem;
+      letter-spacing: .06em; text-transform: uppercase;
+    }
+    .badge-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--cyan); box-shadow: 0 0 6px var(--cyan);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.5; transform:scale(1.4); }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 800; color: var(--navy);
+      line-height: 1.12; max-width: 820px;
+      letter-spacing: -.04em; margin-bottom: 1.2rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--cyan), var(--teal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.1rem; color: var(--muted);
+      max-width: 540px; margin: 0 auto 2.4rem;
+    }
+
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); font-weight: 700; font-size: .95rem;
+      padding: .85rem 2rem; border-radius: 50px;
+      text-decoration: none; border: none; cursor: pointer;
+      box-shadow: 0 4px 24px rgba(0,188,212,.35);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,188,212,.45);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid rgba(10,15,44,.2);
+      color: var(--navy); font-weight: 600; font-size: .95rem;
+      padding: .85rem 2rem; border-radius: 50px;
+      text-decoration: none; cursor: pointer;
+      transition: border-color .2s, background .2s, color .2s;
+    }
+    .btn-outline:hover { border-color: var(--cyan); color: var(--teal); background: rgba(0,188,212,.06); }
+
+    .scroll-hint {
+      position: absolute; bottom: 2.2rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: .4rem;
+      color: var(--muted); font-size: .75rem; letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .scroll-bar {
+      width: 1.5px; height: 36px;
+      background: linear-gradient(to bottom, var(--cyan), transparent);
+      animation: drip 2s infinite;
+    }
+    @keyframes drip {
+      0%  { transform: scaleY(0); transform-origin: top; opacity:1; }
+      50% { transform: scaleY(1); transform-origin: top; opacity:1; }
+      100%{ transform: scaleY(1); transform-origin: top; opacity:0; }
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: 6rem 5%; }
+
+    .section-label {
+      text-align: center; font-size: .75rem; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--cyan); margin-bottom: .7rem;
+    }
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 800; color: var(--navy);
+      letter-spacing: -.03em; margin-bottom: .8rem;
+    }
+    .section-sub {
+      text-align: center; color: var(--muted); font-size: 1rem;
+      max-width: 560px; margin: 0 auto 3.5rem;
+    }
+
+    /* ── SERVICES ── */
+    #services { background: var(--white); }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem; max-width: 1200px; margin: 0 auto;
+    }
+
+    .step-card {
+      background: var(--card);
+      border: 1px solid rgba(10,15,44,.07);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      transition: transform .25s, box-shadow .25s;
+      position: relative; overflow: hidden;
+    }
+    .step-card:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(10,15,44,.14); }
+    .step-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--cyan), var(--teal));
+    }
+
+    .step-number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 42px; height: 42px; border-radius: 12px;
+      font-size: 1rem; font-weight: 800; margin-bottom: 1.2rem;
+    }
+    .step-card:nth-child(1) .step-number { background: rgba(0,188,212,.12); color: var(--cyan); }
+    .step-card:nth-child(2) .step-number { background: rgba(21,101,192,.12); color: var(--blue); }
+    .step-card:nth-child(3) .step-number { background: rgba(0,137,123,.12);  color: var(--teal); }
+    .step-card:nth-child(4) .step-number { background: rgba(26,35,126,.12);  color: var(--indigo); }
+
+    .step-card h3  { font-size: 1.2rem; font-weight: 700; color: var(--navy); margin-bottom: .3rem; }
+    .step-card .step-tag { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: 1rem; }
+    .step-card p   { color: var(--muted); font-size: .9rem; margin-bottom: 1.2rem; }
+
+    .sub-items { list-style: none; display: flex; flex-direction: column; gap: .55rem; }
+    .sub-items li { display: flex; align-items: flex-start; gap: .6rem; font-size: .88rem; color: var(--text); }
+    .sub-items li .check {
+      flex-shrink: 0; margin-top: 2px;
+      width: 17px; height: 17px; border-radius: 4px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sub-items li .check svg { width: 10px; height: 10px; }
+
+    /* ── PRICING ── */
+    #pricing { background: var(--off); }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem; max-width: 1050px; margin: 0 auto;
+      align-items: stretch;
+    }
+
+    .plan-card {
+      background: var(--white);
+      border: 2px solid rgba(10,15,44,.08);
+      border-radius: var(--radius);
+      padding: 2.2rem 2rem;
+      box-shadow: var(--shadow);
+      display: flex; flex-direction: column;
+      transition: transform .25s, box-shadow .25s;
+      position: relative; overflow: hidden;
+    }
+    .plan-card:hover { transform: translateY(-6px); box-shadow: 0 20px 56px rgba(10,15,44,.14); }
+
+    /* featured middle card */
+    .plan-card.featured {
+      border-color: var(--cyan);
+      background: linear-gradient(160deg, #e0f7fa 0%, #f0fdfa 100%);
+    }
+    .plan-card.featured .plan-name  { color: var(--teal); }
+    .plan-card.featured .plan-price { color: var(--navy); }
+    .plan-card.featured .plan-period{ color: var(--muted); }
+    .plan-card.featured .plan-desc  { color: var(--muted); }
+    .plan-card.featured .plan-feature { color: var(--text); }
+    .plan-card.featured .plan-feature .check { background: linear-gradient(135deg, var(--cyan), var(--teal)); }
+    .plan-card.featured .plan-tagline { color: var(--navy); }
+    .plan-card.featured .plan-divider { background: rgba(0,188,212,.2); }
+
+    .plan-badge {
+      position: absolute; top: 1.2rem; right: 1.2rem;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); font-size: .7rem; font-weight: 700;
+      padding: .25rem .7rem; border-radius: 50px;
+      letter-spacing: .05em; text-transform: uppercase;
+    }
+
+    .plan-name {
+      font-size: .78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--cyan); margin-bottom: .6rem;
+    }
+    .plan-price {
+      font-size: 2.8rem; font-weight: 800; color: var(--navy);
+      letter-spacing: -.04em; line-height: 1;
+    }
+    .plan-price sup { font-size: 1.4rem; vertical-align: super; line-height: 0; font-weight: 700; }
+    .plan-period {
+      font-size: .85rem; color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .plan-tagline {
+      font-size: 1rem; font-weight: 700; color: var(--navy);
+      margin-bottom: .6rem;
+    }
+    .plan-card.featured .plan-tagline { color: var(--white); }
+
+    .plan-desc {
+      font-size: .88rem; color: var(--muted);
+      margin-bottom: 1.6rem; flex-grow: 1;
+    }
+
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: .6rem; margin-bottom: 2rem; }
+    .plan-feature { display: flex; align-items: flex-start; gap: .6rem; font-size: .88rem; color: var(--text); }
+    .plan-feature .check {
+      flex-shrink: 0; margin-top: 2px;
+      width: 17px; height: 17px; border-radius: 4px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+    }
+    .plan-feature .check svg { width: 10px; height: 10px; }
+
+    .plan-cta {
+      display: block; text-align: center; text-decoration: none;
+      padding: .85rem 1.5rem; border-radius: 50px;
+      font-weight: 700; font-size: .95rem;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .plan-card:not(.featured) .plan-cta {
+      background: var(--off);
+      color: var(--navy);
+      border: 2px solid rgba(10,15,44,.1);
+    }
+    .plan-card:not(.featured) .plan-cta:hover {
+      background: var(--cyan); color: var(--white); border-color: var(--cyan);
+      transform: translateY(-2px);
+    }
+    .plan-card.featured .plan-cta {
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white);
+      box-shadow: 0 4px 20px rgba(0,188,212,.35);
+    }
+    .plan-card.featured .plan-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,188,212,.5);
+    }
+
+    .plan-divider {
+      height: 1px; background: rgba(10,15,44,.07);
+      margin: 1.4rem 0;
+    }
+    .plan-card.featured .plan-divider { background: rgba(255,255,255,.1); }
+
+    /* ── WHY US ── */
+    #why { background: var(--white); }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1.2rem; max-width: 960px; margin: 0 auto;
+    }
+    .why-card {
+      background: var(--off);
+      border: 1px solid rgba(10,15,44,.06);
+      border-radius: var(--radius);
+      padding: 1.8rem 1.5rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transition: transform .2s;
+    }
+    .why-card:hover { transform: translateY(-4px); }
+    .why-icon { font-size: 1.9rem; margin-bottom: .8rem; }
+    .why-card h4 { font-size: .95rem; font-weight: 700; color: var(--navy); margin-bottom: .4rem; }
+    .why-card p  { font-size: .84rem; color: var(--muted); }
+
+    /* ── CONTACT ── */
+    #contact {
+      background: var(--off);
+      text-align: center;
+    }
+    #contact .section-title { color: var(--navy); }
+    #contact .section-sub   { color: var(--muted); }
+
+    .contact-form {
+      max-width: 520px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .form-row { display: flex; gap: 1rem; }
+
+    .contact-form input,
+    .contact-form textarea,
+    .contact-form select {
+      width: 100%; padding: .85rem 1.1rem;
+      background: var(--white);
+      border: 1px solid rgba(10,15,44,.14);
+      border-radius: 10px;
+      color: var(--text); font-size: .9rem; font-family: inherit;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    .contact-form input::placeholder,
+    .contact-form textarea::placeholder { color: #b0b8cc; }
+    .contact-form input:focus,
+    .contact-form textarea:focus,
+    .contact-form select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(0,188,212,.12);
+    }
+    .contact-form select option { background: var(--white); color: var(--text); }
+    .contact-form textarea { resize: vertical; min-height: 110px; }
+    .contact-form .btn-primary { align-self: center; min-width: 220px; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--white);
+      color: var(--muted);
+      text-align: center;
+      padding: 2rem 5%;
+      font-size: .84rem;
+      border-top: 1px solid rgba(10,15,44,.08);
+    }
+    footer strong { color: var(--navy); }
+    footer a { color: var(--teal); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav ul { display: none; }
+      .form-row { flex-direction: column; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">
+      <svg class="logo-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#00bcd4"/>
+            <stop offset="100%" stop-color="#00897b"/>
+          </linearGradient>
+        </defs>
+        <line x1="8"  y1="8"  x2="20" y2="20" stroke="url(#lg1)" stroke-width="1.2" opacity=".6"/>
+        <line x1="32" y1="8"  x2="20" y2="20" stroke="url(#lg1)" stroke-width="1.2" opacity=".6"/>
+        <line x1="8"  y1="32" x2="20" y2="20" stroke="url(#lg1)" stroke-width="1.2" opacity=".6"/>
+        <line x1="32" y1="32" x2="20" y2="20" stroke="url(#lg1)" stroke-width="1.2" opacity=".6"/>
+        <line x1="8"  y1="8"  x2="8"  y2="32" stroke="url(#lg1)" stroke-width="1"   opacity=".35"/>
+        <line x1="32" y1="8"  x2="32" y2="32" stroke="url(#lg1)" stroke-width="1"   opacity=".35"/>
+        <circle cx="20" cy="20" r="5"  fill="url(#lg1)" opacity=".95"/>
+        <circle cx="8"  cy="8"  r="3"  fill="#00bcd4"   opacity=".85"/>
+        <circle cx="32" cy="8"  r="3"  fill="#00897b"   opacity=".85"/>
+        <circle cx="8"  cy="32" r="3"  fill="#00897b"   opacity=".85"/>
+        <circle cx="32" cy="32" r="3"  fill="#00bcd4"   opacity=".85"/>
+      </svg>
+      <div>
+        <div class="logo-text">JJ <span>AI</span> Services</div>
+        <div class="logo-sub">Level Up with AI</div>
+      </div>
+    </div>
+    <ul>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#why">Why Us</a></li>
+      <li><a href="#contact" class="nav-cta">Get Started</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <svg class="hero-network" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="netg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#00bcd4"/>
+          <stop offset="100%" stop-color="#00897b"/>
+        </linearGradient>
+      </defs>
+      <line x1="100" y1="150" x2="300" y2="250" stroke="url(#netg)" stroke-width="1"/>
+      <line x1="300" y1="250" x2="550" y2="180" stroke="url(#netg)" stroke-width="1"/>
+      <line x1="550" y1="180" x2="750" y2="320" stroke="url(#netg)" stroke-width="1"/>
+      <line x1="750" y1="320" x2="950" y2="200" stroke="url(#netg)" stroke-width="1"/>
+      <line x1="950" y1="200" x2="1100" y2="350" stroke="url(#netg)" stroke-width="1"/>
+      <line x1="200" y1="450" x2="400" y2="380" stroke="url(#netg)" stroke-width="1"/>
+      <line x1="400" y1="380" x2="600" y2="500" stroke="url(#netg)" stroke-width="1"/>
+      <line x1="600" y1="500" x2="850" y2="420" stroke="url(#netg)" stroke-width="1"/>
+      <line x1="850" y1="420" x2="1050" y2="550" stroke="url(#netg)" stroke-width="1"/>
+      <line x1="300" y1="250" x2="400" y2="380" stroke="url(#netg)" stroke-width=".8"/>
+      <line x1="550" y1="180" x2="600" y2="500" stroke="url(#netg)" stroke-width=".8"/>
+      <line x1="750" y1="320" x2="850" y2="420" stroke="url(#netg)" stroke-width=".8"/>
+      <circle cx="100"  cy="150" r="5" fill="#00bcd4"/>
+      <circle cx="300"  cy="250" r="7" fill="#00897b"/>
+      <circle cx="550"  cy="180" r="6" fill="#00bcd4"/>
+      <circle cx="750"  cy="320" r="8" fill="#00897b"/>
+      <circle cx="950"  cy="200" r="5" fill="#00bcd4"/>
+      <circle cx="1100" cy="350" r="6" fill="#00897b"/>
+      <circle cx="200"  cy="450" r="5" fill="#00897b"/>
+      <circle cx="400"  cy="380" r="7" fill="#00bcd4"/>
+      <circle cx="600"  cy="500" r="6" fill="#00897b"/>
+      <circle cx="850"  cy="420" r="8" fill="#00bcd4"/>
+      <circle cx="1050" cy="550" r="5" fill="#00897b"/>
+    </svg>
+
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      AI Transformation Partner
+    </div>
+    <h1>We help people &amp; companies<br><em>level up</em> in the age of AI</h1>
+    <p>From readiness to real-world deployment — we guide your team through every step of the AI journey with clarity and confidence.</p>
+    <div class="hero-actions">
+      <a href="#services" class="btn-primary">Explore Our Process</a>
+      <a href="#contact" class="btn-outline">Book a Free Discovery Call</a>
+    </div>
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-bar"></div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="section-label">Our Process</div>
+    <h2 class="section-title">Four steps to AI success</h2>
+    <p class="section-sub">A structured, end-to-end methodology that takes your organization from zero to production-ready AI — without the guesswork.</p>
+
+    <div class="steps">
+
+      <div class="step-card">
+        <div class="step-number">01</div>
+        <div class="step-tag">AI Readiness Assessment</div>
+        <h3>Assess</h3>
+        <p>Understand your starting point so we build the right solution for your unique situation.</p>
+        <ul class="sub-items">
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Discovery</strong> — How can AI create real value in your business?</span></li>
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Feasibility</strong> — Audit digital systems and team capabilities</span></li>
+        </ul>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">02</div>
+        <div class="step-tag">Strategy &amp; Planning</div>
+        <h3>Design</h3>
+        <p>Turn insights into a clear blueprint with defined scope, milestones, and realistic timelines.</p>
+        <ul class="sub-items">
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>What to do</strong> — Prioritize use cases by impact &amp; achievability</span></li>
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>How long</strong> — Roadmap with phases, owners &amp; delivery dates</span></li>
+        </ul>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">03</div>
+        <div class="step-tag">Validation &amp; Enablement</div>
+        <h3>Test</h3>
+        <p>Ensure everything works — and that your people are ready to use it with confidence.</p>
+        <ul class="sub-items">
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Staff testing</strong> — Real users validate in real workflows</span></li>
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Training</strong> — Hands-on enablement for your team</span></li>
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Bug fixes</strong> — Rapid iteration until quality meets your bar</span></li>
+        </ul>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">04</div>
+        <div class="step-tag">Go Live</div>
+        <h3>Deliver</h3>
+        <p>Launch into production with a smooth transition and your team fully in control.</p>
+        <ul class="sub-items">
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Deployment</strong> — Secure, scalable zero-disruption go-live</span></li>
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Handover</strong> — Full docs &amp; a trained team that owns the solution</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="section-label">Plans &amp; Pricing</div>
+    <h2 class="section-title">Choose your path to AI</h2>
+    <p class="section-sub">Whether you're just starting out or ready to go all-in, there's a plan designed for where you are right now.</p>
+
+    <div class="pricing-grid">
+
+      <!-- Plan 1: Strategy Session -->
+      <div class="plan-card">
+        <div class="plan-name">Strategy Session</div>
+        <div class="plan-price"><sup>$</sup>50</div>
+        <div class="plan-period">one-time &nbsp;·&nbsp; 30 minutes</div>
+        <div class="plan-tagline">Make smarter AI decisions, faster.</div>
+        <div class="plan-divider"></div>
+        <div class="plan-desc">A focused 1-on-1 session with an AI Navigator who helps you cut through the noise and find the path that's right for you.</div>
+        <ul class="plan-features">
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>1:1 session with a dedicated AI Navigator</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Understand your AI options clearly</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Avoid common (costly) mistakes</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Pointers to the right tools &amp; experts</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Save time, money &amp; stress</span></li>
+        </ul>
+        <a href="#contact" class="plan-cta" data-plan="strategy">Book a Session</a>
+      </div>
+
+      <!-- Plan 2: DIY (featured) -->
+      <div class="plan-card featured">
+        <div class="plan-badge">Most Popular</div>
+        <div class="plan-name">Standalone Project</div>
+        <div class="plan-price"><sup>$</sup>500</div>
+        <div class="plan-period">one-time payment</div>
+        <div class="plan-tagline">Standalone AI project to introduce new capabilities.</div>
+        <div class="plan-divider"></div>
+        <div class="plan-desc">A focused standalone project that introduces AI capabilities tailored to your business — from scoping through delivery.</div>
+        <ul class="plan-features">
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Self-guided assessment &amp; planning software</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>24/7 access — work at your own pace</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Personalized AI readiness report</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Step-by-step action plan</span></li>
+        </ul>
+        <a href="#contact" class="plan-cta" data-plan="standalone">Get Started</a>
+      </div>
+
+      <!-- Plan 3: Expert Led -->
+      <div class="plan-card">
+        <div class="plan-name">Expert Led</div>
+        <div class="plan-price"><sup>$</sup>5,000</div>
+        <div class="plan-period">full project &nbsp;·&nbsp; concierge service</div>
+        <div class="plan-tagline">Done with you, start to finish.</div>
+        <div class="plan-divider"></div>
+        <div class="plan-desc">Our fully supported, end-to-end concierge experience. We handle every step alongside you — from assessment through live deployment.</div>
+        <ul class="plan-features">
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Full Assess → Design → Test → Deliver</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Dedicated expert team throughout</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Staff training &amp; change management</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Production deployment &amp; handover</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Priority support &amp; documentation</span></li>
+        </ul>
+        <a href="#contact" class="plan-cta" data-plan="full">Talk to Us</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section id="why">
+    <div class="section-label">Why JJ AI Services</div>
+    <h2 class="section-title">Built for real-world results</h2>
+    <p class="section-sub">Deep technical expertise combined with business-first thinking — so AI actually sticks.</p>
+
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon">&#127919;</div>
+        <h4>Business-First</h4>
+        <p>Every recommendation ties to measurable outcomes, not technology for its own sake.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">&#128100;</div>
+        <h4>People-Centered</h4>
+        <p>We train and involve your staff at every stage so adoption is real, not forced.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">&#128196;</div>
+        <h4>Clear Roadmaps</h4>
+        <p>Actionable plans with timelines and owners — no vague consulting decks.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon">&#128640;</div>
+        <h4>End-to-End</h4>
+        <p>One partner from the first conversation all the way to live production.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-label">Get in touch</div>
+    <h2 class="section-title">Ready to level up?</h2>
+    <p class="section-sub">Tell us about your business and we'll reach out to schedule your free discovery call.</p>
+
+    <form class="contact-form" onsubmit="handleSubmit(event)">
+      <div class="form-row">
+        <input type="text"  name="first_name" placeholder="First name" required />
+        <input type="text"  name="last_name"  placeholder="Last name"  required />
+      </div>
+      <input type="email"   name="email"    placeholder="Work email" required />
+      <input type="text"    name="company"  placeholder="Company / Organisation" />
+      <select name="plan">
+        <option value="" disabled selected>Which plan interests you?</option>
+        <option value="discovery">Free Discovery Call</option>
+        <option value="strategy">Strategy Session — $50</option>
+        <option value="standalone">Standalone Project — $500</option>
+        <option value="full">Expert Led — $5,000</option>
+        <option value="unsure">Not sure yet — help me decide</option>
+      </select>
+      <textarea name="message" placeholder="Tell us a little more (optional)"></textarea>
+      <p id="form-message" style="min-height:1.4em;font-size:.9rem;text-align:center;font-weight:500;"></p>
+      <button type="submit" class="btn-primary">Send My Request &rarr;</button>
+    </form>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 <strong>JJ AI Services</strong> &nbsp;|&nbsp; Helping people &amp; companies level up in the age of AI &nbsp;|&nbsp; <a href="mailto:janejanelandolin@gmail.com">janejanelandolin@gmail.com</a></p>
+  </footer>
+
+  <script>
+  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Pre-select plan when clicking pricing card CTAs
+  document.querySelectorAll('[data-plan]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sel = document.querySelector('select[name="plan"]');
+      if (sel) sel.value = btn.dataset.plan;
+    });
+  });
+
+  // Pre-select "discovery" when clicking the hero discovery call button
+  const heroOutline = document.querySelector('.hero-actions .btn-outline');
+  if (heroOutline) {
+    heroOutline.addEventListener('click', () => {
+      const sel = document.querySelector('select[name="plan"]');
+      if (sel) sel.value = 'discovery';
+    });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const form  = e.target;
+    const btn   = form.querySelector('button[type="submit"]');
+    const msgEl = document.getElementById('form-message');
+
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    msgEl.textContent = '';
+
+    const { error } = await _sb.from('signups').insert({
+      first_name: form.first_name.value.trim(),
+      last_name:  form.last_name.value.trim(),
+      email:      form.email.value.trim(),
+      company:    form.company.value.trim() || null,
+      plan:       form.plan.value || 'unsure',
+      challenge:  form.challenge ? form.challenge.value : null,
+      message:    form.message.value.trim() || null,
+    });
+
+    if (error) {
+      msgEl.textContent = 'Something went wrong. Please try again or email us directly.';
+      msgEl.style.color = '#c62828';
+      btn.textContent = 'Try Again';
+      btn.disabled = false;
+    } else {
+      msgEl.textContent = '✓ Request received! We\'ll be in touch shortly.';
+      msgEl.style.color = '#00695c';
+      btn.textContent = 'Request Sent!';
+      btn.style.background = 'linear-gradient(135deg,#00897b,#00695c)';
+      form.reset();
+      setTimeout(() => {
+        btn.textContent = 'Send My Request →';
+        btn.style.background = '';
+        btn.disabled = false;
+        msgEl.textContent = '';
+      }, 5000);
+    }
+  }
+  </script>
+
+</body>
+</html>

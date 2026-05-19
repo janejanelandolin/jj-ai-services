@@ -40,6 +40,7 @@ exports.handler = async (event) => {
     role:      'client',
     full_name: full_name || '',
     company:   company  || '',
+    email:     email    || '',
   }, { onConflict: 'id' });
 
   return {

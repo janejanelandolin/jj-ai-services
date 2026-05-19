@@ -8,3 +8,8 @@
   from = "/lab"
   to   = "/lab/index.html"
   status = 200
+
+[[redirects]]
+  from = "/lab/LAB-birthday-greetings"
+  to   = "/lab/LAB-birthday-greetings/index.html"
+  status = 200

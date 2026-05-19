@@ -8,33 +8,22 @@
   <script src="config.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --navy:   #0a0f2c;
-      --indigo: #1a237e;
-      --blue:   #1565c0;
-      --cyan:   #00bcd4;
-      --teal:   #00897b;
-      --white:  #ffffff;
-      --off:    #f0f4ff;
-      --text:   #1c1c2e;
-      --muted:  #5c6480;
-      --radius: 12px;
-      --shadow: 0 4px 20px rgba(10,15,44,.09);
+      --navy: #0a0f2c; --indigo: #1a237e; --blue: #1565c0;
+      --cyan: #00bcd4; --teal: #00897b;
+      --white: #ffffff; --off: #f0f4ff; --text: #1c1c2e; --muted: #5c6480;
+      --radius: 12px; --shadow: 0 4px 20px rgba(10,15,44,.09);
     }
-
     body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--off); color: var(--text); min-height: 100vh; }
 
     /* ── LOGIN ── */
     #login-screen {
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
       background: linear-gradient(160deg, #f0f9ff 0%, #e0f7fa 50%, #f0f4ff 100%);
     }
     .login-card {
-      background: var(--white); border-radius: 20px;
-      padding: 2.5rem 2rem; width: 100%; max-width: 380px;
-      box-shadow: 0 12px 48px rgba(10,15,44,.12);
+      background: var(--white); border-radius: 20px; padding: 2.5rem 2rem;
+      width: 100%; max-width: 380px; box-shadow: 0 12px 48px rgba(10,15,44,.12);
       border: 1px solid rgba(10,15,44,.07);
     }
     .login-logo { display: flex; align-items: center; gap: .65rem; margin-bottom: 1.8rem; justify-content: center; }
@@ -42,18 +31,18 @@
     .login-logo-text span { color: var(--cyan); }
     .login-card h2 { font-size: 1.3rem; font-weight: 700; color: var(--navy); text-align: center; margin-bottom: .4rem; }
     .login-card p  { text-align: center; color: var(--muted); font-size: .88rem; margin-bottom: 1.6rem; }
-
     .field { display: flex; flex-direction: column; gap: .35rem; margin-bottom: 1rem; }
     .field label { font-size: .82rem; font-weight: 600; color: var(--navy); }
-    .field input {
+    .field input, .field select, .field textarea {
       padding: .75rem 1rem; border: 1px solid rgba(10,15,44,.14); border-radius: 10px;
       font-size: .92rem; color: var(--text); font-family: inherit;
       outline: none; transition: border-color .2s, box-shadow .2s;
     }
-    .field input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,188,212,.12); }
-
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,188,212,.12);
+    }
+    .field textarea { resize: vertical; min-height: 80px; }
     #login-error { font-size: .85rem; color: #c62828; text-align: center; min-height: 1.2em; margin-bottom: .6rem; }
-
     .btn-login {
       width: 100%; padding: .85rem; border: none; border-radius: 50px;
       background: linear-gradient(135deg, var(--cyan), var(--teal));
@@ -65,38 +54,48 @@
 
     /* ── DASHBOARD ── */
     #dashboard-screen { display: none; }
-
     header {
       background: var(--white); border-bottom: 1px solid rgba(10,15,44,.08);
       padding: 1rem 5%; display: flex; align-items: center; justify-content: space-between;
-      box-shadow: 0 1px 8px rgba(10,15,44,.05);
-      position: sticky; top: 0; z-index: 10;
+      box-shadow: 0 1px 8px rgba(10,15,44,.05); position: sticky; top: 0; z-index: 10;
     }
     .header-logo { display: flex; align-items: center; gap: .65rem; }
     .header-logo-text { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
     .header-logo-text span { color: var(--cyan); }
     .header-logo-sub { font-size: .6rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-    .header-title { font-size: .95rem; font-weight: 600; color: var(--muted); }
-
     .btn-logout {
       padding: .45rem 1.1rem; border: 1.5px solid rgba(10,15,44,.15); border-radius: 50px;
       background: transparent; color: var(--navy); font-size: .85rem; font-weight: 600;
-      cursor: pointer; transition: border-color .2s, background .2s;
+      cursor: pointer; transition: border-color .2s;
     }
-    .btn-logout:hover { border-color: var(--cyan); background: rgba(0,188,212,.06); }
+    .btn-logout:hover { border-color: var(--cyan); }
 
     main { padding: 2rem 5%; max-width: 1300px; margin: 0 auto; }
 
-    /* Stats */
+    /* ── SECTION NAV ── */
+    .section-nav {
+      display: flex; gap: .4rem; margin-bottom: 2rem;
+      border-bottom: 2px solid rgba(10,15,44,.08); padding-bottom: 0;
+    }
+    .section-tab {
+      padding: .6rem 1.4rem; border: none; background: transparent;
+      font-size: .9rem; font-weight: 600; color: var(--muted); cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -2px;
+      transition: color .2s, border-color .2s;
+    }
+    .section-tab:hover { color: var(--navy); }
+    .section-tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+    .section-panel { display: none; }
+    .section-panel.active { display: block; }
+
+    /* ── STATS ── */
     .stats-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
       gap: 1rem; margin-bottom: 2rem;
     }
     .stat-card {
-      background: var(--white); border-radius: var(--radius);
-      padding: 1.3rem 1.2rem; box-shadow: var(--shadow);
-      border: 1px solid rgba(10,15,44,.06);
-      border-top: 3px solid;
+      background: var(--white); border-radius: var(--radius); padding: 1.3rem 1.2rem;
+      box-shadow: var(--shadow); border: 1px solid rgba(10,15,44,.06); border-top: 3px solid;
     }
     .stat-card:nth-child(1) { border-top-color: #00897b; }
     .stat-card:nth-child(2) { border-top-color: #1b5e20; }
@@ -106,7 +105,7 @@
     .stat-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .4rem; }
     .stat-value { font-size: 2rem; font-weight: 800; color: var(--navy); line-height: 1; }
 
-    /* Controls */
+    /* ── CONTROLS ── */
     .controls {
       display: flex; align-items: center; gap: 1rem;
       flex-wrap: wrap; margin-bottom: 1.2rem; justify-content: space-between;
@@ -117,33 +116,32 @@
       background: var(--white); color: var(--muted); font-size: .82rem; font-weight: 600;
       cursor: pointer; transition: all .2s;
     }
-    .tab-btn.active, .tab-btn:hover {
-      border-color: var(--cyan); background: rgba(0,188,212,.08); color: var(--teal);
-    }
     .tab-btn.active { background: var(--cyan); color: var(--white); border-color: var(--cyan); }
-
+    .tab-btn:hover  { border-color: var(--cyan); color: var(--teal); }
     .right-controls { display: flex; align-items: center; gap: .7rem; }
-    #search-input {
+    .search-input {
       padding: .45rem .9rem; border: 1px solid rgba(10,15,44,.14); border-radius: 8px;
       font-size: .88rem; color: var(--text); outline: none; width: 200px;
       font-family: inherit; transition: border-color .2s;
     }
-    #search-input:focus { border-color: var(--cyan); }
-
-    .btn-export {
+    .search-input:focus { border-color: var(--cyan); }
+    .btn-action {
       padding: .45rem 1rem; border-radius: 8px;
       background: linear-gradient(135deg, var(--cyan), var(--teal));
       color: var(--white); font-size: .82rem; font-weight: 700;
-      border: none; cursor: pointer; transition: opacity .2s;
-      white-space: nowrap;
+      border: none; cursor: pointer; transition: opacity .2s; white-space: nowrap;
     }
-    .btn-export:hover { opacity: .85; }
+    .btn-action:hover { opacity: .85; }
+    .btn-action.secondary {
+      background: var(--white); color: var(--navy);
+      border: 1.5px solid rgba(10,15,44,.12);
+    }
+    .btn-action.secondary:hover { border-color: var(--cyan); color: var(--teal); opacity: 1; }
 
-    /* Table */
+    /* ── TABLE ── */
     .table-wrap {
       background: var(--white); border-radius: var(--radius);
-      box-shadow: var(--shadow); border: 1px solid rgba(10,15,44,.06);
-      overflow: hidden;
+      box-shadow: var(--shadow); border: 1px solid rgba(10,15,44,.06); overflow: hidden;
     }
     table { width: 100%; border-collapse: collapse; }
     thead th {
@@ -155,11 +153,11 @@
     tbody tr { border-bottom: 1px solid rgba(10,15,44,.05); transition: background .15s; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: #fafbff; }
-    tbody td { padding: .85rem 1rem; font-size: .88rem; vertical-align: top; }
-    td.date-cell { color: var(--muted); white-space: nowrap; font-size: .82rem; }
-    td.name-cell { font-weight: 600; white-space: nowrap; }
+    tbody td { padding: .85rem 1rem; font-size: .88rem; vertical-align: middle; }
+    td.date-cell  { color: var(--muted); white-space: nowrap; font-size: .82rem; }
+    td.name-cell  { font-weight: 600; }
     td.email-cell { color: var(--blue); }
-    td.msg-cell  { color: var(--muted); max-width: 260px; }
+    td.msg-cell   { color: var(--muted); max-width: 220px; }
     td.msg-cell span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
     .plan-badge {
@@ -172,12 +170,32 @@
     .badge-full       { background: #ede7f6; color: #311b92; }
     .badge-unsure     { background: #f5f5f5; color: #616161; }
 
-    .empty-state {
-      padding: 3rem; text-align: center; color: var(--muted); font-size: .95rem;
+    .status-badge {
+      display: inline-block; padding: .2rem .6rem; border-radius: 50px;
+      font-size: .73rem; font-weight: 700; white-space: nowrap;
     }
-    .loading-state { padding: 2rem; text-align: center; color: var(--muted); }
+    .status-planning    { background: #e3f2fd; color: #1565c0; }
+    .status-in-progress { background: #e0f7fa; color: #00695c; }
+    .status-review      { background: #fff8e1; color: #f57f17; }
+    .status-completed   { background: #e8f5e9; color: #2e7d32; }
+    .status-on-hold     { background: #f5f5f5; color: #616161; }
 
-    /* Pagination */
+    .empty-state  { padding: 3rem; text-align: center; color: var(--muted); font-size: .95rem; }
+    .loading-state{ padding: 2rem; text-align: center; color: var(--muted); }
+
+    .btn-row { display: flex; gap: .4rem; }
+    .btn-sm {
+      padding: .28rem .7rem; border-radius: 6px; font-size: .78rem; font-weight: 600;
+      border: 1.5px solid; cursor: pointer; transition: all .15s; background: transparent;
+    }
+    .btn-sm.edit   { border-color: rgba(0,188,212,.4); color: var(--teal); }
+    .btn-sm.edit:hover   { background: rgba(0,188,212,.08); }
+    .btn-sm.delete { border-color: rgba(198,40,40,.3); color: #c62828; }
+    .btn-sm.delete:hover { background: rgba(198,40,40,.06); }
+    .btn-sm.view   { border-color: rgba(21,101,192,.3); color: var(--blue); }
+    .btn-sm.view:hover   { background: rgba(21,101,192,.06); }
+
+    /* ── PAGINATION ── */
     .pagination {
       display: flex; align-items: center; justify-content: space-between;
       padding: 1rem 1.2rem; border-top: 1px solid rgba(10,15,44,.06);
@@ -186,16 +204,61 @@
     .page-btns { display: flex; gap: .4rem; }
     .page-btn {
       padding: .3rem .7rem; border: 1px solid rgba(10,15,44,.12); border-radius: 6px;
-      background: var(--white); color: var(--navy); font-size: .82rem; cursor: pointer;
-      transition: all .15s;
+      background: var(--white); color: var(--navy); font-size: .82rem; cursor: pointer; transition: all .15s;
     }
     .page-btn:hover:not(:disabled) { border-color: var(--cyan); color: var(--teal); }
     .page-btn:disabled { opacity: .4; cursor: default; }
     .page-btn.current { background: var(--cyan); color: var(--white); border-color: var(--cyan); }
 
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(10,15,44,.45); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 18px; padding: 2rem;
+      width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 24px 80px rgba(10,15,44,.22);
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.6rem; }
+    .modal-header h3 { font-size: 1.15rem; font-weight: 800; color: var(--navy); }
+    .modal-close { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--muted); line-height: 1; }
+    .modal-close:hover { color: var(--navy); }
+    .modal-actions { display: flex; gap: .7rem; justify-content: flex-end; margin-top: 1.4rem; }
+    .modal-actions .btn-primary {
+      padding: .7rem 1.6rem; border: none; border-radius: 50px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); font-weight: 700; font-size: .9rem; cursor: pointer; transition: opacity .2s;
+    }
+    .modal-actions .btn-primary:hover { opacity: .88; }
+    .modal-actions .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .modal-actions .btn-cancel {
+      padding: .7rem 1.4rem; border: 1.5px solid rgba(10,15,44,.12); border-radius: 50px;
+      background: transparent; color: var(--navy); font-weight: 600; font-size: .9rem; cursor: pointer;
+    }
+    .modal-msg { font-size: .85rem; text-align: center; min-height: 1.2em; margin-top: .6rem; }
+
+    /* Dynamic rows (milestones / links) */
+    .dyn-row { display: flex; gap: .5rem; align-items: center; margin-bottom: .5rem; }
+    .dyn-row input { flex: 1; padding: .5rem .8rem; border: 1px solid rgba(10,15,44,.14); border-radius: 8px; font-size: .85rem; font-family: inherit; outline: none; }
+    .dyn-row input:focus { border-color: var(--cyan); }
+    .dyn-row .btn-rm { background: none; border: none; color: #c62828; font-size: 1.1rem; cursor: pointer; flex-shrink: 0; }
+    .btn-add-row { background: none; border: 1.5px dashed rgba(10,15,44,.2); border-radius: 8px;
+      padding: .4rem .9rem; font-size: .82rem; color: var(--muted); cursor: pointer; width: 100%; margin-top: .3rem; }
+    .btn-add-row:hover { border-color: var(--cyan); color: var(--teal); }
+
+    .color-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .4rem; }
+    .color-swatch {
+      width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: transform .15s;
+    }
+    .color-swatch:hover, .color-swatch.selected { border-color: var(--navy); transform: scale(1.15); }
+
     @media (max-width: 700px) {
       .controls { flex-direction: column; align-items: flex-start; }
-      #search-input { width: 100%; }
+      .search-input { width: 100%; }
       table { font-size: .8rem; }
       thead th, tbody td { padding: .6rem .7rem; }
       td.msg-cell { display: none; }
@@ -204,7 +267,7 @@
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">
@@ -220,12 +283,10 @@
         <circle cx="8" cy="32" r="3" fill="#00897b" opacity=".85"/>
         <circle cx="32" cy="32" r="3" fill="#00bcd4" opacity=".85"/>
       </svg>
-      <div>
-        <div class="login-logo-text">JJ <span>AI</span> Services</div>
-      </div>
+      <div class="login-logo-text">JJ <span>AI</span> Services</div>
     </div>
     <h2>Admin Sign In</h2>
-    <p>Sign in to view and manage signups</p>
+    <p>Sign in to manage signups, clients &amp; projects</p>
     <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="admin@example.com" /></div>
     <div class="field"><label>Password</label><input type="password" id="login-password" placeholder="••••••••" /></div>
     <p id="login-error"></p>
@@ -233,7 +294,7 @@
   </div>
 </div>
 
-<!-- DASHBOARD SCREEN -->
+<!-- DASHBOARD -->
 <div id="dashboard-screen">
   <header>
     <div class="header-logo">
@@ -254,234 +315,532 @@
         <div class="header-logo-sub">Admin Dashboard</div>
       </div>
     </div>
-    <span class="header-title" id="admin-email-display"></span>
+    <span style="font-size:.9rem;color:var(--muted);" id="admin-email-display"></span>
     <button class="btn-logout" onclick="doLogout()">Sign Out</button>
   </header>
 
   <main>
-    <!-- Stats -->
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-card"><div class="stat-label">Free Discovery</div><div class="stat-value" id="cnt-discovery">—</div></div>
-      <div class="stat-card"><div class="stat-label">Strategy $50</div><div class="stat-value" id="cnt-strategy">—</div></div>
-      <div class="stat-card"><div class="stat-label">Standalone $500</div><div class="stat-value" id="cnt-standalone">—</div></div>
-      <div class="stat-card"><div class="stat-label">Expert Led $5k</div><div class="stat-value" id="cnt-full">—</div></div>
-      <div class="stat-card"><div class="stat-label">Total Signups</div><div class="stat-value" id="cnt-total">—</div></div>
+    <!-- Section nav -->
+    <div class="section-nav">
+      <button class="section-tab active" onclick="switchSection('signups',this)">Signups</button>
+      <button class="section-tab"        onclick="switchSection('clients',this)">Clients</button>
+      <button class="section-tab"        onclick="switchSection('projects',this)">Projects</button>
     </div>
 
-    <!-- Controls -->
-    <div class="controls">
-      <div class="filter-tabs">
-        <button class="tab-btn active" data-filter="all"        onclick="setFilter('all',this)">All</button>
-        <button class="tab-btn"        data-filter="discovery"  onclick="setFilter('discovery',this)">Free Discovery</button>
-        <button class="tab-btn"        data-filter="strategy"   onclick="setFilter('strategy',this)">Strategy $50</button>
-        <button class="tab-btn"        data-filter="standalone" onclick="setFilter('standalone',this)">Standalone $500</button>
-        <button class="tab-btn"        data-filter="full"       onclick="setFilter('full',this)">Expert Led $5k</button>
+    <!-- ── SIGNUPS PANEL ── -->
+    <div class="section-panel active" id="panel-signups">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Free Discovery</div><div class="stat-value" id="cnt-discovery">—</div></div>
+        <div class="stat-card"><div class="stat-label">Strategy $50</div><div class="stat-value" id="cnt-strategy">—</div></div>
+        <div class="stat-card"><div class="stat-label">Standalone $500</div><div class="stat-value" id="cnt-standalone">—</div></div>
+        <div class="stat-card"><div class="stat-label">Expert Led $5k</div><div class="stat-value" id="cnt-full">—</div></div>
+        <div class="stat-card"><div class="stat-label">Total Signups</div><div class="stat-value" id="cnt-total">—</div></div>
       </div>
-      <div class="right-controls">
-        <input type="text" id="search-input" placeholder="Search name, email…" oninput="renderTable()" />
-        <button class="btn-export" onclick="exportCSV()">↓ Export CSV</button>
+      <div class="controls">
+        <div class="filter-tabs">
+          <button class="tab-btn active" onclick="setFilter('all',this)">All</button>
+          <button class="tab-btn" onclick="setFilter('discovery',this)">Free Discovery</button>
+          <button class="tab-btn" onclick="setFilter('strategy',this)">Strategy $50</button>
+          <button class="tab-btn" onclick="setFilter('standalone',this)">Standalone $500</button>
+          <button class="tab-btn" onclick="setFilter('full',this)">Expert Led $5k</button>
+        </div>
+        <div class="right-controls">
+          <input class="search-input" id="search-input" type="text" placeholder="Search name, email…" oninput="renderSignupsTable()" />
+          <button class="btn-action" onclick="exportCSV()">↓ Export CSV</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Company</th><th>Plan</th><th>Message</th></tr></thead>
+          <tbody id="signups-tbody"><tr><td colspan="7" class="loading-state">Loading…</td></tr></tbody>
+        </table>
+        <div class="pagination" id="pagination" style="display:none;">
+          <span id="page-info"></span>
+          <div class="page-btns" id="page-btns"></div>
+        </div>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Company</th>
-            <th>Plan</th>
-            <th>Message</th>
-          </tr>
-        </thead>
-        <tbody id="signups-tbody">
-          <tr><td colspan="6" class="loading-state">Loading…</td></tr>
-        </tbody>
-      </table>
-      <div class="pagination" id="pagination" style="display:none;">
-        <span id="page-info"></span>
-        <div class="page-btns" id="page-btns"></div>
+    <!-- ── CLIENTS PANEL ── -->
+    <div class="section-panel" id="panel-clients">
+      <div class="controls">
+        <input class="search-input" id="client-search" type="text" placeholder="Search clients…" oninput="renderClientsTable()" />
+        <button class="btn-action" onclick="openInviteModal()">+ Invite Client</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Company</th><th>Projects</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody id="clients-tbody"><tr><td colspan="6" class="loading-state">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── PROJECTS PANEL ── -->
+    <div class="section-panel" id="panel-projects">
+      <div class="controls">
+        <input class="search-input" id="project-search" type="text" placeholder="Search projects…" oninput="renderProjectsTable()" />
+        <button class="btn-action" onclick="openProjectModal()">+ New Project</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Project</th><th>Client</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
+          <tbody id="projects-tbody"><tr><td colspan="5" class="loading-state">Loading…</td></tr></tbody>
+        </table>
       </div>
     </div>
   </main>
 </div>
 
+<!-- ── INVITE CLIENT MODAL ── -->
+<div class="modal-overlay" id="invite-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Invite Client</h3>
+      <button class="modal-close" onclick="closeModal('invite-modal')">×</button>
+    </div>
+    <div class="field"><label>Email *</label><input type="email" id="inv-email" placeholder="client@example.com" /></div>
+    <div class="field"><label>Full Name</label><input type="text" id="inv-name" placeholder="Jane Smith" /></div>
+    <div class="field"><label>Company</label><input type="text" id="inv-company" placeholder="Acme Corp" /></div>
+    <p class="modal-msg" id="invite-msg"></p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('invite-modal')">Cancel</button>
+      <button class="btn-primary" id="invite-btn" onclick="doInviteClient()">Send Invite</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PROJECT MODAL ── -->
+<div class="modal-overlay" id="project-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="project-modal-title">New Project</h3>
+      <button class="modal-close" onclick="closeModal('project-modal')">×</button>
+    </div>
+    <input type="hidden" id="proj-id" />
+    <div class="field">
+      <label>Client *</label>
+      <select id="proj-client"><option value="">Select a client…</option></select>
+    </div>
+    <div class="field"><label>Project Name *</label><input type="text" id="proj-name" placeholder="AI Chatbot Implementation" /></div>
+    <div class="field"><label>Description</label><textarea id="proj-desc" placeholder="Brief overview of the project…"></textarea></div>
+    <div class="field">
+      <label>Status</label>
+      <select id="proj-status">
+        <option value="planning">Planning</option>
+        <option value="in-progress">In Progress</option>
+        <option value="review">Review</option>
+        <option value="completed">Completed</option>
+        <option value="on-hold">On Hold</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Cover Color</label>
+      <div class="color-row" id="color-row">
+        <div class="color-swatch selected" style="background:#00bcd4" data-color="#00bcd4" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#00897b" data-color="#00897b" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#1565c0" data-color="#1565c0" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#6d28d9" data-color="#6d28d9" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#e65100" data-color="#e65100" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#2e7d32" data-color="#2e7d32" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#c62828" data-color="#c62828" onclick="selectColor(this)"></div>
+        <div class="color-swatch" style="background:#0a0f2c" data-color="#0a0f2c" onclick="selectColor(this)"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Milestones</label>
+      <div id="milestones-list"></div>
+      <button class="btn-add-row" onclick="addMilestone()">+ Add milestone</button>
+    </div>
+    <div class="field">
+      <label>Links &amp; Resources</label>
+      <div id="links-list"></div>
+      <button class="btn-add-row" onclick="addLink()">+ Add link</button>
+    </div>
+    <div class="field"><label>Notes &amp; Updates</label><textarea id="proj-notes" placeholder="Internal notes or client-facing updates…"></textarea></div>
+    <p class="modal-msg" id="project-msg"></p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('project-modal')">Cancel</button>
+      <button class="btn-primary" id="project-save-btn" onclick="saveProject()">Save Project</button>
+    </div>
+  </div>
+</div>
+
 <script>
   const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const PLAN_LABELS = {
-    discovery:  'Free Discovery Call',
-    strategy:   'Strategy Session',
-    standalone: 'Standalone Project',
-    full:       'Expert Led',
-    unsure:     'Not Sure Yet',
-  };
+  const PLAN_LABELS = { discovery:'Free Discovery Call', strategy:'Strategy Session', standalone:'Standalone Project', full:'Expert Led', unsure:'Not Sure Yet' };
+  const STATUS_LABELS = { planning:'Planning', 'in-progress':'In Progress', review:'Review', completed:'Completed', 'on-hold':'On Hold' };
+  const COLORS = ['#00bcd4','#00897b','#1565c0','#6d28d9','#e65100','#2e7d32','#c62828','#0a0f2c'];
 
-  let allSignups   = [];
-  let activeFilter = 'all';
-  let currentPage  = 1;
-  const PAGE_SIZE  = 50;
+  let allSignups = [], activeFilter = 'all', currentPage = 1;
+  const PAGE_SIZE = 50;
+  let allClients = [], allProjects = [], clientMap = {};
+  let _session = null;
 
-  // ── AUTH ──────────────────────────────────────────────────────
+  // ── AUTH ──
   _sb.auth.getSession().then(({ data: { session } }) => {
-    if (session) enterDashboard(session.user);
-    else         showLogin();
+    if (session) { _session = session; enterDashboard(session.user); }
+    else showLogin();
   });
 
   function showLogin() {
-    document.getElementById('login-screen').style.display    = 'flex';
+    document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('dashboard-screen').style.display = 'none';
   }
-
   function enterDashboard(user) {
-    document.getElementById('login-screen').style.display    = 'none';
+    document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard-screen').style.display = 'block';
     document.getElementById('admin-email-display').textContent = user.email;
-    loadData();
+    loadSignups(); loadClients(); loadProjects();
   }
-
   async function doLogin() {
     const email = document.getElementById('login-email').value.trim();
     const pass  = document.getElementById('login-password').value;
     const btn   = document.getElementById('login-btn');
     const err   = document.getElementById('login-error');
-    err.textContent = '';
-    btn.textContent = 'Signing in…'; btn.disabled = true;
-
+    err.textContent = ''; btn.textContent = 'Signing in…'; btn.disabled = true;
     const { data, error } = await _sb.auth.signInWithPassword({ email, password: pass });
-    if (error) {
-      err.textContent = error.message;
-      btn.textContent = 'Sign In'; btn.disabled = false;
-    } else {
-      enterDashboard(data.user);
-    }
+    if (error) { err.textContent = error.message; btn.textContent = 'Sign In'; btn.disabled = false; }
+    else { _session = data.session; enterDashboard(data.user); }
   }
-
-  document.getElementById('login-password').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doLogin();
-  });
-
+  document.getElementById('login-password').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
   async function doLogout() {
-    await _sb.auth.signOut();
+    await _sb.auth.signOut(); _session = null;
+    allSignups = []; allClients = []; allProjects = []; clientMap = {};
     showLogin();
-    allSignups = [];
   }
 
-  // ── DATA ──────────────────────────────────────────────────────
-  async function loadData() {
-    document.getElementById('signups-tbody').innerHTML =
-      '<tr><td colspan="6" class="loading-state">Loading…</td></tr>';
+  // ── SECTION NAV ──
+  function switchSection(name, el) {
+    document.querySelectorAll('.section-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+  }
 
-    const { data, error } = await _sb
-      .from('signups')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      document.getElementById('signups-tbody').innerHTML =
-        `<tr><td colspan="6" class="empty-state">Error loading data: ${error.message}</td></tr>`;
-      return;
-    }
-
+  // ── SIGNUPS ──
+  async function loadSignups() {
+    const { data, error } = await _sb.from('signups').select('*').order('created_at', { ascending: false });
+    if (error) { document.getElementById('signups-tbody').innerHTML = `<tr><td colspan="7" class="empty-state">Error: ${error.message}</td></tr>`; return; }
     allSignups = data || [];
-    updateStats();
-    renderTable();
+    updateStats(); renderSignupsTable();
   }
-
   function updateStats() {
-    const counts = { discovery: 0, strategy: 0, standalone: 0, full: 0 };
-    allSignups.forEach(r => { if (counts[r.plan] !== undefined) counts[r.plan]++; });
-    document.getElementById('cnt-discovery').textContent  = counts.discovery;
-    document.getElementById('cnt-strategy').textContent   = counts.strategy;
-    document.getElementById('cnt-standalone').textContent = counts.standalone;
-    document.getElementById('cnt-full').textContent       = counts.full;
+    const c = { discovery:0, strategy:0, standalone:0, full:0 };
+    allSignups.forEach(r => { if (c[r.plan]!==undefined) c[r.plan]++; });
+    document.getElementById('cnt-discovery').textContent  = c.discovery;
+    document.getElementById('cnt-strategy').textContent   = c.strategy;
+    document.getElementById('cnt-standalone').textContent = c.standalone;
+    document.getElementById('cnt-full').textContent       = c.full;
     document.getElementById('cnt-total').textContent      = allSignups.length;
   }
-
   function setFilter(f, el) {
     activeFilter = f; currentPage = 1;
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
-    renderTable();
+    el.classList.add('active'); renderSignupsTable();
   }
-
-  function getFiltered() {
+  function getFilteredSignups() {
     const q = document.getElementById('search-input').value.toLowerCase();
     return allSignups.filter(r => {
-      const matchPlan = activeFilter === 'all' || r.plan === activeFilter;
-      const matchQ    = !q ||
-        (r.first_name + ' ' + r.last_name).toLowerCase().includes(q) ||
-        r.email.toLowerCase().includes(q) ||
-        (r.company || '').toLowerCase().includes(q);
-      return matchPlan && matchQ;
+      const mp = activeFilter === 'all' || r.plan === activeFilter;
+      const mq = !q || (r.first_name+' '+r.last_name).toLowerCase().includes(q) || r.email.toLowerCase().includes(q) || (r.company||'').toLowerCase().includes(q);
+      return mp && mq;
     });
   }
-
-  function renderTable() {
-    const rows    = getFiltered();
-    const total   = rows.length;
-    const pages   = Math.ceil(total / PAGE_SIZE);
+  function renderSignupsTable() {
+    const rows = getFilteredSignups();
+    const total = rows.length, pages = Math.ceil(total/PAGE_SIZE);
     if (currentPage > pages) currentPage = Math.max(1, pages);
-    const slice   = rows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-    const tbody   = document.getElementById('signups-tbody');
-    const pagDiv  = document.getElementById('pagination');
-
-    if (rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No signups found.</td></tr>';
-      pagDiv.style.display = 'none';
-      return;
-    }
-
+    const slice = rows.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+    const tbody = document.getElementById('signups-tbody');
+    const pagDiv = document.getElementById('pagination');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No signups found.</td></tr>'; pagDiv.style.display='none'; return; }
     tbody.innerHTML = slice.map(r => {
-      const date = new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      const plan = r.plan || 'unsure';
-      const label = PLAN_LABELS[plan] || plan;
+      const date = new Date(r.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      const plan = r.plan||'unsure';
       return `<tr>
         <td class="date-cell">${date}</td>
         <td class="name-cell">${esc(r.first_name)} ${esc(r.last_name)}</td>
         <td class="email-cell">${esc(r.email)}</td>
-        <td>${esc(r.company || '—')}</td>
-        <td><span class="plan-badge badge-${plan}">${label}</span></td>
-        <td class="msg-cell"><span title="${esc(r.message || '')}">${esc(r.message || '—')}</span></td>
+        <td>${esc(r.phone||'—')}</td>
+        <td>${esc(r.company||'—')}</td>
+        <td><span class="plan-badge badge-${plan}">${PLAN_LABELS[plan]||plan}</span></td>
+        <td class="msg-cell"><span title="${esc(r.message||'')}">${esc(r.message||'—')}</span></td>
       </tr>`;
     }).join('');
-
-    // Pagination
-    if (pages <= 1) { pagDiv.style.display = 'none'; return; }
-    pagDiv.style.display = 'flex';
-    document.getElementById('page-info').textContent =
-      `Showing ${(currentPage-1)*PAGE_SIZE+1}–${Math.min(currentPage*PAGE_SIZE, total)} of ${total}`;
-    const btns = document.getElementById('page-btns');
-    btns.innerHTML = `
+    if (pages<=1) { pagDiv.style.display='none'; return; }
+    pagDiv.style.display='flex';
+    document.getElementById('page-info').textContent = `Showing ${(currentPage-1)*PAGE_SIZE+1}–${Math.min(currentPage*PAGE_SIZE,total)} of ${total}`;
+    document.getElementById('page-btns').innerHTML = `
       <button class="page-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹ Prev</button>
       <button class="page-btn current">${currentPage}</button>
       <button class="page-btn" onclick="goPage(${currentPage+1})" ${currentPage===pages?'disabled':''}>Next ›</button>`;
   }
-
-  function goPage(p) { currentPage = p; renderTable(); window.scrollTo(0,0); }
-
-  function esc(s) {
-    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
-  // ── CSV EXPORT ────────────────────────────────────────────────
+  function goPage(p) { currentPage=p; renderSignupsTable(); window.scrollTo(0,0); }
   function exportCSV() {
-    const rows  = getFiltered();
-    const header = ['Date','First Name','Last Name','Email','Company','Plan','Challenge','Message'];
+    const rows = getFilteredSignups();
+    const header = ['Date','First Name','Last Name','Email','Phone','Company','Plan','Message'];
     const lines  = [header.join(',')];
     rows.forEach(r => {
       const date = new Date(r.created_at).toLocaleDateString('en-US');
-      lines.push([date, r.first_name, r.last_name, r.email, r.company||'', PLAN_LABELS[r.plan]||r.plan, r.challenge||'', r.message||'']
-        .map(v => `"${String(v).replace(/"/g,'""')}"`)
-        .join(','));
+      lines.push([date,r.first_name,r.last_name,r.email,r.phone||'',r.company||'',PLAN_LABELS[r.plan]||r.plan,r.message||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
     });
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a'); a.href = url;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));
     a.download = `jj-ai-signups-${new Date().toISOString().slice(0,10)}.csv`;
-    a.click(); URL.revokeObjectURL(url);
+    a.click();
+  }
+
+  // ── CLIENTS ──
+  async function loadClients() {
+    const { data, error } = await _sb.from('profiles').select('*').eq('role','client').order('created_at',{ascending:false});
+    if (error) { document.getElementById('clients-tbody').innerHTML=`<tr><td colspan="6" class="empty-state">Error: ${error.message}</td></tr>`; return; }
+    allClients = data || [];
+    allClients.forEach(c => { clientMap[c.id] = c; });
+    renderClientsTable();
+    populateClientDropdown();
+  }
+  function renderClientsTable() {
+    const q = document.getElementById('client-search').value.toLowerCase();
+    const rows = allClients.filter(c => !q || (c.full_name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.company||'').toLowerCase().includes(q));
+    const tbody = document.getElementById('clients-tbody');
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="6" class="empty-state">No clients yet.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(c => {
+      const date = c.created_at ? new Date(c.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+      const projCount = allProjects.filter(p => p.client_id === c.id).length;
+      return `<tr>
+        <td class="name-cell">${esc(c.full_name||'—')}</td>
+        <td class="email-cell">${esc(c.email||'—')}</td>
+        <td>${esc(c.company||'—')}</td>
+        <td>${projCount}</td>
+        <td class="date-cell">${date}</td>
+        <td><div class="btn-row">
+          <button class="btn-sm view" onclick="filterProjectsByClient('${c.id}')">View Projects</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+  function filterProjectsByClient(clientId) {
+    switchSection('projects', document.querySelectorAll('.section-tab')[2]);
+    document.getElementById('project-search').value = clientMap[clientId]?.full_name || '';
+    renderProjectsTable();
+  }
+
+  // Invite client
+  function openInviteModal() {
+    document.getElementById('inv-email').value = '';
+    document.getElementById('inv-name').value  = '';
+    document.getElementById('inv-company').value = '';
+    document.getElementById('invite-msg').textContent = '';
+    document.getElementById('invite-btn').disabled = false;
+    document.getElementById('invite-btn').textContent = 'Send Invite';
+    document.getElementById('invite-modal').classList.add('open');
+  }
+  async function doInviteClient() {
+    const email   = document.getElementById('inv-email').value.trim();
+    const name    = document.getElementById('inv-name').value.trim();
+    const company = document.getElementById('inv-company').value.trim();
+    const btn     = document.getElementById('invite-btn');
+    const msg     = document.getElementById('invite-msg');
+    if (!email) { msg.style.color='#c62828'; msg.textContent='Email is required.'; return; }
+    btn.disabled = true; btn.textContent = 'Sending…'; msg.textContent = '';
+    const { data: { session } } = await _sb.auth.getSession();
+    const res = await fetch('/.netlify/functions/invite-client', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, full_name: name, company }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      msg.style.color = '#c62828'; msg.textContent = json.error || 'Error sending invite.';
+      btn.disabled = false; btn.textContent = 'Send Invite';
+    } else {
+      msg.style.color = '#00695c'; msg.textContent = `✓ Invite sent to ${email}`;
+      btn.textContent = 'Sent!';
+      setTimeout(() => { closeModal('invite-modal'); loadClients(); }, 1500);
+    }
+  }
+
+  // ── PROJECTS ──
+  async function loadProjects() {
+    const { data, error } = await _sb.from('projects').select('*').order('updated_at',{ascending:false});
+    if (error) { document.getElementById('projects-tbody').innerHTML=`<tr><td colspan="5" class="empty-state">Error: ${error.message}</td></tr>`; return; }
+    allProjects = data || [];
+    renderProjectsTable();
+    renderClientsTable(); // refresh project counts
+  }
+  function renderProjectsTable() {
+    const q = document.getElementById('project-search').value.toLowerCase();
+    const rows = allProjects.filter(p => {
+      const client = clientMap[p.client_id];
+      return !q || p.name.toLowerCase().includes(q) || (client?.full_name||'').toLowerCase().includes(q) || (client?.company||'').toLowerCase().includes(q);
+    });
+    const tbody = document.getElementById('projects-tbody');
+    if (!rows.length) { tbody.innerHTML='<tr><td colspan="5" class="empty-state">No projects yet.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(p => {
+      const client = clientMap[p.client_id];
+      const date   = new Date(p.updated_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      const status = p.status || 'planning';
+      return `<tr>
+        <td class="name-cell">${esc(p.name)}</td>
+        <td>${esc(client?.full_name || client?.email || 'Unknown')}</td>
+        <td><span class="status-badge status-${status}">${STATUS_LABELS[status]||status}</span></td>
+        <td class="date-cell">${date}</td>
+        <td><div class="btn-row">
+          <button class="btn-sm edit"   onclick="openProjectModal(${JSON.stringify(p).replace(/"/g,'&quot;')})">Edit</button>
+          <button class="btn-sm delete" onclick="deleteProject('${p.id}','${esc(p.name)}')">Delete</button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function populateClientDropdown() {
+    const sel = document.getElementById('proj-client');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Select a client…</option>';
+    allClients.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = (c.full_name ? `${c.full_name} — ` : '') + (c.email || c.id);
+      sel.appendChild(opt);
+    });
+    if (current) sel.value = current;
+  }
+
+  function openProjectModal(project) {
+    document.getElementById('project-modal-title').textContent = project ? 'Edit Project' : 'New Project';
+    document.getElementById('proj-id').value      = project?.id || '';
+    document.getElementById('proj-name').value    = project?.name || '';
+    document.getElementById('proj-desc').value    = project?.description || '';
+    document.getElementById('proj-status').value  = project?.status || 'planning';
+    document.getElementById('proj-notes').value   = project?.notes || '';
+    document.getElementById('proj-client').value  = project?.client_id || '';
+    document.getElementById('project-msg').textContent = '';
+    document.getElementById('project-save-btn').disabled = false;
+    document.getElementById('project-save-btn').textContent = 'Save Project';
+
+    // Color
+    const color = project?.cover_color || '#00bcd4';
+    document.querySelectorAll('.color-swatch').forEach(s => {
+      s.classList.toggle('selected', s.dataset.color === color);
+    });
+
+    // Milestones
+    const milestones = project?.milestones || [];
+    document.getElementById('milestones-list').innerHTML = '';
+    milestones.forEach(m => addMilestone(m));
+
+    // Links
+    const links = project?.links || [];
+    document.getElementById('links-list').innerHTML = '';
+    links.forEach(l => addLink(l));
+
+    populateClientDropdown();
+    document.getElementById('project-modal').classList.add('open');
+  }
+
+  function selectColor(el) {
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function addMilestone(m) {
+    const div = document.createElement('div');
+    div.className = 'dyn-row';
+    div.innerHTML = `
+      <input type="text"  class="ms-title" placeholder="Milestone title" value="${esc(m?.title||'')}" />
+      <input type="text"  class="ms-date"  placeholder="Date (optional)" style="max-width:130px" value="${esc(m?.date||'')}" />
+      <label style="display:flex;align-items:center;gap:.3rem;font-size:.78rem;color:var(--muted);flex-shrink:0;">
+        <input type="checkbox" class="ms-done" ${m?.completed?'checked':''} /> Done
+      </label>
+      <button class="btn-rm" onclick="this.parentElement.remove()">×</button>`;
+    document.getElementById('milestones-list').appendChild(div);
+  }
+
+  function addLink(l) {
+    const div = document.createElement('div');
+    div.className = 'dyn-row';
+    div.innerHTML = `
+      <input type="text" class="lk-label" placeholder="Label" style="max-width:160px" value="${esc(l?.label||'')}" />
+      <input type="url"  class="lk-url"   placeholder="https://…" value="${esc(l?.url||'')}" />
+      <button class="btn-rm" onclick="this.parentElement.remove()">×</button>`;
+    document.getElementById('links-list').appendChild(div);
+  }
+
+  function collectMilestones() {
+    return [...document.querySelectorAll('#milestones-list .dyn-row')].map(row => ({
+      title:     row.querySelector('.ms-title').value.trim(),
+      date:      row.querySelector('.ms-date').value.trim(),
+      completed: row.querySelector('.ms-done').checked,
+    })).filter(m => m.title);
+  }
+
+  function collectLinks() {
+    return [...document.querySelectorAll('#links-list .dyn-row')].map(row => ({
+      label: row.querySelector('.lk-label').value.trim(),
+      url:   row.querySelector('.lk-url').value.trim(),
+    })).filter(l => l.url);
+  }
+
+  async function saveProject() {
+    const id        = document.getElementById('proj-id').value;
+    const clientId  = document.getElementById('proj-client').value;
+    const name      = document.getElementById('proj-name').value.trim();
+    const btn       = document.getElementById('project-save-btn');
+    const msg       = document.getElementById('project-msg');
+    if (!clientId || !name) { msg.style.color='#c62828'; msg.textContent='Client and project name are required.'; return; }
+
+    const color = document.querySelector('.color-swatch.selected')?.dataset.color || '#00bcd4';
+    const payload = {
+      action:      id ? 'update' : 'create',
+      id:          id || undefined,
+      client_id:   clientId,
+      name,
+      description: document.getElementById('proj-desc').value.trim() || null,
+      status:      document.getElementById('proj-status').value,
+      cover_color: color,
+      milestones:  collectMilestones(),
+      links:       collectLinks(),
+      notes:       document.getElementById('proj-notes').value.trim() || null,
+    };
+
+    btn.disabled = true; btn.textContent = 'Saving…'; msg.textContent = '';
+    const { data: { session } } = await _sb.auth.getSession();
+    const res = await fetch('/.netlify/functions/manage-project', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      msg.style.color = '#c62828'; msg.textContent = json.error || 'Error saving project.';
+      btn.disabled = false; btn.textContent = 'Save Project';
+    } else {
+      msg.style.color = '#00695c'; msg.textContent = '✓ Saved!';
+      setTimeout(() => { closeModal('project-modal'); loadProjects(); }, 800);
+    }
+  }
+
+  async function deleteProject(id, name) {
+    if (!confirm(`Delete project "${name}"? This cannot be undone.`)) return;
+    const { data: { session } } = await _sb.auth.getSession();
+    const res = await fetch('/.netlify/functions/manage-project', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id }),
+    });
+    if (res.ok) loadProjects();
+    else alert('Error deleting project.');
+  }
+
+  // ── MODALS ──
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+  });
+
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 </script>
 </body>

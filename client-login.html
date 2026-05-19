@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Login — JJAIServices.com</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0a0f2c; --cyan: #00bcd4; --teal: #00897b;
+      --white: #ffffff; --off: #f0f4ff; --text: #1c1c2e; --muted: #5c6480;
+    }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(160deg, #f0f9ff 0%, #e0f7fa 50%, #f0f4ff 100%);
+      min-height: 100vh; display: flex; flex-direction: column;
+    }
+    nav {
+      background: rgba(255,255,255,.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(10,15,44,.08);
+      padding: 1rem 5%; display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: .65rem; text-decoration: none; }
+    .logo-text { font-size: 1.15rem; font-weight: 800; color: var(--navy); }
+    .logo-text span { color: var(--cyan); }
+    nav a.back { font-size: .88rem; color: var(--teal); text-decoration: none; font-weight: 600; }
+    nav a.back:hover { text-decoration: underline; }
+
+    main {
+      flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem;
+    }
+    .card {
+      background: var(--white); border-radius: 20px;
+      padding: 2.8rem 2.2rem; width: 100%; max-width: 400px;
+      box-shadow: 0 12px 48px rgba(10,15,44,.12);
+      border: 1px solid rgba(10,15,44,.07);
+    }
+    .card-logo { display: flex; align-items: center; gap: .65rem; justify-content: center; margin-bottom: 2rem; }
+    .card-logo-text { font-size: 1.2rem; font-weight: 800; color: var(--navy); }
+    .card-logo-text span { color: var(--cyan); }
+
+    h2 { font-size: 1.4rem; font-weight: 800; color: var(--navy); text-align: center; margin-bottom: .4rem; }
+    .subtitle { text-align: center; color: var(--muted); font-size: .9rem; margin-bottom: 2rem; }
+
+    .field { display: flex; flex-direction: column; gap: .35rem; margin-bottom: 1rem; }
+    .field label { font-size: .82rem; font-weight: 600; color: var(--navy); }
+    .field input {
+      padding: .8rem 1rem; border: 1px solid rgba(10,15,44,.14); border-radius: 10px;
+      font-size: .92rem; color: var(--text); font-family: inherit; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .field input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,188,212,.12); }
+
+    .forgot { text-align: right; margin-top: -.4rem; margin-bottom: 1.2rem; }
+    .forgot a { font-size: .8rem; color: var(--teal); text-decoration: none; }
+    .forgot a:hover { text-decoration: underline; }
+
+    #login-error { font-size: .85rem; color: #c62828; text-align: center; min-height: 1.2em; margin-bottom: .6rem; }
+
+    .btn {
+      width: 100%; padding: .9rem; border: none; border-radius: 50px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); font-weight: 700; font-size: .95rem;
+      cursor: pointer; transition: opacity .2s, transform .2s;
+      box-shadow: 0 4px 20px rgba(0,188,212,.3);
+    }
+    .btn:hover { opacity: .88; transform: translateY(-1px); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .divider { display: flex; align-items: center; gap: 1rem; margin: 1.4rem 0; }
+    .divider hr { flex: 1; border: none; border-top: 1px solid rgba(10,15,44,.08); }
+    .divider span { font-size: .78rem; color: var(--muted); }
+
+    .magic-btn {
+      width: 100%; padding: .8rem; border: 1.5px solid rgba(10,15,44,.12); border-radius: 50px;
+      background: transparent; color: var(--navy); font-weight: 600; font-size: .88rem;
+      cursor: pointer; transition: border-color .2s, background .2s;
+    }
+    .magic-btn:hover { border-color: var(--cyan); background: rgba(0,188,212,.05); }
+    .magic-btn:disabled { opacity: .5; cursor: not-allowed; }
+    #magic-msg { font-size: .82rem; color: var(--teal); text-align: center; min-height: 1.2em; margin-top: .5rem; }
+
+    footer {
+      text-align: center; padding: 1.5rem; font-size: .8rem; color: var(--muted);
+    }
+    footer a { color: var(--teal); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">
+    <svg width="30" height="30" viewBox="0 0 40 40" fill="none">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="100%" stop-color="#00897b"/></linearGradient></defs>
+      <line x1="8" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="8" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <circle cx="20" cy="20" r="5" fill="url(#lg)"/>
+      <circle cx="8" cy="8" r="3" fill="#00bcd4" opacity=".85"/>
+      <circle cx="32" cy="8" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="8" cy="32" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="32" cy="32" r="3" fill="#00bcd4" opacity=".85"/>
+    </svg>
+    <div class="logo-text">JJ <span>AI</span> Services</div>
+  </a>
+  <a class="back" href="/">← Back to Home</a>
+</nav>
+
+<main>
+  <div class="card">
+    <div class="card-logo">
+      <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+        <defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="100%" stop-color="#00897b"/></linearGradient></defs>
+        <line x1="8" y1="8" x2="20" y2="20" stroke="url(#lg2)" stroke-width="1.2" opacity=".6"/>
+        <line x1="32" y1="8" x2="20" y2="20" stroke="url(#lg2)" stroke-width="1.2" opacity=".6"/>
+        <line x1="8" y1="32" x2="20" y2="20" stroke="url(#lg2)" stroke-width="1.2" opacity=".6"/>
+        <line x1="32" y1="32" x2="20" y2="20" stroke="url(#lg2)" stroke-width="1.2" opacity=".6"/>
+        <circle cx="20" cy="20" r="5" fill="url(#lg2)"/>
+        <circle cx="8" cy="8" r="3" fill="#00bcd4" opacity=".85"/>
+        <circle cx="32" cy="8" r="3" fill="#00897b" opacity=".85"/>
+        <circle cx="8" cy="32" r="3" fill="#00897b" opacity=".85"/>
+        <circle cx="32" cy="32" r="3" fill="#00bcd4" opacity=".85"/>
+      </svg>
+      <div class="card-logo-text">JJ <span>AI</span> Services</div>
+    </div>
+
+    <h2>Client Portal</h2>
+    <p class="subtitle">Sign in to view your projects</p>
+
+    <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@example.com" /></div>
+    <div class="field"><label>Password</label><input type="password" id="password" placeholder="••••••••" /></div>
+    <div class="forgot"><a href="#" onclick="showForgot(event)">Forgot password?</a></div>
+
+    <p id="login-error"></p>
+    <button class="btn" id="login-btn" onclick="doLogin()">Sign In</button>
+
+    <div class="divider"><hr /><span>or</span><hr /></div>
+
+    <button class="magic-btn" id="magic-btn" onclick="sendMagicLink()">Send me a magic link</button>
+    <p id="magic-msg"></p>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2026 <a href="/">JJAIServices.com</a> &nbsp;|&nbsp; <a href="/privacy.html">Privacy</a> &nbsp;|&nbsp; <a href="/terms.html">Terms</a></p>
+</footer>
+
+<script>
+  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // If already logged in, redirect to portal
+  _sb.auth.getSession().then(({ data: { session } }) => {
+    if (session) window.location.href = '/client-portal.html';
+  });
+
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  async function doLogin() {
+    const email = document.getElementById('email').value.trim();
+    const pass  = document.getElementById('password').value;
+    const btn   = document.getElementById('login-btn');
+    const err   = document.getElementById('login-error');
+    err.textContent = '';
+    btn.textContent = 'Signing in…'; btn.disabled = true;
+
+    const { error } = await _sb.auth.signInWithPassword({ email, password: pass });
+    if (error) {
+      err.textContent = error.message;
+      btn.textContent = 'Sign In'; btn.disabled = false;
+    } else {
+      window.location.href = '/client-portal.html';
+    }
+  }
+
+  async function sendMagicLink() {
+    const email = document.getElementById('email').value.trim();
+    const btn   = document.getElementById('magic-btn');
+    const msg   = document.getElementById('magic-msg');
+    if (!email) { msg.style.color = '#c62828'; msg.textContent = 'Enter your email first.'; return; }
+
+    btn.disabled = true; btn.textContent = 'Sending…';
+    const { error } = await _sb.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: 'https://jjaiservices.com/client-portal.html' }
+    });
+    if (error) {
+      msg.style.color = '#c62828'; msg.textContent = error.message;
+      btn.disabled = false; btn.textContent = 'Send me a magic link';
+    } else {
+      msg.style.color = '#00695c';
+      msg.textContent = '✓ Magic link sent! Check your inbox.';
+      btn.textContent = 'Link sent';
+    }
+  }
+
+  async function showForgot(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const err   = document.getElementById('login-error');
+    if (!email) { err.textContent = 'Enter your email above first.'; return; }
+    const { error } = await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://jjaiservices.com/client-login.html'
+    });
+    err.style.color = error ? '#c62828' : '#00695c';
+    err.textContent = error ? error.message : '✓ Password reset email sent!';
+  }
+</script>
+</body>
+</html>

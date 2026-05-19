@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Projects — JJAIServices.com</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0a0f2c; --cyan: #00bcd4; --teal: #00897b;
+      --white: #ffffff; --off: #f0f4ff; --text: #1c1c2e; --muted: #5c6480;
+      --radius: 16px; --shadow: 0 4px 24px rgba(10,15,44,.09);
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--off); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--white); border-bottom: 1px solid rgba(10,15,44,.08);
+      padding: 1rem 5%; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 8px rgba(10,15,44,.05); position: sticky; top: 0; z-index: 10;
+    }
+    .logo { display: flex; align-items: center; gap: .65rem; text-decoration: none; }
+    .logo-text { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
+    .logo-text span { color: var(--cyan); }
+    .logo-sub { font-size: .6rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .user-name { font-size: .88rem; color: var(--muted); }
+    .btn-logout {
+      padding: .4rem 1rem; border: 1.5px solid rgba(10,15,44,.12); border-radius: 50px;
+      background: transparent; color: var(--navy); font-size: .82rem; font-weight: 600;
+      cursor: pointer; transition: border-color .2s;
+    }
+    .btn-logout:hover { border-color: var(--cyan); }
+
+    main { max-width: 1100px; margin: 0 auto; padding: 3rem 5%; }
+
+    .page-header { margin-bottom: 2.5rem; }
+    .page-header h1 { font-size: 1.8rem; font-weight: 800; color: var(--navy); letter-spacing: -.03em; }
+    .page-header p  { color: var(--muted); font-size: .95rem; margin-top: .4rem; }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.4rem;
+    }
+
+    .project-card {
+      background: var(--white); border-radius: var(--radius);
+      border: 1px solid rgba(10,15,44,.07);
+      box-shadow: var(--shadow);
+      text-decoration: none; color: inherit;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .project-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(10,15,44,.13); }
+
+    .card-top {
+      height: 8px;
+    }
+    .card-body { padding: 1.6rem; flex: 1; display: flex; flex-direction: column; gap: .6rem; }
+
+    .card-status {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; padding: .25rem .7rem; border-radius: 50px;
+    }
+    .status-planning    { background: #e3f2fd; color: #1565c0; }
+    .status-in-progress { background: #e0f7fa; color: #00695c; }
+    .status-review      { background: #fff8e1; color: #f57f17; }
+    .status-completed   { background: #e8f5e9; color: #2e7d32; }
+    .status-on-hold     { background: #f5f5f5; color: #616161; }
+
+    .card-name { font-size: 1.1rem; font-weight: 700; color: var(--navy); }
+    .card-desc { font-size: .88rem; color: var(--muted); line-height: 1.5;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .card-footer {
+      padding: .9rem 1.6rem;
+      border-top: 1px solid rgba(10,15,44,.06);
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: .78rem; color: var(--muted);
+    }
+    .card-footer .arrow { color: var(--teal); font-size: 1rem; }
+
+    .empty-state {
+      text-align: center; padding: 5rem 2rem; color: var(--muted);
+    }
+    .empty-state h3 { font-size: 1.1rem; font-weight: 600; color: var(--navy); margin-bottom: .5rem; }
+    .empty-state p  { font-size: .9rem; }
+
+    .loading { text-align: center; padding: 4rem; color: var(--muted); }
+
+    footer {
+      text-align: center; padding: 2rem 5%;
+      font-size: .82rem; color: var(--muted);
+      border-top: 1px solid rgba(10,15,44,.07); margin-top: 4rem;
+    }
+    footer a { color: var(--teal); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">
+    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="100%" stop-color="#00897b"/></linearGradient></defs>
+      <line x1="8" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="8" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <circle cx="20" cy="20" r="5" fill="url(#lg)"/>
+      <circle cx="8" cy="8" r="3" fill="#00bcd4" opacity=".85"/>
+      <circle cx="32" cy="8" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="8" cy="32" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="32" cy="32" r="3" fill="#00bcd4" opacity=".85"/>
+    </svg>
+    <div>
+      <div class="logo-text">JJ <span>AI</span> Services</div>
+      <div class="logo-sub">Client Portal</div>
+    </div>
+  </a>
+  <div class="header-right">
+    <span class="user-name" id="user-name"></span>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </div>
+</header>
+
+<main>
+  <div class="page-header">
+    <h1>My Projects</h1>
+    <p>Click a project to view details, milestones, and updates.</p>
+  </div>
+  <div id="projects-container" class="loading">Loading your projects…</div>
+</main>
+
+<footer>
+  <p>&copy; 2026 <a href="/">JJAIServices.com</a> &nbsp;|&nbsp; <a href="/privacy.html">Privacy</a> &nbsp;|&nbsp; <a href="/terms.html">Terms</a></p>
+</footer>
+
+<script>
+  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const STATUS_LABELS = {
+    planning:    'Planning',
+    'in-progress': 'In Progress',
+    review:      'Review',
+    completed:   'Completed',
+    'on-hold':   'On Hold',
+  };
+
+  _sb.auth.getSession().then(({ data: { session } }) => {
+    if (!session) { window.location.href = '/client-login.html'; return; }
+    const user = session.user;
+    const name = user.user_metadata?.full_name || user.email;
+    document.getElementById('user-name').textContent = name;
+    loadProjects(user.id);
+  });
+
+  async function doLogout() {
+    await _sb.auth.signOut();
+    window.location.href = '/client-login.html';
+  }
+
+  async function loadProjects(clientId) {
+    const { data, error } = await _sb
+      .from('projects')
+      .select('id, name, description, status, cover_color, updated_at')
+      .eq('client_id', clientId)
+      .order('updated_at', { ascending: false });
+
+    const container = document.getElementById('projects-container');
+
+    if (error) {
+      container.innerHTML = `<div class="empty-state"><h3>Error loading projects</h3><p>${error.message}</p></div>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      container.innerHTML = `<div class="empty-state">
+        <h3>No projects yet</h3>
+        <p>Your projects will appear here once your AI Navigator sets them up.</p>
+      </div>`;
+      return;
+    }
+
+    container.className = 'projects-grid';
+    container.innerHTML = data.map(p => {
+      const status = p.status || 'planning';
+      const label  = STATUS_LABELS[status] || status;
+      const date   = new Date(p.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `<a class="project-card" href="/project.html?id=${p.id}">
+        <div class="card-top" style="background:${p.cover_color || '#00bcd4'};"></div>
+        <div class="card-body">
+          <span class="card-status status-${status}">${label}</span>
+          <div class="card-name">${esc(p.name)}</div>
+          ${p.description ? `<div class="card-desc">${esc(p.description)}</div>` : ''}
+        </div>
+        <div class="card-footer">
+          <span>Updated ${date}</span>
+          <span class="arrow">→</span>
+        </div>
+      </a>`;
+    }).join('');
+  }
+
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+</script>
+</body>
+</html>

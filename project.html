@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project — JJAIServices.com</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0a0f2c; --cyan: #00bcd4; --teal: #00897b;
+      --white: #ffffff; --off: #f0f4ff; --text: #1c1c2e; --muted: #5c6480;
+      --radius: 14px; --shadow: 0 4px 24px rgba(10,15,44,.09);
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--off); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--white); border-bottom: 1px solid rgba(10,15,44,.08);
+      padding: 1rem 5%; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 8px rgba(10,15,44,.05); position: sticky; top: 0; z-index: 10;
+    }
+    .logo { display: flex; align-items: center; gap: .65rem; text-decoration: none; }
+    .logo-text { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
+    .logo-text span { color: var(--cyan); }
+    .logo-sub { font-size: .6rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .btn-back {
+      padding: .4rem 1rem; border: 1.5px solid rgba(10,15,44,.12); border-radius: 50px;
+      background: transparent; color: var(--navy); font-size: .82rem; font-weight: 600;
+      text-decoration: none; transition: border-color .2s;
+    }
+    .btn-back:hover { border-color: var(--cyan); color: var(--teal); }
+    .btn-logout {
+      padding: .4rem 1rem; border: 1.5px solid rgba(10,15,44,.12); border-radius: 50px;
+      background: transparent; color: var(--navy); font-size: .82rem; font-weight: 600;
+      cursor: pointer; transition: border-color .2s;
+    }
+    .btn-logout:hover { border-color: var(--cyan); }
+
+    /* Cover banner */
+    .cover { height: 10px; width: 100%; }
+
+    main { max-width: 860px; margin: 0 auto; padding: 2.5rem 5% 5rem; }
+
+    /* Project header */
+    .project-header { margin-bottom: 2rem; }
+    .project-status {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; padding: .25rem .7rem; border-radius: 50px;
+      margin-bottom: .8rem;
+    }
+    .status-planning    { background: #e3f2fd; color: #1565c0; }
+    .status-in-progress { background: #e0f7fa; color: #00695c; }
+    .status-review      { background: #fff8e1; color: #f57f17; }
+    .status-completed   { background: #e8f5e9; color: #2e7d32; }
+    .status-on-hold     { background: #f5f5f5; color: #616161; }
+
+    .project-name { font-size: 2rem; font-weight: 800; color: var(--navy); letter-spacing: -.03em; margin-bottom: .6rem; }
+    .project-meta { font-size: .82rem; color: var(--muted); }
+
+    /* Sections */
+    .section {
+      background: var(--white); border-radius: var(--radius);
+      border: 1px solid rgba(10,15,44,.07); box-shadow: var(--shadow);
+      padding: 1.8rem; margin-bottom: 1.4rem;
+    }
+    .section-title {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--cyan); margin-bottom: 1rem;
+    }
+    .section-body { font-size: .95rem; color: var(--muted); line-height: 1.7; white-space: pre-wrap; }
+
+    /* Milestones */
+    .milestones { display: flex; flex-direction: column; gap: .7rem; }
+    .milestone {
+      display: flex; align-items: flex-start; gap: .8rem;
+    }
+    .milestone-check {
+      flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid; display: flex; align-items: center; justify-content: center;
+      margin-top: 1px;
+    }
+    .milestone-check.done  { background: var(--teal); border-color: var(--teal); }
+    .milestone-check.open  { background: transparent; border-color: rgba(10,15,44,.2); }
+    .milestone-check.done svg { width: 10px; height: 10px; }
+    .milestone-info { flex: 1; }
+    .milestone-title { font-size: .92rem; font-weight: 600; color: var(--navy); }
+    .milestone-title.done { text-decoration: line-through; color: var(--muted); font-weight: 400; }
+    .milestone-date { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+
+    /* Links */
+    .links-list { display: flex; flex-direction: column; gap: .6rem; }
+    .link-item {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .7rem 1rem; border-radius: 8px;
+      background: var(--off); text-decoration: none;
+      transition: background .15s;
+    }
+    .link-item:hover { background: #e0f7fa; }
+    .link-icon { font-size: 1rem; flex-shrink: 0; }
+    .link-label { font-size: .9rem; font-weight: 600; color: var(--navy); }
+    .link-url   { font-size: .78rem; color: var(--muted); margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+    .link-arrow { margin-left: auto; color: var(--teal); font-size: .9rem; }
+
+    /* Notes */
+    .notes-empty { color: var(--muted); font-size: .9rem; font-style: italic; }
+
+    /* Loading / error */
+    .loading { text-align: center; padding: 5rem 2rem; color: var(--muted); }
+
+    footer {
+      text-align: center; padding: 2rem 5%;
+      font-size: .82rem; color: var(--muted);
+      border-top: 1px solid rgba(10,15,44,.07);
+    }
+    footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .project-name { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">
+    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="100%" stop-color="#00897b"/></linearGradient></defs>
+      <line x1="8" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="8" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <circle cx="20" cy="20" r="5" fill="url(#lg)"/>
+      <circle cx="8" cy="8" r="3" fill="#00bcd4" opacity=".85"/>
+      <circle cx="32" cy="8" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="8" cy="32" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="32" cy="32" r="3" fill="#00bcd4" opacity=".85"/>
+    </svg>
+    <div>
+      <div class="logo-text">JJ <span>AI</span> Services</div>
+      <div class="logo-sub">Client Portal</div>
+    </div>
+  </a>
+  <div class="header-right">
+    <a class="btn-back" href="/client-portal.html">← My Projects</a>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </div>
+</header>
+
+<div class="cover" id="cover-bar"></div>
+
+<div id="page-content" class="loading">Loading project…</div>
+
+<footer>
+  <p>&copy; 2026 <a href="/">JJAIServices.com</a> &nbsp;|&nbsp; <a href="/privacy.html">Privacy</a> &nbsp;|&nbsp; <a href="/terms.html">Terms</a></p>
+</footer>
+
+<script>
+  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const STATUS_LABELS = {
+    planning:      'Planning',
+    'in-progress': 'In Progress',
+    review:        'Review',
+    completed:     'Completed',
+    'on-hold':     'On Hold',
+  };
+
+  const projectId = new URLSearchParams(window.location.search).get('id');
+  if (!projectId) window.location.href = '/client-portal.html';
+
+  _sb.auth.getSession().then(({ data: { session } }) => {
+    if (!session) { window.location.href = '/client-login.html'; return; }
+    loadProject(session.user.id);
+  });
+
+  async function doLogout() {
+    await _sb.auth.signOut();
+    window.location.href = '/client-login.html';
+  }
+
+  async function loadProject(clientId) {
+    const { data: project, error } = await _sb
+      .from('projects')
+      .select('*')
+      .eq('id', projectId)
+      .eq('client_id', clientId)
+      .single();
+
+    const content = document.getElementById('page-content');
+
+    if (error || !project) {
+      content.innerHTML = `<main style="text-align:center;padding:5rem 2rem;color:#5c6480;">
+        <h2 style="color:#0a0f2c;margin-bottom:.5rem;">Project not found</h2>
+        <p>This project doesn't exist or you don't have access.</p>
+        <a href="/client-portal.html" style="color:#00897b;text-decoration:none;font-weight:600;">← Back to My Projects</a>
+      </main>`;
+      return;
+    }
+
+    document.title = `${project.name} — JJAIServices.com`;
+    document.getElementById('cover-bar').style.background = project.cover_color || '#00bcd4';
+    document.getElementById('cover-bar').style.height = '10px';
+
+    const status     = project.status || 'planning';
+    const statusLabel = STATUS_LABELS[status] || status;
+    const updated    = new Date(project.updated_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const milestones = Array.isArray(project.milestones) ? project.milestones : [];
+    const links      = Array.isArray(project.links) ? project.links : [];
+
+    const milestonesHtml = milestones.length === 0
+      ? '<p class="notes-empty">No milestones added yet.</p>'
+      : `<div class="milestones">${milestones.map(m => `
+          <div class="milestone">
+            <div class="milestone-check ${m.completed ? 'done' : 'open'}">
+              ${m.completed ? `<svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+            </div>
+            <div class="milestone-info">
+              <div class="milestone-title ${m.completed ? 'done' : ''}">${esc(m.title)}</div>
+              ${m.date ? `<div class="milestone-date">${esc(m.date)}</div>` : ''}
+            </div>
+          </div>`).join('')}
+        </div>`;
+
+    const linksHtml = links.length === 0
+      ? '<p class="notes-empty">No links added yet.</p>'
+      : `<div class="links-list">${links.map(l => `
+          <a class="link-item" href="${esc(l.url)}" target="_blank" rel="noopener">
+            <span class="link-icon">🔗</span>
+            <div>
+              <div class="link-label">${esc(l.label)}</div>
+              <div class="link-url">${esc(l.url)}</div>
+            </div>
+            <span class="link-arrow">↗</span>
+          </a>`).join('')}
+        </div>`;
+
+    content.className = '';
+    content.innerHTML = `
+      <main>
+        <div class="project-header">
+          <span class="project-status status-${status}">${statusLabel}</span>
+          <div class="project-name">${esc(project.name)}</div>
+          <div class="project-meta">Last updated ${updated}</div>
+        </div>
+
+        ${project.description ? `
+        <div class="section">
+          <div class="section-title">About this project</div>
+          <div class="section-body">${esc(project.description)}</div>
+        </div>` : ''}
+
+        <div class="section">
+          <div class="section-title">Milestones</div>
+          ${milestonesHtml}
+        </div>
+
+        <div class="section">
+          <div class="section-title">Links &amp; Resources</div>
+          ${linksHtml}
+        </div>
+
+        ${project.notes ? `
+        <div class="section">
+          <div class="section-title">Notes &amp; Updates</div>
+          <div class="section-body">${esc(project.notes)}</div>
+        </div>` : ''}
+      </main>`;
+  }
+
+  function esc(s) {
+    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>

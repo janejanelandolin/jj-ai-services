@@ -693,17 +693,23 @@
         <option value="unsure">Not sure yet — help me decide</option>
       </select>
       <textarea name="message" placeholder="Tell us a little more (optional)"></textarea>
+
+      <hr style="border:none;border-top:1px solid rgba(10,15,44,.08);margin:.5rem 0;" />
+      <p style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(10,15,44,.4);margin-bottom:.6rem;">Optional — SMS Updates</p>
+
       <label style="display:flex;align-items:flex-start;gap:.75rem;cursor:pointer;text-align:left;">
         <input type="checkbox" name="sms_consent"
           style="flex-shrink:0;width:18px;height:18px;margin-top:2px;accent-color:#00897b;cursor:pointer;" />
         <span style="font-size:.82rem;color:rgba(10,15,44,.6);line-height:1.5;">
-          <strong style="color:rgba(10,15,44,.75);">(Optional)</strong> I agree to receive text messages and phone calls from JJAIServices.com about my enquiry and services.
-          Consent is not required to receive our services.
-          Message &amp; data rates may apply. Reply STOP to unsubscribe at any time.
-          View our <a href="/privacy.html" style="color:#00897b;">Privacy Policy</a>
-          and <a href="/terms.html" style="color:#00897b;">Terms &amp; Conditions</a>.
+          I agree to receive text messages from JJAIServices.com about my enquiry and services. <strong style="color:rgba(10,15,44,.7);">This is optional — you can submit this form and receive our services without opting in.</strong>
         </span>
       </label>
+      <p style="font-size:.76rem;color:rgba(10,15,44,.45);line-height:1.6;margin-top:.5rem;padding:.65rem .8rem;background:rgba(10,15,44,.03);border-radius:8px;border:1px solid rgba(10,15,44,.07);">
+        By checking the box above, you consent to receive SMS/text messages from JJAIServices.com. Message frequency varies.
+        Message &amp; data rates may apply. Reply <strong>STOP</strong> to opt out at any time. Reply <strong>HELP</strong> for support.
+        Consent is not a condition of purchase or service. Mobile numbers and consent data are never shared with third parties for marketing.
+        View our <a href="/privacy.html" style="color:#00897b;">Privacy Policy</a> and <a href="/terms.html" style="color:#00897b;">Terms &amp; Conditions</a>.
+      </p>
       <p id="form-message" style="min-height:1.4em;font-size:.9rem;text-align:center;font-weight:500;"></p>
       <button type="submit" class="btn-primary">Send My Request &rarr;</button>
     </form>

@@ -61,7 +61,6 @@
 
     /* Forms */
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
     .form-group { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1rem; }
     .form-group:last-child { margin-bottom: 0; }
     .form-group label { font-size: .8rem; font-weight: 600; color: var(--navy); }
@@ -91,13 +90,13 @@
     }
     .btn-secondary:hover { border-color: var(--cyan); }
 
-    /* Generate section */
+    /* Spinners */
     .generate-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1.2rem; }
     .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,188,212,.2); border-top-color: var(--cyan); border-radius: 50%; animation: spin .7s linear infinite; }
     .spinner.show { display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Post ideas list */
+    /* Ideas */
     .ideas-list { display: flex; flex-direction: column; gap: .8rem; margin-top: 1rem; }
     .idea-item {
       background: var(--off); border-radius: 10px; padding: 1rem 1.2rem;
@@ -115,7 +114,7 @@
     }
     .idea-use-btn:hover { background: var(--teal); color: var(--white); }
 
-    /* Post preview card */
+    /* Post preview (generate tab) */
     .post-preview {
       background: var(--white); border-radius: var(--radius); border: 1px solid rgba(10,15,44,.07);
       box-shadow: var(--shadow); overflow: hidden; margin-top: 1rem;
@@ -127,8 +126,7 @@
     .post-avatar {
       width: 34px; height: 34px; border-radius: 50%;
       background: linear-gradient(135deg, var(--cyan), var(--teal));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
     }
     .post-handle { font-size: .85rem; font-weight: 700; color: var(--navy); }
     .post-image-placeholder {
@@ -142,61 +140,131 @@
     .post-caption-area { padding: 1rem 1.2rem; }
     .post-caption { font-size: .88rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
     .post-hashtags { margin-top: .5rem; font-size: .82rem; color: var(--teal); }
-    .post-actions { display: flex; gap: .8rem; padding: 1rem 1.2rem; border-top: 1px solid rgba(10,15,44,.06); flex-wrap: wrap; }
 
-    /* Queue table */
-    .queue-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
+    /* ── Queue Cards ─────────────────────────────────────────────────────── */
+    .queue-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: .5rem; }
     .queue-header h2 { font-size: 1rem; font-weight: 700; color: var(--navy); }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-    th { padding: .6rem .9rem; text-align: left; font-size: .7rem; font-weight: 700;
-         text-transform: uppercase; letter-spacing: .07em; color: var(--muted);
-         border-bottom: 2px solid rgba(10,15,44,.07); }
-    td { padding: .75rem .9rem; border-bottom: 1px solid rgba(10,15,44,.05); vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    .empty { text-align: center; color: var(--muted); padding: 2.5rem; font-style: italic; }
-
-    .badge { display: inline-block; padding: .2rem .65rem; border-radius: 50px; font-size: .7rem; font-weight: 700; }
-    .badge-pending  { background: #fff8e1; color: #f57f17; }
-    .badge-approved { background: #e8f5e9; color: #2e7d32; }
-    .badge-posted   { background: #e3f2fd; color: #1565c0; }
-    .badge-rejected { background: #ffebee; color: #c62828; }
-
-    .action-btn {
-      padding: .3rem .75rem; border-radius: 50px; border: 1.5px solid;
-      background: transparent; font-size: .75rem; font-weight: 600;
-      cursor: pointer; transition: background .15s, color .15s; margin-right: .3rem;
+    .queue-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.2rem;
     }
-    .approve-btn { border-color: var(--teal); color: var(--teal); }
-    .approve-btn:hover { background: var(--teal); color: var(--white); }
-    .reject-btn { border-color: rgba(10,15,44,.2); color: var(--muted); }
-    .reject-btn:hover { border-color: #c62828; color: #c62828; }
-    .view-btn { border-color: var(--cyan); color: var(--cyan); }
-    .view-btn:hover { background: var(--cyan); color: var(--white); }
+    .queue-card {
+      background: var(--white); border-radius: var(--radius);
+      border: 1px solid rgba(10,15,44,.07); box-shadow: var(--shadow);
+      overflow: hidden; cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .queue-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(10,15,44,.13); }
 
-    .caption-cell { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .topic-cell   { max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .queue-card-image {
+      width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
+      background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
+    }
+    .queue-card-placeholder {
+      width: 100%; aspect-ratio: 1;
+      background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: var(--muted); font-size: .78rem; gap: .4rem;
+    }
+    .queue-card-placeholder .ph-icon { font-size: 2rem; }
 
-    /* Modal */
+    .queue-card-body { padding: 1rem; }
+    .queue-card-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+    .queue-card-topic { font-size: .78rem; font-weight: 700; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+    .queue-card-caption { font-size: .82rem; color: var(--muted); line-height: 1.4;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+      margin-bottom: .75rem; }
+    .queue-card-footer { display: flex; align-items: center; justify-content: space-between; }
+    .queue-card-date { font-size: .72rem; color: var(--muted); }
+    .view-link { font-size: .78rem; font-weight: 700; color: var(--cyan); background: none; border: none; cursor: pointer; padding: 0; }
+
+    /* Badges */
+    .badge { display: inline-block; padding: .2rem .65rem; border-radius: 50px; font-size: .7rem; font-weight: 700; }
+    .badge-pending   { background: #fff8e1; color: #f57f17; }
+    .badge-approved  { background: #e8f5e9; color: #2e7d32; }
+    .badge-posted    { background: #e3f2fd; color: #1565c0; }
+    .badge-scheduled { background: #ede7f6; color: #4527a0; }
+    .badge-rejected  { background: #ffebee; color: #c62828; }
+
+    .empty-queue { text-align: center; padding: 3rem; color: var(--muted); font-style: italic; }
+
+    /* ── Modal ───────────────────────────────────────────────────────────── */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(10,15,44,.45); z-index: 200;
+      position: fixed; inset: 0; background: rgba(10,15,44,.5); z-index: 200;
       display: none; align-items: center; justify-content: center; padding: 1rem;
     }
     .modal-overlay.open { display: flex; }
     .modal {
-      background: var(--white); border-radius: var(--radius); max-width: 480px; width: 100%;
-      box-shadow: 0 20px 60px rgba(10,15,44,.25); overflow: hidden;
+      background: var(--white); border-radius: var(--radius); width: 100%; max-width: 500px;
+      max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(10,15,44,.3);
     }
     .modal-header {
-      padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(10,15,44,.07);
+      padding: 1rem 1.2rem; border-bottom: 1px solid rgba(10,15,44,.07);
       display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; background: var(--white); z-index: 1;
     }
-    .modal-header h3 { font-size: 1rem; font-weight: 700; color: var(--navy); }
-    .modal-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--muted); }
-    .modal-body { padding: 1.5rem; }
-    .modal-caption { font-size: .9rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
-    .modal-hashtags { margin-top: .5rem; font-size: .84rem; color: var(--teal); }
-    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid rgba(10,15,44,.07); display: flex; gap: .7rem; justify-content: flex-end; }
+    .modal-handle { font-size: .82rem; font-weight: 700; color: var(--navy); }
+    .modal-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--muted); line-height: 1; }
+
+    /* Instagram mockup inside modal */
+    .ig-mockup { background: var(--white); }
+    .ig-image-wrap { position: relative; aspect-ratio: 1; overflow: hidden; background: linear-gradient(135deg, #e0f7fa, #e8f5e9); }
+    .ig-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ig-no-image {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: .6rem; color: var(--muted);
+    }
+    .ig-no-image .ni-icon { font-size: 2.8rem; }
+    .ig-no-image .ni-label { font-size: .82rem; }
+    .ig-caption-area { padding: 1rem 1.2rem; border-bottom: 1px solid rgba(10,15,44,.06); }
+    .ig-caption { font-size: .88rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
+    .ig-hashtags { margin-top: .4rem; font-size: .82rem; color: var(--teal); }
+
+    /* Modal actions */
+    .modal-actions { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: .7rem; }
+    .modal-actions-row { display: flex; gap: .6rem; flex-wrap: wrap; }
+
+    .action-btn {
+      padding: .5rem 1.1rem; border-radius: 50px; border: 1.5px solid;
+      background: transparent; font-size: .82rem; font-weight: 600;
+      cursor: pointer; transition: background .15s, color .15s;
+    }
+    .approve-btn  { border-color: var(--teal); color: var(--teal); }
+    .approve-btn:hover  { background: var(--teal); color: var(--white); }
+    .reject-btn   { border-color: rgba(10,15,44,.2); color: var(--muted); }
+    .reject-btn:hover   { border-color: #c62828; color: #c62828; }
+    .img-gen-btn  { border-color: var(--cyan); color: var(--cyan); }
+    .img-gen-btn:hover  { background: var(--cyan); color: var(--white); }
+    .post-now-btn { border-color: #1565c0; color: #1565c0; }
+    .post-now-btn:hover { background: #1565c0; color: var(--white); }
+    .schedule-btn { border-color: #4527a0; color: #4527a0; }
+    .schedule-btn:hover { background: #4527a0; color: var(--white); }
+    .action-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Schedule inline form */
+    .schedule-form {
+      background: var(--off); border-radius: 10px; padding: 1rem;
+      display: none; flex-direction: column; gap: .7rem;
+    }
+    .schedule-form.open { display: flex; }
+    .schedule-form label { font-size: .78rem; font-weight: 600; color: var(--navy); }
+    .schedule-form input[type="datetime-local"] {
+      padding: .6rem .8rem; border: 1px solid rgba(10,15,44,.14); border-radius: 8px;
+      font-size: .88rem; font-family: inherit; color: var(--text); outline: none;
+      transition: border-color .2s; background: var(--white); width: 100%;
+    }
+    .schedule-form input:focus { border-color: var(--cyan); }
+    .schedule-form-actions { display: flex; gap: .6rem; }
+
+    .ig-spinner {
+      position: absolute; inset: 0; background: rgba(255,255,255,.8);
+      display: none; align-items: center; justify-content: center;
+    }
+    .ig-spinner.show { display: flex; }
+    .ig-spinner-ring { width: 36px; height: 36px; border: 3px solid rgba(0,188,212,.2); border-top-color: var(--cyan); border-radius: 50%; animation: spin .7s linear infinite; }
 
     /* Toast */
     .toast {
@@ -217,8 +285,9 @@
     footer a { color: var(--teal); text-decoration: none; }
 
     @media (max-width: 600px) {
-      .form-row, .form-row-3 { grid-template-columns: 1fr; }
-      .post-preview { margin: 0 -1rem; border-radius: 0; }
+      .form-row { grid-template-columns: 1fr; }
+      .queue-grid { grid-template-columns: 1fr; }
+      .modal { max-height: 100vh; border-radius: 0; }
     }
   </style>
 </head>
@@ -263,7 +332,6 @@
 
   <!-- ── GENERATE ── -->
   <div id="generate" class="tab-panel active">
-
     <div class="card">
       <div class="card-title">Step 1 — Generate Post Ideas</div>
       <div class="form-row">
@@ -291,7 +359,7 @@
       </div>
       <div class="form-group">
         <label>Additional Context <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-        <textarea id="extra-context" rows="2" placeholder="e.g. 'Watercolor Botanicals class this Saturday at 2pm, 3 spots left'"></textarea>
+        <textarea id="extra-context" rows="2" placeholder="e.g. 'Kokedama class this Saturday at 2pm, 4 spots left'"></textarea>
       </div>
       <div class="generate-actions">
         <button class="btn-primary" id="generate-ideas-btn" onclick="generateIdeas()">Generate Ideas</button>
@@ -315,22 +383,20 @@
         </div>
         <div class="form-group">
           <label>Hashtags</label>
-          <input type="text" id="hashtags-edit" placeholder="#craftivity #craftclass #sanfrancisco" />
+          <input type="text" id="hashtags-edit" />
           <span class="hint">Comma or space separated</span>
         </div>
 
         <div class="post-preview" id="post-preview">
           <div class="post-preview-header">
             <div class="post-avatar">🎨</div>
-            <div>
-              <div class="post-handle">@craftivitysf</div>
-            </div>
+            <div><div class="post-handle">@craftivitysf</div></div>
           </div>
           <div class="post-image-area">
             <div class="post-image-placeholder" id="image-placeholder">
               <div class="icon">🖼️</div>
-              <div>Image prompt will appear here</div>
-              <div id="image-prompt-preview" style="font-size:.78rem;max-width:260px;text-align:center;margin-top:.3rem;color:var(--muted);"></div>
+              <div>Image will be generated from the prompt below</div>
+              <div id="image-prompt-preview" style="font-size:.75rem;max-width:260px;text-align:center;margin-top:.3rem;color:var(--muted);"></div>
             </div>
           </div>
           <div class="post-caption-area">
@@ -340,14 +406,8 @@
         </div>
 
         <div class="form-group" style="margin-top:1.2rem;">
-          <label>Image Prompt <span style="font-weight:400;color:var(--muted)">(for AI image generation)</span></label>
+          <label>Image Prompt <span style="font-weight:400;color:var(--muted)">(for DALL-E image generation)</span></label>
           <textarea id="image-prompt-edit" rows="3"></textarea>
-          <span class="hint">This prompt will be used to generate the post image via DALL-E</span>
-        </div>
-
-        <div class="form-group">
-          <label>Schedule Date &amp; Time <span style="font-weight:400;color:var(--muted)">(optional — leave blank to save as draft)</span></label>
-          <input type="datetime-local" id="schedule-at" />
         </div>
 
         <div class="generate-actions">
@@ -357,7 +417,6 @@
         </div>
       </div>
     </div>
-
   </div>
 
   <!-- ── QUEUE ── -->
@@ -367,21 +426,8 @@
         <h2>Content Queue</h2>
         <button class="btn-secondary" onclick="loadQueue()">Refresh</button>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Topic</th>
-              <th>Caption</th>
-              <th>Scheduled</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="queue-body">
-            <tr><td colspan="5" class="empty">Loading…</td></tr>
-          </tbody>
-        </table>
+      <div id="queue-grid" class="queue-grid">
+        <div class="empty-queue">Loading…</div>
       </div>
     </div>
   </div>
@@ -410,16 +456,16 @@
         </div>
         <div class="form-group">
           <label>Primary Audience</label>
-          <input type="text" id="biz-audience" placeholder="e.g. adults 25–55, craft enthusiasts, beginners welcome" />
+          <input type="text" id="biz-audience" placeholder="e.g. adults 25–55, craft enthusiasts" />
         </div>
       </div>
       <div class="form-group">
         <label>Brand Voice</label>
-        <textarea id="brand-voice" rows="3" placeholder="e.g. Warm, encouraging, and community-focused. We celebrate creativity at all skill levels and love helping people discover the joy of making things with their hands."></textarea>
+        <textarea id="brand-voice" rows="3" placeholder="e.g. Warm, encouraging, and community-focused…"></textarea>
       </div>
       <div class="form-group">
         <label>Class Types Offered</label>
-        <textarea id="class-types" rows="3" placeholder="e.g. Watercolor painting, macramé, resin art, candle making, pottery wheel, knitting, hand lettering"></textarea>
+        <textarea id="class-types" rows="3" placeholder="e.g. Kokedama, Soap Making, Donut Candles, Floral Arrangements…"></textarea>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -433,36 +479,80 @@
       </div>
       <div class="form-group">
         <label>Default Hashtags</label>
-        <input type="text" id="default-hashtags" placeholder="#craftivity #craftclass #sfcrafts #sanfrancisco #makerspace #artclass" />
-        <span class="hint">These will pre-fill on every generated post</span>
+        <input type="text" id="default-hashtags" placeholder="#craftivity #craftclass #sanfrancisco" />
+        <span class="hint">Pre-fill on every generated post</span>
       </div>
       <div style="margin-top:.5rem;">
         <button class="btn-primary" onclick="saveSettings()">Save Brand Profile</button>
       </div>
     </div>
   </div>
-
 </main>
 
 <footer>
   <p>&copy; 2026 <a href="/">JJAIServices.com</a> &nbsp;|&nbsp; Powered by JJ AI Services</p>
 </footer>
 
-<!-- Post detail modal -->
+<!-- ── POST MODAL ── -->
 <div class="modal-overlay" id="post-modal">
   <div class="modal">
+    <!-- Header -->
     <div class="modal-header">
-      <h3 id="modal-topic">Post Preview</h3>
+      <div>
+        <div class="post-avatar" style="width:28px;height:28px;font-size:.8rem;display:inline-flex;vertical-align:middle;margin-right:.4rem;">🎨</div>
+        <span class="modal-handle">@craftivitysf</span>
+      </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div class="modal-body">
-      <div class="modal-caption" id="modal-caption"></div>
-      <div class="modal-hashtags" id="modal-hashtags"></div>
-      <div id="modal-image-prompt" style="margin-top:.8rem;font-size:.78rem;color:var(--muted);background:var(--off);padding:.6rem .8rem;border-radius:8px;"></div>
+
+    <!-- Instagram image area -->
+    <div class="ig-mockup">
+      <div class="ig-image-wrap" id="modal-image-wrap">
+        <div class="ig-no-image" id="modal-no-image">
+          <div class="ni-icon">🖼️</div>
+          <div class="ni-label">No image yet</div>
+        </div>
+        <div class="ig-spinner" id="modal-img-spinner">
+          <div class="ig-spinner-ring"></div>
+        </div>
+      </div>
+      <div class="ig-caption-area">
+        <div class="ig-caption" id="modal-caption"></div>
+        <div class="ig-hashtags" id="modal-hashtags"></div>
+      </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn-secondary" onclick="closeModal()">Close</button>
-      <button class="action-btn approve-btn" id="modal-approve-btn">Approve</button>
+
+    <!-- Actions -->
+    <div class="modal-actions">
+      <!-- Status badge -->
+      <div id="modal-status-row"></div>
+
+      <!-- Approve / Reject (pending only) -->
+      <div class="modal-actions-row" id="modal-approve-row" style="display:none;">
+        <button class="action-btn approve-btn" id="modal-approve-btn">✓ Approve</button>
+        <button class="action-btn reject-btn"  id="modal-reject-btn">✕ Reject</button>
+      </div>
+
+      <!-- Generate Image -->
+      <div class="modal-actions-row" id="modal-image-row" style="display:none;">
+        <button class="action-btn img-gen-btn" id="modal-gen-image-btn" onclick="generateImageForModal()">🎨 Generate Image</button>
+      </div>
+
+      <!-- Post Now / Schedule (approved only) -->
+      <div class="modal-actions-row" id="modal-publish-row" style="display:none;">
+        <button class="action-btn post-now-btn" id="modal-post-now-btn" onclick="postNow()">▶ Post Now</button>
+        <button class="action-btn schedule-btn" onclick="toggleScheduleForm()">🗓 Schedule</button>
+      </div>
+
+      <!-- Schedule inline form -->
+      <div class="schedule-form" id="schedule-form">
+        <label>Pick a date &amp; time to publish</label>
+        <input type="datetime-local" id="schedule-datetime" />
+        <div class="schedule-form-actions">
+          <button class="btn-primary" style="padding:.6rem 1.4rem;font-size:.85rem;" onclick="schedulePost()">Confirm Schedule</button>
+          <button class="btn-secondary" onclick="toggleScheduleForm()">Cancel</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -471,14 +561,14 @@
 
 <script>
 const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let _clientId = null;
+let _clientId    = null;
+let _authToken   = null;
 let _brandProfile = {};
 let _currentIdeas = [];
 let _selectedIdea = null;
-let _modalPostId = null;
+let _modalPost    = null;
 
 // ── Auth ──────────────────────────────────────────────────────────────────
-let _authToken = null;
 _sb.auth.getSession().then(({ data: { session } }) => {
   if (!session) { window.location.href = '/client-login.html'; return; }
   _clientId  = session.user.id;
@@ -512,18 +602,17 @@ function toast(msg, type = '') {
 
 // ── Settings ──────────────────────────────────────────────────────────────
 async function loadSettings() {
-  const { data } = await _sb.from('craftivity_brand_profile')
-    .select('*').eq('client_id', _clientId).maybeSingle();
+  const { data } = await _sb.from('craftivity_brand_profile').select('*').eq('client_id', _clientId).maybeSingle();
   if (!data) return;
   _brandProfile = data;
-  document.getElementById('biz-name').value        = data.biz_name        || '';
-  document.getElementById('ig-handle').value       = data.ig_handle       || '';
-  document.getElementById('biz-location').value    = data.biz_location    || '';
-  document.getElementById('biz-audience').value    = data.biz_audience    || '';
-  document.getElementById('brand-voice').value     = data.brand_voice     || '';
-  document.getElementById('class-types').value     = data.class_types     || '';
-  document.getElementById('price-range').value     = data.price_range     || '';
-  document.getElementById('booking-link').value    = data.booking_link    || '';
+  document.getElementById('biz-name').value         = data.biz_name         || '';
+  document.getElementById('ig-handle').value        = data.ig_handle        || '';
+  document.getElementById('biz-location').value     = data.biz_location     || '';
+  document.getElementById('biz-audience').value     = data.biz_audience     || '';
+  document.getElementById('brand-voice').value      = data.brand_voice      || '';
+  document.getElementById('class-types').value      = data.class_types      || '';
+  document.getElementById('price-range').value      = data.price_range      || '';
+  document.getElementById('booking-link').value     = data.booking_link     || '';
   document.getElementById('default-hashtags').value = data.default_hashtags || '';
 }
 
@@ -551,49 +640,40 @@ async function saveSettings() {
 async function generateIdeas() {
   const btn = document.getElementById('generate-ideas-btn');
   const spinner = document.getElementById('ideas-spinner');
-  btn.disabled = true;
-  spinner.classList.add('show');
-
-  const theme   = document.getElementById('theme').value;
-  const tone    = document.getElementById('tone').value;
-  const context = document.getElementById('extra-context').value.trim();
+  btn.disabled = true; spinner.classList.add('show');
 
   try {
     const res = await fetch('/.netlify/functions/craftivity-generate-ideas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
-      body: JSON.stringify({ theme, tone, context, brandProfile: _brandProfile }),
+      body: JSON.stringify({
+        theme:        document.getElementById('theme').value,
+        tone:         document.getElementById('tone').value,
+        context:      document.getElementById('extra-context').value.trim(),
+        brandProfile: _brandProfile,
+      }),
     });
     if (!res.ok) throw new Error(await res.text());
     const { ideas } = await res.json();
     _currentIdeas = ideas;
-    renderIdeas(ideas);
+    document.getElementById('ideas-list').innerHTML = ideas.map((idea, i) => `
+      <div class="idea-item" data-index="${i}">
+        <div class="idea-num">${i + 1}</div>
+        <div class="idea-text">${escHtml(idea)}</div>
+        <button class="idea-use-btn" onclick="selectIdea(${i})">Use this →</button>
+      </div>`).join('');
     document.getElementById('ideas-section').style.display = 'block';
     document.getElementById('content-section').style.display = 'none';
   } catch (e) {
     toast('Failed to generate ideas: ' + e.message, 'error');
   } finally {
-    btn.disabled = false;
-    spinner.classList.remove('show');
+    btn.disabled = false; spinner.classList.remove('show');
   }
-}
-
-function renderIdeas(ideas) {
-  const list = document.getElementById('ideas-list');
-  list.innerHTML = ideas.map((idea, i) => `
-    <div class="idea-item" data-index="${i}">
-      <div class="idea-num">${i + 1}</div>
-      <div class="idea-text">${escHtml(idea)}</div>
-      <button class="idea-use-btn" onclick="selectIdea(${i})">Use this →</button>
-    </div>
-  `).join('');
 }
 
 async function selectIdea(index) {
   _selectedIdea = _currentIdeas[index];
-  document.querySelectorAll('.idea-item').forEach((el, i) => {
-    el.classList.toggle('selected', i === index);
-  });
+  document.querySelectorAll('.idea-item').forEach((el, i) => el.classList.toggle('selected', i === index));
   await generateContent(_selectedIdea);
 }
 
@@ -607,11 +687,7 @@ async function generateContent(idea) {
     const res = await fetch('/.netlify/functions/craftivity-generate-content', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
-      body: JSON.stringify({
-        idea,
-        tone: document.getElementById('tone').value,
-        brandProfile: _brandProfile,
-      }),
+      body: JSON.stringify({ idea, tone: document.getElementById('tone').value, brandProfile: _brandProfile }),
     });
     if (!res.ok) throw new Error(await res.text());
     const { caption, hashtags, imagePrompt } = await res.json();
@@ -619,8 +695,8 @@ async function generateContent(idea) {
     document.getElementById('caption-edit').value      = caption;
     document.getElementById('hashtags-edit').value     = hashtags;
     document.getElementById('image-prompt-edit').value = imagePrompt;
-
     updatePreview();
+
     document.getElementById('content-section').style.display = 'block';
     document.getElementById('content-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (e) {
@@ -635,12 +711,10 @@ async function regenerateContent() {
 }
 
 function updatePreview() {
-  const caption = document.getElementById('caption-edit').value;
-  const hashtags = document.getElementById('hashtags-edit').value;
-  const imagePrompt = document.getElementById('image-prompt-edit').value;
-  document.getElementById('preview-caption').textContent = caption;
-  document.getElementById('preview-hashtags').textContent = hashtags;
-  document.getElementById('image-prompt-preview').textContent = imagePrompt ? '🎨 ' + imagePrompt : '';
+  document.getElementById('preview-caption').textContent = document.getElementById('caption-edit').value;
+  document.getElementById('preview-hashtags').textContent = document.getElementById('hashtags-edit').value;
+  const p = document.getElementById('image-prompt-edit').value;
+  document.getElementById('image-prompt-preview').textContent = p ? '🎨 ' + p : '';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -650,28 +724,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ── Save Post to Queue ────────────────────────────────────────────────────
+// ── Save Post ─────────────────────────────────────────────────────────────
 async function savePost() {
   const caption     = document.getElementById('caption-edit').value.trim();
   const hashtags    = document.getElementById('hashtags-edit').value.trim();
   const imagePrompt = document.getElementById('image-prompt-edit').value.trim();
-  const scheduleAt  = document.getElementById('schedule-at').value;
-
   if (!caption) { toast('Caption cannot be empty', 'error'); return; }
 
   const btn = document.getElementById('save-post-btn');
   btn.disabled = true;
 
   const { error } = await _sb.from('craftivity_posts').insert({
-    client_id:    _clientId,
-    topic:        _selectedIdea || '',
-    caption,
-    hashtags,
-    image_prompt: imagePrompt,
-    schedule_at:  scheduleAt || null,
-    status:       'pending',
+    client_id: _clientId, topic: _selectedIdea || '',
+    caption, hashtags, image_prompt: imagePrompt, status: 'pending',
   });
-
   btn.disabled = false;
   if (error) { toast('Error saving post: ' + error.message, 'error'); return; }
   toast('Post saved to queue!', 'success');
@@ -680,62 +746,189 @@ async function savePost() {
   document.getElementById('extra-context').value = '';
 }
 
-// ── Queue ─────────────────────────────────────────────────────────────────
+// ── Queue Cards ───────────────────────────────────────────────────────────
 async function loadQueue() {
   const { data, error } = await _sb.from('craftivity_posts')
-    .select('*').eq('client_id', _clientId)
-    .order('created_at', { ascending: false });
+    .select('*').eq('client_id', _clientId).order('created_at', { ascending: false });
 
-  const tbody = document.getElementById('queue-body');
-  if (error || !data) { tbody.innerHTML = `<tr><td colspan="5" class="empty">Failed to load queue.</td></tr>`; return; }
-  if (data.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="empty">No posts yet — generate your first one!</td></tr>`; return; }
+  const grid = document.getElementById('queue-grid');
+  if (error || !data) { grid.innerHTML = `<div class="empty-queue">Failed to load queue.</div>`; return; }
+  if (data.length === 0) { grid.innerHTML = `<div class="empty-queue">No posts yet — generate your first one!</div>`; return; }
 
-  tbody.innerHTML = data.map(p => `
-    <tr>
-      <td class="topic-cell" title="${escHtml(p.topic)}">${escHtml(p.topic || '—')}</td>
-      <td class="caption-cell" title="${escHtml(p.caption)}">${escHtml(p.caption)}</td>
-      <td style="white-space:nowrap;font-size:.82rem;">${p.schedule_at ? fmtDate(p.schedule_at) : '<span style="color:var(--muted)">Draft</span>'}</td>
-      <td><span class="badge badge-${p.status}">${p.status}</span></td>
-      <td style="white-space:nowrap;">
-        <button class="action-btn view-btn" onclick="openModal('${p.id}')">View</button>
-        ${p.status === 'pending' ? `
-          <button class="action-btn approve-btn" onclick="updateStatus('${p.id}','approved')">Approve</button>
-          <button class="action-btn reject-btn"  onclick="updateStatus('${p.id}','rejected')">Reject</button>
-        ` : ''}
-      </td>
-    </tr>
-  `).join('');
-}
-
-async function updateStatus(id, status) {
-  const { error } = await _sb.from('craftivity_posts').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
-  if (error) { toast('Update failed', 'error'); return; }
-  toast(status === 'approved' ? 'Post approved!' : 'Post rejected', status === 'approved' ? 'success' : '');
-  loadQueue();
-  closeModal();
+  grid.className = 'queue-grid';
+  grid.innerHTML = data.map(p => `
+    <div class="queue-card" onclick="openModal('${p.id}')">
+      ${p.image_url
+        ? `<img class="queue-card-image" src="${escHtml(p.image_url)}" alt="Post image" loading="lazy" />`
+        : `<div class="queue-card-placeholder"><div class="ph-icon">🎨</div><div>No image yet</div></div>`
+      }
+      <div class="queue-card-body">
+        <div class="queue-card-meta">
+          <div class="queue-card-topic" title="${escHtml(p.topic)}">${escHtml(p.topic || 'Untitled')}</div>
+          <span class="badge badge-${p.status}">${p.status}</span>
+        </div>
+        <div class="queue-card-caption">${escHtml(p.caption)}</div>
+        <div class="queue-card-footer">
+          <span class="queue-card-date">${p.schedule_at ? '🗓 ' + fmtDate(p.schedule_at) : p.posted_at ? '✓ Posted' : 'Draft'}</span>
+          <button class="view-link">View →</button>
+        </div>
+      </div>
+    </div>`).join('');
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────
 async function openModal(id) {
   const { data } = await _sb.from('craftivity_posts').select('*').eq('id', id).single();
   if (!data) return;
-  _modalPostId = id;
-  document.getElementById('modal-topic').textContent    = data.topic || 'Post Preview';
-  document.getElementById('modal-caption').textContent  = data.caption;
-  document.getElementById('modal-hashtags').textContent = data.hashtags || '';
-  document.getElementById('modal-image-prompt').textContent = data.image_prompt ? '🎨 Image prompt: ' + data.image_prompt : '';
-  const approveBtn = document.getElementById('modal-approve-btn');
-  approveBtn.style.display = data.status === 'pending' ? '' : 'none';
-  approveBtn.onclick = () => updateStatus(id, 'approved');
+  _modalPost = data;
+  renderModal(data);
   document.getElementById('post-modal').classList.add('open');
 }
+
+function renderModal(p) {
+  // Image
+  const wrap = document.getElementById('modal-image-wrap');
+  const noImg = document.getElementById('modal-no-image');
+  const existing = wrap.querySelector('img');
+  if (existing) existing.remove();
+  if (p.image_url) {
+    noImg.style.display = 'none';
+    const img = document.createElement('img');
+    img.src = p.image_url; img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+    wrap.insertBefore(img, wrap.firstChild);
+  } else {
+    noImg.style.display = 'flex';
+  }
+
+  // Caption
+  document.getElementById('modal-caption').textContent  = p.caption || '';
+  document.getElementById('modal-hashtags').textContent = p.hashtags || '';
+
+  // Status badge
+  document.getElementById('modal-status-row').innerHTML = `<span class="badge badge-${p.status}">${p.status}</span>`;
+
+  // Approve/Reject row (pending only)
+  const approveRow = document.getElementById('modal-approve-row');
+  approveRow.style.display = p.status === 'pending' ? '' : 'none';
+  document.getElementById('modal-approve-btn').onclick = () => updateStatus(p.id, 'approved');
+  document.getElementById('modal-reject-btn').onclick  = () => updateStatus(p.id, 'rejected');
+
+  // Generate Image button (show if no image and not rejected/posted)
+  const imgRow = document.getElementById('modal-image-row');
+  imgRow.style.display = (!p.image_url && p.status !== 'rejected' && p.status !== 'posted') ? '' : 'none';
+
+  // Post Now / Schedule (approved + has image)
+  const publishRow = document.getElementById('modal-publish-row');
+  publishRow.style.display = (p.status === 'approved' && p.image_url) ? '' : 'none';
+
+  // Hide schedule form
+  document.getElementById('schedule-form').classList.remove('open');
+}
+
 function closeModal() {
   document.getElementById('post-modal').classList.remove('open');
-  _modalPostId = null;
+  _modalPost = null;
 }
 document.getElementById('post-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
+
+async function updateStatus(id, status) {
+  const { error } = await _sb.from('craftivity_posts')
+    .update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) { toast('Update failed', 'error'); return; }
+  toast(status === 'approved' ? 'Post approved!' : 'Post rejected', status === 'approved' ? 'success' : '');
+  await reloadModalPost(id);
+  loadQueue();
+}
+
+async function reloadModalPost(id) {
+  const { data } = await _sb.from('craftivity_posts').select('*').eq('id', id).single();
+  if (data) { _modalPost = data; renderModal(data); }
+}
+
+// ── Generate Image ────────────────────────────────────────────────────────
+async function generateImageForModal() {
+  if (!_modalPost) return;
+  const btn     = document.getElementById('modal-gen-image-btn');
+  const spinner = document.getElementById('modal-img-spinner');
+  btn.disabled = true; spinner.classList.add('show');
+
+  try {
+    const res = await fetch('/.netlify/functions/craftivity-generate-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
+      body: JSON.stringify({ postId: _modalPost.id }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || res.statusText);
+    }
+    const { imageUrl } = await res.json();
+    toast('Image generated!', 'success');
+    await reloadModalPost(_modalPost.id);
+    loadQueue();
+  } catch (e) {
+    toast('Image generation failed: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; spinner.classList.remove('show');
+  }
+}
+
+// ── Publish ───────────────────────────────────────────────────────────────
+async function postNow() {
+  if (!_modalPost) return;
+  const btn = document.getElementById('modal-post-now-btn');
+  btn.disabled = true;
+  try {
+    const res = await fetch('/.netlify/functions/craftivity-publish-post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
+      body: JSON.stringify({ postId: _modalPost.id }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    toast('Posted to Instagram! 🎉', 'success');
+    await reloadModalPost(_modalPost.id);
+    loadQueue();
+  } catch (e) {
+    toast('Posting failed: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function toggleScheduleForm() {
+  document.getElementById('schedule-form').classList.toggle('open');
+}
+
+async function schedulePost() {
+  if (!_modalPost) return;
+  const dt = document.getElementById('schedule-datetime').value;
+  if (!dt) { toast('Please pick a date and time', 'error'); return; }
+
+  const scheduleAt = new Date(dt).toISOString();
+  const minTime    = new Date(Date.now() + 10 * 60 * 1000);
+  if (new Date(scheduleAt) < minTime) {
+    toast('Schedule time must be at least 10 minutes from now', 'error'); return;
+  }
+
+  try {
+    const res = await fetch('/.netlify/functions/craftivity-publish-post', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
+      body: JSON.stringify({ postId: _modalPost.id, scheduleAt }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    toast(`Scheduled for ${fmtDate(scheduleAt)} 🗓`, 'success');
+    await reloadModalPost(_modalPost.id);
+    loadQueue();
+    toggleScheduleForm();
+  } catch (e) {
+    toast('Scheduling failed: ' + e.message, 'error');
+  }
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 function escHtml(str) {

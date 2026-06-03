@@ -130,7 +130,7 @@
 
 <main>
   <div class="page-header">
-    <h1>My Projects</h1>
+    <h1 id="portal-heading">My Projects</h1>
     <p>Click a project to view details, milestones, and updates.</p>
   </div>
   <div id="projects-container" class="loading">Loading your projects…</div>
@@ -151,11 +151,17 @@
     'on-hold':   'On Hold',
   };
 
-  _sb.auth.getSession().then(({ data: { session } }) => {
+  _sb.auth.getSession().then(async ({ data: { session } }) => {
     if (!session) { window.location.href = '/client-login.html'; return; }
     const user = session.user;
     const name = user.user_metadata?.full_name || user.email;
     document.getElementById('user-name').textContent = name;
+
+    const company = user.user_metadata?.company || '';
+    const heading = company ? `${company} Projects` : 'My Projects';
+    document.getElementById('portal-heading').textContent = heading;
+    document.title = `${heading} — JJAIServices.com`;
+
     loadProjects(user.id);
   });
 

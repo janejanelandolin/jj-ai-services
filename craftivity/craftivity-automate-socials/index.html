@@ -236,8 +236,8 @@
     .approve-btn:hover  { background: var(--teal); color: var(--white); }
     .reject-btn   { border-color: rgba(10,15,44,.2); color: var(--muted); }
     .reject-btn:hover   { border-color: #c62828; color: #c62828; }
-    .img-gen-btn  { border-color: var(--cyan); color: var(--cyan); }
-    .img-gen-btn:hover  { background: var(--cyan); color: var(--white); }
+    .img-upload-btn { border-color: var(--cyan); color: var(--cyan); }
+    .img-upload-btn:hover { background: var(--cyan); color: var(--white); }
     .post-now-btn { border-color: #1565c0; color: #1565c0; }
     .post-now-btn:hover { background: #1565c0; color: var(--white); }
     .schedule-btn { border-color: #4527a0; color: #4527a0; }
@@ -533,10 +533,12 @@
         <button class="action-btn reject-btn"  id="modal-reject-btn">✕ Reject</button>
       </div>
 
-      <!-- Generate Image -->
+      <!-- Upload Image -->
       <div class="modal-actions-row" id="modal-image-row" style="display:none;">
-        <button class="action-btn img-gen-btn" id="modal-gen-image-btn" onclick="generateImageForModal()">🎨 Generate Image</button>
+        <button class="action-btn img-upload-btn" onclick="document.getElementById('modal-image-upload').click()">📷 Upload Photo</button>
+        <input type="file" id="modal-image-upload" accept="image/*" style="display:none;" onchange="uploadImage(this)" />
       </div>
+      <div id="modal-image-prompt-hint" style="display:none;font-size:.75rem;color:var(--muted);background:var(--off);padding:.6rem .8rem;border-radius:8px;line-height:1.5;"></div>
 
       <!-- Post Now / Schedule (approved only) -->
       <div class="modal-actions-row" id="modal-publish-row" style="display:none;">
@@ -813,9 +815,19 @@ function renderModal(p) {
   document.getElementById('modal-approve-btn').onclick = () => updateStatus(p.id, 'approved');
   document.getElementById('modal-reject-btn').onclick  = () => updateStatus(p.id, 'rejected');
 
-  // Generate Image button (show if no image and not rejected/posted)
+  // Upload Image button (show if no image and not rejected/posted)
   const imgRow = document.getElementById('modal-image-row');
-  imgRow.style.display = (!p.image_url && p.status !== 'rejected' && p.status !== 'posted') ? '' : 'none';
+  const showUpload = !p.image_url && p.status !== 'rejected' && p.status !== 'posted';
+  imgRow.style.display = showUpload ? '' : 'none';
+
+  // Show the AI-generated image prompt as a reference hint
+  const hint = document.getElementById('modal-image-prompt-hint');
+  if (showUpload && p.image_prompt) {
+    hint.style.display = '';
+    hint.textContent = '💡 Photo idea: ' + p.image_prompt;
+  } else {
+    hint.style.display = 'none';
+  }
 
   // Post Now / Schedule (approved + has image)
   const publishRow = document.getElementById('modal-publish-row');
@@ -847,31 +859,37 @@ async function reloadModalPost(id) {
   if (data) { _modalPost = data; renderModal(data); }
 }
 
-// ── Generate Image ────────────────────────────────────────────────────────
-async function generateImageForModal() {
-  if (!_modalPost) return;
-  const btn     = document.getElementById('modal-gen-image-btn');
+// ── Upload Image ──────────────────────────────────────────────────────────
+async function uploadImage(input) {
+  if (!_modalPost || !input.files[0]) return;
+  const file    = input.files[0];
   const spinner = document.getElementById('modal-img-spinner');
-  btn.disabled = true; spinner.classList.add('show');
+  spinner.classList.add('show');
 
   try {
-    const res = await fetch('/.netlify/functions/craftivity-generate-image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
-      body: JSON.stringify({ postId: _modalPost.id }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ error: res.statusText }));
-      throw new Error(err.error || res.statusText);
-    }
-    const { imageUrl } = await res.json();
-    toast('Image generated!', 'success');
+    const ext      = file.name.split('.').pop();
+    const fileName = `${_modalPost.id}.${ext}`;
+
+    const { error: uploadErr } = await _sb.storage
+      .from('craftivity-images')
+      .upload(fileName, file, { contentType: file.type, upsert: true });
+    if (uploadErr) throw new Error(uploadErr.message);
+
+    const { data: { publicUrl } } = _sb.storage.from('craftivity-images').getPublicUrl(fileName);
+
+    const { error: updateErr } = await _sb.from('craftivity_posts')
+      .update({ image_url: publicUrl, updated_at: new Date().toISOString() })
+      .eq('id', _modalPost.id);
+    if (updateErr) throw new Error(updateErr.message);
+
+    toast('Photo uploaded!', 'success');
     await reloadModalPost(_modalPost.id);
     loadQueue();
   } catch (e) {
-    toast('Image generation failed: ' + e.message, 'error');
+    toast('Upload failed: ' + e.message, 'error');
   } finally {
-    btn.disabled = false; spinner.classList.remove('show');
+    spinner.classList.remove('show');
+    input.value = '';
   }
 }
 

@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Automate Socials — Craftivity</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0a0f2c; --cyan: #00bcd4; --teal: #00897b;
+      --white: #ffffff; --off: #f0f4ff; --text: #1c1c2e; --muted: #5c6480;
+      --radius: 14px; --shadow: 0 4px 24px rgba(10,15,44,.09);
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--off); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--white); border-bottom: 1px solid rgba(10,15,44,.08);
+      padding: 1rem 5%; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 8px rgba(10,15,44,.05); position: sticky; top: 0; z-index: 10;
+    }
+    .logo { display: flex; align-items: center; gap: .65rem; text-decoration: none; }
+    .logo-text { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
+    .logo-text span { color: var(--cyan); }
+    .logo-sub { font-size: .6rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .btn-back, .btn-logout {
+      padding: .4rem 1rem; border: 1.5px solid rgba(10,15,44,.12); border-radius: 50px;
+      background: transparent; color: var(--navy); font-size: .82rem; font-weight: 600;
+      text-decoration: none; cursor: pointer; transition: border-color .2s;
+    }
+    .btn-back:hover, .btn-logout:hover { border-color: var(--cyan); color: var(--teal); }
+
+    main { max-width: 1000px; margin: 0 auto; padding: 2.5rem 5% 5rem; }
+    .page-header { margin-bottom: 2rem; }
+    .page-header h1 { font-size: 1.7rem; font-weight: 800; color: var(--navy); letter-spacing: -.03em; }
+    .page-header p  { color: var(--muted); font-size: .92rem; margin-top: .35rem; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: .5rem; margin-bottom: 1.6rem; flex-wrap: wrap; }
+    .tab {
+      padding: .5rem 1.2rem; border-radius: 50px; border: 1.5px solid rgba(10,15,44,.12);
+      background: transparent; font-size: .85rem; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: all .18s;
+    }
+    .tab.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Cards */
+    .card {
+      background: var(--white); border-radius: var(--radius);
+      border: 1px solid rgba(10,15,44,.07); box-shadow: var(--shadow);
+      padding: 1.8rem; margin-bottom: 1.4rem;
+    }
+    .card-title {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--cyan); margin-bottom: 1.2rem;
+    }
+
+    /* Forms */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1rem; }
+    .form-group:last-child { margin-bottom: 0; }
+    .form-group label { font-size: .8rem; font-weight: 600; color: var(--navy); }
+    .form-group input, .form-group textarea, .form-group select {
+      padding: .7rem .9rem; border: 1px solid rgba(10,15,44,.14); border-radius: 8px;
+      font-size: .9rem; font-family: inherit; color: var(--text); outline: none;
+      transition: border-color .2s, box-shadow .2s; background: var(--white);
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,188,212,.1);
+    }
+    .hint { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
+
+    .btn-primary {
+      padding: .75rem 2rem; border: none; border-radius: 50px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); font-weight: 700; font-size: .9rem;
+      cursor: pointer; transition: opacity .2s, transform .2s;
+      box-shadow: 0 4px 16px rgba(0,188,212,.25);
+    }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+    .btn-secondary {
+      padding: .5rem 1.2rem; border: 1.5px solid rgba(10,15,44,.12); border-radius: 50px;
+      background: transparent; font-size: .82rem; font-weight: 600; color: var(--navy);
+      cursor: pointer; transition: border-color .2s;
+    }
+    .btn-secondary:hover { border-color: var(--cyan); }
+
+    /* Generate section */
+    .generate-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1.2rem; }
+    .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,188,212,.2); border-top-color: var(--cyan); border-radius: 50%; animation: spin .7s linear infinite; }
+    .spinner.show { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Post ideas list */
+    .ideas-list { display: flex; flex-direction: column; gap: .8rem; margin-top: 1rem; }
+    .idea-item {
+      background: var(--off); border-radius: 10px; padding: 1rem 1.2rem;
+      display: flex; align-items: flex-start; gap: 1rem; border: 1.5px solid transparent;
+      cursor: pointer; transition: border-color .2s, background .2s;
+    }
+    .idea-item:hover { border-color: var(--cyan); background: rgba(0,188,212,.04); }
+    .idea-item.selected { border-color: var(--cyan); background: rgba(0,188,212,.07); }
+    .idea-num { font-size: .78rem; font-weight: 700; color: var(--cyan); min-width: 1.4rem; margin-top: .1rem; }
+    .idea-text { font-size: .88rem; color: var(--text); line-height: 1.5; flex: 1; }
+    .idea-use-btn {
+      padding: .3rem .8rem; border-radius: 50px; border: 1.5px solid var(--teal);
+      background: transparent; color: var(--teal); font-size: .75rem; font-weight: 600;
+      cursor: pointer; white-space: nowrap; transition: background .15s, color .15s;
+    }
+    .idea-use-btn:hover { background: var(--teal); color: var(--white); }
+
+    /* Post preview card */
+    .post-preview {
+      background: var(--white); border-radius: var(--radius); border: 1px solid rgba(10,15,44,.07);
+      box-shadow: var(--shadow); overflow: hidden; margin-top: 1rem;
+    }
+    .post-preview-header {
+      display: flex; align-items: center; gap: .6rem; padding: .9rem 1.2rem;
+      border-bottom: 1px solid rgba(10,15,44,.06);
+    }
+    .post-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+    }
+    .post-handle { font-size: .85rem; font-weight: 700; color: var(--navy); }
+    .post-image-placeholder {
+      width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: var(--muted); font-size: .9rem; gap: .5rem;
+    }
+    .post-image-placeholder .icon { font-size: 2.5rem; }
+    .post-image-area { position: relative; }
+    .post-image-area img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .post-caption-area { padding: 1rem 1.2rem; }
+    .post-caption { font-size: .88rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
+    .post-hashtags { margin-top: .5rem; font-size: .82rem; color: var(--teal); }
+    .post-actions { display: flex; gap: .8rem; padding: 1rem 1.2rem; border-top: 1px solid rgba(10,15,44,.06); flex-wrap: wrap; }
+
+    /* Queue table */
+    .queue-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
+    .queue-header h2 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    th { padding: .6rem .9rem; text-align: left; font-size: .7rem; font-weight: 700;
+         text-transform: uppercase; letter-spacing: .07em; color: var(--muted);
+         border-bottom: 2px solid rgba(10,15,44,.07); }
+    td { padding: .75rem .9rem; border-bottom: 1px solid rgba(10,15,44,.05); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    .empty { text-align: center; color: var(--muted); padding: 2.5rem; font-style: italic; }
+
+    .badge { display: inline-block; padding: .2rem .65rem; border-radius: 50px; font-size: .7rem; font-weight: 700; }
+    .badge-pending  { background: #fff8e1; color: #f57f17; }
+    .badge-approved { background: #e8f5e9; color: #2e7d32; }
+    .badge-posted   { background: #e3f2fd; color: #1565c0; }
+    .badge-rejected { background: #ffebee; color: #c62828; }
+
+    .action-btn {
+      padding: .3rem .75rem; border-radius: 50px; border: 1.5px solid;
+      background: transparent; font-size: .75rem; font-weight: 600;
+      cursor: pointer; transition: background .15s, color .15s; margin-right: .3rem;
+    }
+    .approve-btn { border-color: var(--teal); color: var(--teal); }
+    .approve-btn:hover { background: var(--teal); color: var(--white); }
+    .reject-btn { border-color: rgba(10,15,44,.2); color: var(--muted); }
+    .reject-btn:hover { border-color: #c62828; color: #c62828; }
+    .view-btn { border-color: var(--cyan); color: var(--cyan); }
+    .view-btn:hover { background: var(--cyan); color: var(--white); }
+
+    .caption-cell { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .topic-cell   { max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(10,15,44,.45); z-index: 200;
+      display: none; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: var(--radius); max-width: 480px; width: 100%;
+      box-shadow: 0 20px 60px rgba(10,15,44,.25); overflow: hidden;
+    }
+    .modal-header {
+      padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(10,15,44,.07);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+    .modal-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--muted); }
+    .modal-body { padding: 1.5rem; }
+    .modal-caption { font-size: .9rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
+    .modal-hashtags { margin-top: .5rem; font-size: .84rem; color: var(--teal); }
+    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid rgba(10,15,44,.07); display: flex; gap: .7rem; justify-content: flex-end; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--navy); color: var(--white); padding: .75rem 1.5rem;
+      border-radius: 50px; font-size: .88rem; font-weight: 600;
+      box-shadow: 0 8px 24px rgba(10,15,44,.2); transition: transform .3s, opacity .3s;
+      opacity: 0; pointer-events: none; z-index: 300;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.error   { background: #c62828; }
+    .toast.success { background: var(--teal); }
+
+    footer {
+      text-align: center; padding: 2rem 5%; font-size: .82rem; color: var(--muted);
+      border-top: 1px solid rgba(10,15,44,.07);
+    }
+    footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 600px) {
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+      .post-preview { margin: 0 -1rem; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">
+    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="100%" stop-color="#00897b"/></linearGradient></defs>
+      <line x1="8" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="8" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <circle cx="20" cy="20" r="5" fill="url(#lg)"/>
+      <circle cx="8" cy="8" r="3" fill="#00bcd4" opacity=".85"/>
+      <circle cx="32" cy="8" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="8" cy="32" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="32" cy="32" r="3" fill="#00bcd4" opacity=".85"/>
+    </svg>
+    <div>
+      <div class="logo-text">JJ <span>AI</span> Services</div>
+      <div class="logo-sub">Craftivity</div>
+    </div>
+  </a>
+  <div class="header-right">
+    <a class="btn-back" href="/craftivity/">← Craftivity</a>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </div>
+</header>
+
+<main>
+  <div class="page-header">
+    <h1>📸 Automate Socials</h1>
+    <p>Generate AI-powered Instagram posts for your craft classes and manage your content queue.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="generate">Generate Post</button>
+    <button class="tab" data-tab="queue">Approval Queue</button>
+    <button class="tab" data-tab="settings">Brand Settings</button>
+  </div>
+
+  <!-- ── GENERATE ── -->
+  <div id="generate" class="tab-panel active">
+
+    <div class="card">
+      <div class="card-title">Step 1 — Generate Post Ideas</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Content Theme</label>
+          <select id="theme">
+            <option value="upcoming_class">Upcoming Class Announcement</option>
+            <option value="class_recap">Class Recap / Behind the Scenes</option>
+            <option value="student_spotlight">Student Spotlight</option>
+            <option value="seasonal">Seasonal / Holiday Craft</option>
+            <option value="tip">Craft Tip or Technique</option>
+            <option value="product">Materials &amp; Supply Spotlight</option>
+            <option value="community">Community &amp; Events</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tone</label>
+          <select id="tone">
+            <option value="warm">Warm &amp; Welcoming</option>
+            <option value="playful">Playful &amp; Fun</option>
+            <option value="inspiring">Inspiring &amp; Uplifting</option>
+            <option value="informative">Informative &amp; Educational</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Additional Context <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
+        <textarea id="extra-context" rows="2" placeholder="e.g. 'Watercolor Botanicals class this Saturday at 2pm, 3 spots left'"></textarea>
+      </div>
+      <div class="generate-actions">
+        <button class="btn-primary" id="generate-ideas-btn" onclick="generateIdeas()">Generate Ideas</button>
+        <div class="spinner" id="ideas-spinner"></div>
+      </div>
+    </div>
+
+    <div id="ideas-section" style="display:none;">
+      <div class="card">
+        <div class="card-title">Step 2 — Pick an Idea</div>
+        <div class="ideas-list" id="ideas-list"></div>
+      </div>
+    </div>
+
+    <div id="content-section" style="display:none;">
+      <div class="card">
+        <div class="card-title">Step 3 — Review &amp; Edit Caption</div>
+        <div class="form-group">
+          <label>Caption</label>
+          <textarea id="caption-edit" rows="6"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Hashtags</label>
+          <input type="text" id="hashtags-edit" placeholder="#craftivity #craftclass #sanfrancisco" />
+          <span class="hint">Comma or space separated</span>
+        </div>
+
+        <div class="post-preview" id="post-preview">
+          <div class="post-preview-header">
+            <div class="post-avatar">🎨</div>
+            <div>
+              <div class="post-handle">@craftivitysf</div>
+            </div>
+          </div>
+          <div class="post-image-area">
+            <div class="post-image-placeholder" id="image-placeholder">
+              <div class="icon">🖼️</div>
+              <div>Image prompt will appear here</div>
+              <div id="image-prompt-preview" style="font-size:.78rem;max-width:260px;text-align:center;margin-top:.3rem;color:var(--muted);"></div>
+            </div>
+          </div>
+          <div class="post-caption-area">
+            <div class="post-caption" id="preview-caption"></div>
+            <div class="post-hashtags" id="preview-hashtags"></div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:1.2rem;">
+          <label>Image Prompt <span style="font-weight:400;color:var(--muted)">(for AI image generation)</span></label>
+          <textarea id="image-prompt-edit" rows="3"></textarea>
+          <span class="hint">This prompt will be used to generate the post image via DALL-E</span>
+        </div>
+
+        <div class="form-group">
+          <label>Schedule Date &amp; Time <span style="font-weight:400;color:var(--muted)">(optional — leave blank to save as draft)</span></label>
+          <input type="datetime-local" id="schedule-at" />
+        </div>
+
+        <div class="generate-actions">
+          <button class="btn-primary" id="save-post-btn" onclick="savePost()">Save to Queue</button>
+          <button class="btn-secondary" onclick="regenerateContent()">Regenerate Caption</button>
+          <div class="spinner" id="content-spinner"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── QUEUE ── -->
+  <div id="queue" class="tab-panel">
+    <div class="card">
+      <div class="queue-header">
+        <h2>Content Queue</h2>
+        <button class="btn-secondary" onclick="loadQueue()">Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Topic</th>
+              <th>Caption</th>
+              <th>Scheduled</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="queue-body">
+            <tr><td colspan="5" class="empty">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS ── -->
+  <div id="settings" class="tab-panel">
+    <div class="card">
+      <div class="card-title">Brand Profile</div>
+      <p style="font-size:.85rem;color:var(--muted);margin-bottom:1.4rem;">
+        This context is used by AI to generate on-brand content for every post.
+      </p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Business Name</label>
+          <input type="text" id="biz-name" value="Craftivity" />
+        </div>
+        <div class="form-group">
+          <label>Instagram Handle</label>
+          <input type="text" id="ig-handle" placeholder="@craftivitysf" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Location</label>
+          <input type="text" id="biz-location" value="San Francisco, CA" />
+        </div>
+        <div class="form-group">
+          <label>Primary Audience</label>
+          <input type="text" id="biz-audience" placeholder="e.g. adults 25–55, craft enthusiasts, beginners welcome" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Brand Voice</label>
+        <textarea id="brand-voice" rows="3" placeholder="e.g. Warm, encouraging, and community-focused. We celebrate creativity at all skill levels and love helping people discover the joy of making things with their hands."></textarea>
+      </div>
+      <div class="form-group">
+        <label>Class Types Offered</label>
+        <textarea id="class-types" rows="3" placeholder="e.g. Watercolor painting, macramé, resin art, candle making, pottery wheel, knitting, hand lettering"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Typical Class Price Range</label>
+          <input type="text" id="price-range" placeholder="e.g. $45–$85 per class" />
+        </div>
+        <div class="form-group">
+          <label>Booking Link</label>
+          <input type="url" id="booking-link" placeholder="https://..." />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Default Hashtags</label>
+        <input type="text" id="default-hashtags" placeholder="#craftivity #craftclass #sfcrafts #sanfrancisco #makerspace #artclass" />
+        <span class="hint">These will pre-fill on every generated post</span>
+      </div>
+      <div style="margin-top:.5rem;">
+        <button class="btn-primary" onclick="saveSettings()">Save Brand Profile</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>&copy; 2026 <a href="/">JJAIServices.com</a> &nbsp;|&nbsp; Powered by JJ AI Services</p>
+</footer>
+
+<!-- Post detail modal -->
+<div class="modal-overlay" id="post-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-topic">Post Preview</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-caption" id="modal-caption"></div>
+      <div class="modal-hashtags" id="modal-hashtags"></div>
+      <div id="modal-image-prompt" style="margin-top:.8rem;font-size:.78rem;color:var(--muted);background:var(--off);padding:.6rem .8rem;border-radius:8px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal()">Close</button>
+      <button class="action-btn approve-btn" id="modal-approve-btn">Approve</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let _clientId = null;
+let _brandProfile = {};
+let _currentIdeas = [];
+let _selectedIdea = null;
+let _modalPostId = null;
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+let _authToken = null;
+_sb.auth.getSession().then(({ data: { session } }) => {
+  if (!session) { window.location.href = '/client-login.html'; return; }
+  _clientId  = session.user.id;
+  _authToken = session.access_token;
+  loadSettings();
+  loadQueue();
+});
+async function doLogout() {
+  await _sb.auth.signOut();
+  window.location.href = '/client-login.html';
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'queue') loadQueue();
+  });
+});
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => { el.className = 'toast'; }, 3500);
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────
+async function loadSettings() {
+  const { data } = await _sb.from('craftivity_brand_profile')
+    .select('*').eq('client_id', _clientId).maybeSingle();
+  if (!data) return;
+  _brandProfile = data;
+  document.getElementById('biz-name').value        = data.biz_name        || '';
+  document.getElementById('ig-handle').value       = data.ig_handle       || '';
+  document.getElementById('biz-location').value    = data.biz_location    || '';
+  document.getElementById('biz-audience').value    = data.biz_audience    || '';
+  document.getElementById('brand-voice').value     = data.brand_voice     || '';
+  document.getElementById('class-types').value     = data.class_types     || '';
+  document.getElementById('price-range').value     = data.price_range     || '';
+  document.getElementById('booking-link').value    = data.booking_link    || '';
+  document.getElementById('default-hashtags').value = data.default_hashtags || '';
+}
+
+async function saveSettings() {
+  const profile = {
+    client_id:        _clientId,
+    biz_name:         document.getElementById('biz-name').value.trim(),
+    ig_handle:        document.getElementById('ig-handle').value.trim(),
+    biz_location:     document.getElementById('biz-location').value.trim(),
+    biz_audience:     document.getElementById('biz-audience').value.trim(),
+    brand_voice:      document.getElementById('brand-voice').value.trim(),
+    class_types:      document.getElementById('class-types').value.trim(),
+    price_range:      document.getElementById('price-range').value.trim(),
+    booking_link:     document.getElementById('booking-link').value.trim(),
+    default_hashtags: document.getElementById('default-hashtags').value.trim(),
+    updated_at:       new Date().toISOString(),
+  };
+  const { error } = await _sb.from('craftivity_brand_profile').upsert(profile, { onConflict: 'client_id' });
+  if (error) { toast('Error saving settings', 'error'); return; }
+  _brandProfile = profile;
+  toast('Brand profile saved!', 'success');
+}
+
+// ── Generate Ideas ────────────────────────────────────────────────────────
+async function generateIdeas() {
+  const btn = document.getElementById('generate-ideas-btn');
+  const spinner = document.getElementById('ideas-spinner');
+  btn.disabled = true;
+  spinner.classList.add('show');
+
+  const theme   = document.getElementById('theme').value;
+  const tone    = document.getElementById('tone').value;
+  const context = document.getElementById('extra-context').value.trim();
+
+  try {
+    const res = await fetch('/.netlify/functions/craftivity-generate-ideas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
+      body: JSON.stringify({ theme, tone, context, brandProfile: _brandProfile }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const { ideas } = await res.json();
+    _currentIdeas = ideas;
+    renderIdeas(ideas);
+    document.getElementById('ideas-section').style.display = 'block';
+    document.getElementById('content-section').style.display = 'none';
+  } catch (e) {
+    toast('Failed to generate ideas: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    spinner.classList.remove('show');
+  }
+}
+
+function renderIdeas(ideas) {
+  const list = document.getElementById('ideas-list');
+  list.innerHTML = ideas.map((idea, i) => `
+    <div class="idea-item" data-index="${i}">
+      <div class="idea-num">${i + 1}</div>
+      <div class="idea-text">${escHtml(idea)}</div>
+      <button class="idea-use-btn" onclick="selectIdea(${i})">Use this →</button>
+    </div>
+  `).join('');
+}
+
+async function selectIdea(index) {
+  _selectedIdea = _currentIdeas[index];
+  document.querySelectorAll('.idea-item').forEach((el, i) => {
+    el.classList.toggle('selected', i === index);
+  });
+  await generateContent(_selectedIdea);
+}
+
+// ── Generate Content ──────────────────────────────────────────────────────
+async function generateContent(idea) {
+  const spinner = document.getElementById('content-spinner');
+  spinner.classList.add('show');
+  document.getElementById('content-section').style.display = 'none';
+
+  try {
+    const res = await fetch('/.netlify/functions/craftivity-generate-content', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
+      body: JSON.stringify({
+        idea,
+        tone: document.getElementById('tone').value,
+        brandProfile: _brandProfile,
+      }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const { caption, hashtags, imagePrompt } = await res.json();
+
+    document.getElementById('caption-edit').value      = caption;
+    document.getElementById('hashtags-edit').value     = hashtags;
+    document.getElementById('image-prompt-edit').value = imagePrompt;
+
+    updatePreview();
+    document.getElementById('content-section').style.display = 'block';
+    document.getElementById('content-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    toast('Failed to generate content: ' + e.message, 'error');
+  } finally {
+    spinner.classList.remove('show');
+  }
+}
+
+async function regenerateContent() {
+  if (_selectedIdea) await generateContent(_selectedIdea);
+}
+
+function updatePreview() {
+  const caption = document.getElementById('caption-edit').value;
+  const hashtags = document.getElementById('hashtags-edit').value;
+  const imagePrompt = document.getElementById('image-prompt-edit').value;
+  document.getElementById('preview-caption').textContent = caption;
+  document.getElementById('preview-hashtags').textContent = hashtags;
+  document.getElementById('image-prompt-preview').textContent = imagePrompt ? '🎨 ' + imagePrompt : '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  ['caption-edit', 'hashtags-edit', 'image-prompt-edit'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updatePreview);
+  });
+});
+
+// ── Save Post to Queue ────────────────────────────────────────────────────
+async function savePost() {
+  const caption     = document.getElementById('caption-edit').value.trim();
+  const hashtags    = document.getElementById('hashtags-edit').value.trim();
+  const imagePrompt = document.getElementById('image-prompt-edit').value.trim();
+  const scheduleAt  = document.getElementById('schedule-at').value;
+
+  if (!caption) { toast('Caption cannot be empty', 'error'); return; }
+
+  const btn = document.getElementById('save-post-btn');
+  btn.disabled = true;
+
+  const { error } = await _sb.from('craftivity_posts').insert({
+    client_id:    _clientId,
+    topic:        _selectedIdea || '',
+    caption,
+    hashtags,
+    image_prompt: imagePrompt,
+    schedule_at:  scheduleAt || null,
+    status:       'pending',
+  });
+
+  btn.disabled = false;
+  if (error) { toast('Error saving post: ' + error.message, 'error'); return; }
+  toast('Post saved to queue!', 'success');
+  document.getElementById('content-section').style.display = 'none';
+  document.getElementById('ideas-section').style.display = 'none';
+  document.getElementById('extra-context').value = '';
+}
+
+// ── Queue ─────────────────────────────────────────────────────────────────
+async function loadQueue() {
+  const { data, error } = await _sb.from('craftivity_posts')
+    .select('*').eq('client_id', _clientId)
+    .order('created_at', { ascending: false });
+
+  const tbody = document.getElementById('queue-body');
+  if (error || !data) { tbody.innerHTML = `<tr><td colspan="5" class="empty">Failed to load queue.</td></tr>`; return; }
+  if (data.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="empty">No posts yet — generate your first one!</td></tr>`; return; }
+
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td class="topic-cell" title="${escHtml(p.topic)}">${escHtml(p.topic || '—')}</td>
+      <td class="caption-cell" title="${escHtml(p.caption)}">${escHtml(p.caption)}</td>
+      <td style="white-space:nowrap;font-size:.82rem;">${p.schedule_at ? fmtDate(p.schedule_at) : '<span style="color:var(--muted)">Draft</span>'}</td>
+      <td><span class="badge badge-${p.status}">${p.status}</span></td>
+      <td style="white-space:nowrap;">
+        <button class="action-btn view-btn" onclick="openModal('${p.id}')">View</button>
+        ${p.status === 'pending' ? `
+          <button class="action-btn approve-btn" onclick="updateStatus('${p.id}','approved')">Approve</button>
+          <button class="action-btn reject-btn"  onclick="updateStatus('${p.id}','rejected')">Reject</button>
+        ` : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function updateStatus(id, status) {
+  const { error } = await _sb.from('craftivity_posts').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+  if (error) { toast('Update failed', 'error'); return; }
+  toast(status === 'approved' ? 'Post approved!' : 'Post rejected', status === 'approved' ? 'success' : '');
+  loadQueue();
+  closeModal();
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────
+async function openModal(id) {
+  const { data } = await _sb.from('craftivity_posts').select('*').eq('id', id).single();
+  if (!data) return;
+  _modalPostId = id;
+  document.getElementById('modal-topic').textContent    = data.topic || 'Post Preview';
+  document.getElementById('modal-caption').textContent  = data.caption;
+  document.getElementById('modal-hashtags').textContent = data.hashtags || '';
+  document.getElementById('modal-image-prompt').textContent = data.image_prompt ? '🎨 Image prompt: ' + data.image_prompt : '';
+  const approveBtn = document.getElementById('modal-approve-btn');
+  approveBtn.style.display = data.status === 'pending' ? '' : 'none';
+  approveBtn.onclick = () => updateStatus(id, 'approved');
+  document.getElementById('post-modal').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('post-modal').classList.remove('open');
+  _modalPostId = null;
+}
+document.getElementById('post-modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' });
+}
+</script>
+</body>
+</html>

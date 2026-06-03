@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Craftivity — JJAIServices.com</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0a0f2c; --cyan: #00bcd4; --teal: #00897b;
+      --white: #ffffff; --off: #f0f4ff; --text: #1c1c2e; --muted: #5c6480;
+      --radius: 16px; --shadow: 0 4px 24px rgba(10,15,44,.09);
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--off); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--white); border-bottom: 1px solid rgba(10,15,44,.08);
+      padding: 1rem 5%; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 1px 8px rgba(10,15,44,.05); position: sticky; top: 0; z-index: 10;
+    }
+    .logo { display: flex; align-items: center; gap: .65rem; text-decoration: none; }
+    .logo-text { font-size: 1.1rem; font-weight: 800; color: var(--navy); }
+    .logo-text span { color: var(--cyan); }
+    .logo-sub { font-size: .6rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .btn-back, .btn-logout {
+      padding: .4rem 1rem; border: 1.5px solid rgba(10,15,44,.12); border-radius: 50px;
+      background: transparent; color: var(--navy); font-size: .82rem; font-weight: 600;
+      text-decoration: none; cursor: pointer; transition: border-color .2s;
+    }
+    .btn-back:hover, .btn-logout:hover { border-color: var(--cyan); color: var(--teal); }
+
+    main { max-width: 900px; margin: 0 auto; padding: 3rem 5% 5rem; }
+    .page-header { margin-bottom: 2.5rem; }
+    .page-header h1 { font-size: 1.7rem; font-weight: 800; color: var(--navy); letter-spacing: -.03em; }
+    .page-header p  { color: var(--muted); font-size: .92rem; margin-top: .35rem; }
+
+    .apps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.2rem; }
+    .app-card {
+      background: var(--white); border-radius: var(--radius);
+      border: 1px solid rgba(10,15,44,.07); box-shadow: var(--shadow);
+      text-decoration: none; color: inherit; display: flex; flex-direction: column;
+      overflow: hidden; transition: transform .2s, box-shadow .2s;
+    }
+    .app-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(10,15,44,.13); }
+    .card-top { height: 6px; background: linear-gradient(90deg, var(--cyan), var(--teal)); }
+    .card-body { padding: 1.4rem; flex: 1; }
+    .card-icon  { font-size: 1.8rem; margin-bottom: .6rem; }
+    .card-name  { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: .3rem; }
+    .card-desc  { font-size: .85rem; color: var(--muted); line-height: 1.5; }
+    .card-footer {
+      padding: .8rem 1.4rem; border-top: 1px solid rgba(10,15,44,.06);
+      font-size: .78rem; color: var(--muted); display: flex; justify-content: space-between;
+    }
+    .card-footer .arrow { color: var(--teal); }
+
+    footer {
+      text-align: center; padding: 2rem 5%; font-size: .82rem; color: var(--muted);
+      border-top: 1px solid rgba(10,15,44,.07); margin-top: 4rem;
+    }
+    footer a { color: var(--teal); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="/">
+    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00bcd4"/><stop offset="100%" stop-color="#00897b"/></linearGradient></defs>
+      <line x1="8" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="8" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="8" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <line x1="32" y1="32" x2="20" y2="20" stroke="url(#lg)" stroke-width="1.2" opacity=".6"/>
+      <circle cx="20" cy="20" r="5" fill="url(#lg)"/>
+      <circle cx="8" cy="8" r="3" fill="#00bcd4" opacity=".85"/>
+      <circle cx="32" cy="8" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="8" cy="32" r="3" fill="#00897b" opacity=".85"/>
+      <circle cx="32" cy="32" r="3" fill="#00bcd4" opacity=".85"/>
+    </svg>
+    <div>
+      <div class="logo-text">JJ <span>AI</span> Services</div>
+      <div class="logo-sub">Craftivity</div>
+    </div>
+  </a>
+  <div class="header-right">
+    <a class="btn-back" href="/client-portal.html">← My Projects</a>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </div>
+</header>
+
+<main>
+  <div class="page-header">
+    <h1>Craftivity</h1>
+    <p>Your AI-powered tools, built and managed by JJ AI Services.</p>
+  </div>
+
+  <div class="apps-grid">
+    <a class="app-card" href="/craftivity/craftivity-automate-socials/">
+      <div class="card-top"></div>
+      <div class="card-body">
+        <div class="card-icon">📸</div>
+        <div class="card-name">Automate Socials</div>
+        <div class="card-desc">Generate and schedule AI-powered Instagram posts for your craft classes.</div>
+      </div>
+      <div class="card-footer">
+        <span>Active</span>
+        <span class="arrow">→</span>
+      </div>
+    </a>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2026 <a href="/">JJAIServices.com</a> &nbsp;|&nbsp; Powered by JJ AI Services</p>
+</footer>
+
+<script>
+  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  _sb.auth.getSession().then(({ data: { session } }) => {
+    if (!session) window.location.href = '/client-login.html';
+  });
+  async function doLogout() {
+    await _sb.auth.signOut();
+    window.location.href = '/client-login.html';
+  }
+</script>
+</body>
+</html>

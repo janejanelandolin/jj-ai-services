@@ -34,7 +34,7 @@
     .btn-back:hover, .btn-logout:hover { border-color: var(--cyan); color: var(--teal); }
 
     /* ── Layout ── */
-    main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 5% 5rem; }
+    main { max-width: 1500px; margin: 0 auto; padding: 2.5rem 2% 5rem; }
     .page-header { margin-bottom: 2rem; }
     .page-header h1 { font-size: 1.6rem; font-weight: 800; color: var(--navy); letter-spacing: -.03em; }
     .page-header p  { color: var(--muted); font-size: .92rem; margin-top: .35rem; }
@@ -54,8 +54,10 @@
     .card {
       background: var(--white); border-radius: var(--radius);
       border: 1px solid rgba(10,15,44,.07); box-shadow: var(--shadow);
-      padding: 1.8rem; margin-bottom: 1.4rem;
+      padding: 1.4rem 1rem; margin-bottom: 1.4rem;
     }
+    #queue .card { padding: 1.2rem 0 0; }
+    #queue .queue-header { padding: 0 1.2rem 1rem; }
     .card-title {
       font-size: .72rem; font-weight: 700; text-transform: uppercase;
       letter-spacing: .1em; color: var(--cyan); margin-bottom: 1.2rem;
@@ -68,7 +70,7 @@
 
     /* ── Table ── */
     .table-scroll { overflow-x: auto; }
-    .queue-tbl { width: 100%; border-collapse: collapse; min-width: 760px; }
+    .queue-tbl { width: 100%; border-collapse: collapse; min-width: 900px; }
     .queue-tbl th {
       text-align: left; padding: .65rem .85rem;
       font-size: .7rem; font-weight: 700; text-transform: uppercase;
@@ -175,6 +177,19 @@
       cursor: pointer; transition: border-color .2s;
     }
     .btn-secondary:hover { border-color: var(--cyan); }
+
+    /* ── Photo cell ── */
+    .photo-thumb {
+      width: 44px; height: 44px; border-radius: 6px; object-fit: cover;
+      display: block; border: 1px solid rgba(10,15,44,.08); cursor: pointer;
+    }
+    .photo-upload-btn {
+      width: 44px; height: 44px; border-radius: 6px; border: 1.5px dashed rgba(10,15,44,.2);
+      background: var(--off); color: var(--muted); font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .photo-upload-btn:hover { border-color: var(--cyan); color: var(--cyan); }
 
     /* ── Empty / loading ── */
     .empty-queue { text-align: center; padding: 3rem; color: var(--muted); font-style: italic; }
@@ -330,6 +345,7 @@
               <th>#</th>
               <th>Day</th>
               <th>Date</th>
+              <th>Photo</th>
               <th>Post Type</th>
               <th>Topic</th>
               <th>Caption</th>
@@ -338,7 +354,7 @@
             </tr>
           </thead>
           <tbody id="queue-tbody">
-            <tr><td colspan="9" class="empty-queue">Loading…</td></tr>
+            <tr><td colspan="10" class="empty-queue">Loading…</td></tr>
           </tbody>
         </table>
       </div>
@@ -546,7 +562,7 @@ async function loadQueue() {
 
   const tbody = document.getElementById('queue-tbody');
   if (error || !data) {
-    tbody.innerHTML = `<tr><td colspan="8" class="empty-queue">Failed to load queue.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" class="empty-queue">Failed to load queue.</td></tr>`;
     return;
   }
   _posts = data;
@@ -559,7 +575,7 @@ function renderTable() {
   count.textContent = `(${_posts.length})`;
 
   if (_posts.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" class="empty-queue">No posts yet.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" class="empty-queue">No posts yet.</td></tr>`;
     return;
   }
 
@@ -585,7 +601,18 @@ function renderTable() {
       <td>
         <span class="day-badge ${isMon ? 'day-mon' : 'day-thu'}">${dayName}</span>
       </td>
-      <td style="white-space:nowrap;font-size:.83rem;color:var(--muted);">${dateFmt}</td>
+      <td class="editable" style="white-space:nowrap;" onclick="startDateEdit(event,'${p.id}','${p.schedule_at || ''}')">
+        <span class="cell-text" style="font-size:.83rem;color:var(--muted);">${dateFmt}</span>
+      </td>
+      <td>
+        ${p.image_url
+          ? `<img class="photo-thumb" src="${escHtml(p.image_url)}" alt="Post photo" onclick="openModal('${p.id}')" />`
+          : `<label class="photo-upload-btn" title="Upload photo">
+               📷
+               <input type="file" accept="image/*" style="display:none;" onchange="uploadRowImage('${p.id}',this)" />
+             </label>`
+        }
+      </td>
       <td style="white-space:nowrap;font-size:.8rem;color:var(--muted);">${escHtml(postType)}</td>
       <td class="editable" style="min-width:160px;max-width:220px;" onclick="startEdit(event,'${p.id}','topic')">
         <span class="cell-text" data-field="topic" data-id="${p.id}">${escHtml(p.topic || '')}</span>
@@ -617,6 +644,75 @@ async function quickStatus(id, status) {
   if (post) post.status = status;
   renderTable();
   toast(status === 'approved' ? 'Approved ✓' : 'Rejected', status === 'approved' ? 'success' : '');
+}
+
+// ── Date editing ─────────────────────────────────────────────────────────
+function startDateEdit(e, id, currentScheduleAt) {
+  const cell = e.currentTarget;
+  const existing = cell.querySelector('input[type="date"]');
+  if (existing) return;
+
+  const dt = currentScheduleAt ? new Date(currentScheduleAt) : new Date();
+  const dateStr = dt.toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' }); // YYYY-MM-DD
+
+  const input = document.createElement('input');
+  input.type = 'date';
+  input.className = 'cell-input';
+  input.value = dateStr;
+  input.style.width = '130px';
+  cell.innerHTML = '';
+  cell.appendChild(input);
+  input.focus();
+  input.addEventListener('click', ev => ev.stopPropagation());
+
+  let saved = false;
+  async function save() {
+    if (saved) return;
+    saved = true;
+    const newDate = input.value;
+    if (!newDate || newDate === dateStr) { renderTable(); return; }
+    // Keep 10am PT time (17:00 UTC)
+    const newIso = new Date(newDate + 'T17:00:00.000Z').toISOString();
+    const post = _posts.find(p => p.id === id);
+    if (post) post.schedule_at = newIso;
+    _posts.sort((a, b) => new Date(a.schedule_at) - new Date(b.schedule_at));
+    renderTable();
+    const { error } = await _sb.from('craftivity_posts')
+      .update({ schedule_at: newIso, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) toast('Failed to save date', 'error');
+    else toast('Date updated', 'success');
+  }
+  input.addEventListener('blur', save);
+  input.addEventListener('change', save);
+}
+
+// ── Row photo upload ──────────────────────────────────────────────────────
+async function uploadRowImage(id, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const label = input.closest('label');
+  if (label) label.textContent = '⏳';
+
+  try {
+    const ext      = file.name.split('.').pop();
+    const fileName = `${id}.${ext}`;
+    const { error: uploadErr } = await _sb.storage
+      .from('craftivity-images').upload(fileName, file, { contentType: file.type, upsert: true });
+    if (uploadErr) throw new Error(uploadErr.message);
+
+    const { data: { publicUrl } } = _sb.storage.from('craftivity-images').getPublicUrl(fileName);
+    const { error: updateErr } = await _sb.from('craftivity_posts')
+      .update({ image_url: publicUrl, updated_at: new Date().toISOString() }).eq('id', id);
+    if (updateErr) throw new Error(updateErr.message);
+
+    const post = _posts.find(p => p.id === id);
+    if (post) post.image_url = publicUrl;
+    renderTable();
+    toast('Photo uploaded!', 'success');
+  } catch (err) {
+    toast('Upload failed: ' + err.message, 'error');
+    renderTable();
+  }
 }
 
 // ── In-place editing ──────────────────────────────────────────────────────

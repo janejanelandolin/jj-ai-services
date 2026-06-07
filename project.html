@@ -91,18 +91,18 @@
     .milestone-date { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
 
     /* Links */
-    .links-list { display: flex; flex-direction: column; gap: .6rem; }
+    .links-list { display: flex; flex-wrap: wrap; gap: .7rem; }
     .link-item {
-      display: flex; align-items: center; gap: .7rem;
-      padding: .7rem 1rem; border-radius: 8px;
-      background: var(--off); text-decoration: none;
-      transition: background .15s;
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .6rem 1.2rem; border-radius: 50px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); text-decoration: none; font-size: .88rem; font-weight: 700;
+      box-shadow: 0 4px 14px rgba(0,188,212,.25); transition: opacity .2s, transform .2s;
     }
-    .link-item:hover { background: #e0f7fa; }
-    .link-icon { font-size: 1rem; flex-shrink: 0; }
-    .link-label { font-size: .9rem; font-weight: 600; color: var(--navy); }
-    .link-url   { font-size: .78rem; color: var(--muted); margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
-    .link-arrow { margin-left: auto; color: var(--teal); font-size: .9rem; }
+    .link-item:hover { opacity: .88; transform: translateY(-1px); }
+    .link-icon { font-size: .95rem; flex-shrink: 0; }
+    .link-label { color: var(--white); }
+    .link-arrow { font-size: .85rem; }
 
     /* Notes */
     .notes-empty { color: var(--muted); font-size: .9rem; font-style: italic; }
@@ -229,10 +229,7 @@
       : `<div class="links-list">${links.map(l => `
           <a class="link-item" href="${esc(l.url)}" target="_blank" rel="noopener">
             <span class="link-icon">🔗</span>
-            <div>
-              <div class="link-label">${esc(l.label)}</div>
-              <div class="link-url">${esc(l.url)}</div>
-            </div>
+            <span class="link-label">${esc(l.label)}</span>
             <span class="link-arrow">↗</span>
           </a>`).join('')}
         </div>`;

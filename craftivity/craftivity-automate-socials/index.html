@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Automate Socials — Craftivity</title>
+  <title>Project 1: Basic Marketing — Craftivity</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/config.js"></script>
   <style>
@@ -15,6 +15,7 @@
     }
     body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--off); color: var(--text); min-height: 100vh; }
 
+    /* ── Header ── */
     header {
       background: var(--white); border-bottom: 1px solid rgba(10,15,44,.08);
       padding: 1rem 5%; display: flex; align-items: center; justify-content: space-between;
@@ -32,13 +33,14 @@
     }
     .btn-back:hover, .btn-logout:hover { border-color: var(--cyan); color: var(--teal); }
 
-    main { max-width: 1000px; margin: 0 auto; padding: 2.5rem 5% 5rem; }
+    /* ── Layout ── */
+    main { max-width: 1100px; margin: 0 auto; padding: 2.5rem 5% 5rem; }
     .page-header { margin-bottom: 2rem; }
-    .page-header h1 { font-size: 1.7rem; font-weight: 800; color: var(--navy); letter-spacing: -.03em; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 800; color: var(--navy); letter-spacing: -.03em; }
     .page-header p  { color: var(--muted); font-size: .92rem; margin-top: .35rem; }
 
-    /* Tabs */
-    .tabs { display: flex; gap: .5rem; margin-bottom: 1.6rem; flex-wrap: wrap; }
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: .5rem; margin-bottom: 1.6rem; }
     .tab {
       padding: .5rem 1.2rem; border-radius: 50px; border: 1.5px solid rgba(10,15,44,.12);
       background: transparent; font-size: .85rem; font-weight: 600; color: var(--muted);
@@ -48,7 +50,7 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* Cards */
+    /* ── Card ── */
     .card {
       background: var(--white); border-radius: var(--radius);
       border: 1px solid rgba(10,15,44,.07); box-shadow: var(--shadow);
@@ -59,7 +61,92 @@
       letter-spacing: .1em; color: var(--cyan); margin-bottom: 1.2rem;
     }
 
-    /* Forms */
+    /* ── Queue header ── */
+    .queue-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: .6rem; }
+    .queue-header h2 { font-size: 1rem; font-weight: 700; color: var(--navy); }
+    .post-count { font-size: .85rem; font-weight: 400; color: var(--muted); margin-left: .4rem; }
+
+    /* ── Table ── */
+    .table-scroll { overflow-x: auto; }
+    .queue-tbl { width: 100%; border-collapse: collapse; min-width: 760px; }
+    .queue-tbl th {
+      text-align: left; padding: .65rem .85rem;
+      font-size: .7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--muted);
+      background: var(--off); border-bottom: 1px solid rgba(10,15,44,.08);
+      white-space: nowrap;
+    }
+    .queue-tbl th:first-child { width: 28px; padding: .65rem .5rem; }
+    .queue-tbl td {
+      padding: .65rem .85rem; border-bottom: 1px solid rgba(10,15,44,.05);
+      font-size: .88rem; vertical-align: top;
+    }
+    .queue-tbl td:first-child { padding: .65rem .5rem; }
+    .queue-tbl tr:last-child td { border-bottom: none; }
+    .queue-tbl tbody tr:hover td { background: #fafbff; }
+    .queue-tbl tbody tr.dragging { opacity: .3; }
+    .queue-tbl tbody tr.drag-over td:first-child { box-shadow: inset 3px 0 0 var(--cyan); }
+    .queue-tbl tbody tr.drag-over { background: rgba(0,188,212,.04); }
+
+    /* ── Drag handle ── */
+    .drag-handle {
+      cursor: grab; color: rgba(10,15,44,.25); font-size: 1rem;
+      user-select: none; display: flex; align-items: center; justify-content: center;
+      height: 100%; padding: .1rem;
+    }
+    .drag-handle:active { cursor: grabbing; color: var(--cyan); }
+
+    /* ── Day badge ── */
+    .day-badge {
+      display: inline-block; padding: .15rem .5rem; border-radius: 50px;
+      font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .day-mon { background: #e3f2fd; color: #1565c0; }
+    .day-thu { background: #ede7f6; color: #4527a0; }
+
+    /* ── Editable cells ── */
+    .editable { cursor: text; }
+    .cell-text {
+      display: block; padding: .2rem .3rem; border-radius: 4px;
+      transition: background .15s; line-height: 1.4;
+    }
+    .editable:hover .cell-text { background: rgba(0,188,212,.07); }
+    .caption-text {
+      color: var(--muted); font-size: .82rem;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .cell-input {
+      display: block; width: 100%; padding: .3rem .5rem;
+      border: 1.5px solid var(--cyan); border-radius: 6px;
+      font-size: .88rem; font-family: inherit; color: var(--text);
+      outline: none; background: var(--white);
+      box-shadow: 0 0 0 3px rgba(0,188,212,.1);
+    }
+    textarea.cell-input { resize: vertical; min-height: 70px; }
+
+    /* ── Badges ── */
+    .badge { display: inline-block; padding: .2rem .65rem; border-radius: 50px; font-size: .7rem; font-weight: 700; }
+    .badge-pending   { background: #fff8e1; color: #f57f17; }
+    .badge-approved  { background: #e8f5e9; color: #2e7d32; }
+    .badge-posted    { background: #e3f2fd; color: #1565c0; }
+    .badge-scheduled { background: #ede7f6; color: #4527a0; }
+    .badge-rejected  { background: #ffebee; color: #c62828; }
+
+    /* ── Table action buttons ── */
+    .tbl-actions { display: flex; gap: .35rem; flex-wrap: nowrap; }
+    .tbl-btn {
+      padding: .25rem .6rem; border-radius: 50px; border: 1.5px solid;
+      background: transparent; font-size: .75rem; font-weight: 600;
+      cursor: pointer; transition: background .15s, color .15s; white-space: nowrap;
+    }
+    .tbl-approve { border-color: var(--teal); color: var(--teal); }
+    .tbl-approve:hover { background: var(--teal); color: var(--white); }
+    .tbl-reject  { border-color: rgba(10,15,44,.18); color: var(--muted); }
+    .tbl-reject:hover  { border-color: #c62828; color: #c62828; }
+    .tbl-view    { border-color: rgba(0,188,212,.4); color: var(--cyan); }
+    .tbl-view:hover    { background: rgba(0,188,212,.1); }
+
+    /* ── Forms (settings) ── */
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
     .form-group { display: flex; flex-direction: column; gap: .3rem; margin-bottom: 1rem; }
     .form-group:last-child { margin-bottom: 0; }
@@ -73,7 +160,6 @@
       border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,188,212,.1);
     }
     .hint { font-size: .75rem; color: var(--muted); margin-top: .2rem; }
-
     .btn-primary {
       padding: .75rem 2rem; border: none; border-radius: 50px;
       background: linear-gradient(135deg, var(--cyan), var(--teal));
@@ -90,106 +176,10 @@
     }
     .btn-secondary:hover { border-color: var(--cyan); }
 
-    /* Spinners */
-    .generate-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-top: 1.2rem; }
-    .spinner { display: none; width: 20px; height: 20px; border: 2.5px solid rgba(0,188,212,.2); border-top-color: var(--cyan); border-radius: 50%; animation: spin .7s linear infinite; }
-    .spinner.show { display: inline-block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Ideas */
-    .ideas-list { display: flex; flex-direction: column; gap: .8rem; margin-top: 1rem; }
-    .idea-item {
-      background: var(--off); border-radius: 10px; padding: 1rem 1.2rem;
-      display: flex; align-items: flex-start; gap: 1rem; border: 1.5px solid transparent;
-      cursor: pointer; transition: border-color .2s, background .2s;
-    }
-    .idea-item:hover { border-color: var(--cyan); background: rgba(0,188,212,.04); }
-    .idea-item.selected { border-color: var(--cyan); background: rgba(0,188,212,.07); }
-    .idea-num { font-size: .78rem; font-weight: 700; color: var(--cyan); min-width: 1.4rem; margin-top: .1rem; }
-    .idea-text { font-size: .88rem; color: var(--text); line-height: 1.5; flex: 1; }
-    .idea-use-btn {
-      padding: .3rem .8rem; border-radius: 50px; border: 1.5px solid var(--teal);
-      background: transparent; color: var(--teal); font-size: .75rem; font-weight: 600;
-      cursor: pointer; white-space: nowrap; transition: background .15s, color .15s;
-    }
-    .idea-use-btn:hover { background: var(--teal); color: var(--white); }
-
-    /* Post preview (generate tab) */
-    .post-preview {
-      background: var(--white); border-radius: var(--radius); border: 1px solid rgba(10,15,44,.07);
-      box-shadow: var(--shadow); overflow: hidden; margin-top: 1rem;
-    }
-    .post-preview-header {
-      display: flex; align-items: center; gap: .6rem; padding: .9rem 1.2rem;
-      border-bottom: 1px solid rgba(10,15,44,.06);
-    }
-    .post-avatar {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--cyan), var(--teal));
-      display: flex; align-items: center; justify-content: center; font-size: 1rem;
-    }
-    .post-handle { font-size: .85rem; font-weight: 700; color: var(--navy); }
-    .post-image-placeholder {
-      width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: var(--muted); font-size: .9rem; gap: .5rem;
-    }
-    .post-image-placeholder .icon { font-size: 2.5rem; }
-    .post-image-area { position: relative; }
-    .post-image-area img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
-    .post-caption-area { padding: 1rem 1.2rem; }
-    .post-caption { font-size: .88rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
-    .post-hashtags { margin-top: .5rem; font-size: .82rem; color: var(--teal); }
-
-    /* ── Queue Cards ─────────────────────────────────────────────────────── */
-    .queue-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; flex-wrap: wrap; gap: .5rem; }
-    .queue-header h2 { font-size: 1rem; font-weight: 700; color: var(--navy); }
-    .queue-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.2rem;
-    }
-    .queue-card {
-      background: var(--white); border-radius: var(--radius);
-      border: 1px solid rgba(10,15,44,.07); box-shadow: var(--shadow);
-      overflow: hidden; cursor: pointer;
-      transition: transform .2s, box-shadow .2s;
-    }
-    .queue-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(10,15,44,.13); }
-
-    .queue-card-image {
-      width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
-      background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
-    }
-    .queue-card-placeholder {
-      width: 100%; aspect-ratio: 1;
-      background: linear-gradient(135deg, #e0f7fa, #e8f5e9);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      color: var(--muted); font-size: .78rem; gap: .4rem;
-    }
-    .queue-card-placeholder .ph-icon { font-size: 2rem; }
-
-    .queue-card-body { padding: 1rem; }
-    .queue-card-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
-    .queue-card-topic { font-size: .78rem; font-weight: 700; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
-    .queue-card-caption { font-size: .82rem; color: var(--muted); line-height: 1.4;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-      margin-bottom: .75rem; }
-    .queue-card-footer { display: flex; align-items: center; justify-content: space-between; }
-    .queue-card-date { font-size: .72rem; color: var(--muted); }
-    .view-link { font-size: .78rem; font-weight: 700; color: var(--cyan); background: none; border: none; cursor: pointer; padding: 0; }
-
-    /* Badges */
-    .badge { display: inline-block; padding: .2rem .65rem; border-radius: 50px; font-size: .7rem; font-weight: 700; }
-    .badge-pending   { background: #fff8e1; color: #f57f17; }
-    .badge-approved  { background: #e8f5e9; color: #2e7d32; }
-    .badge-posted    { background: #e3f2fd; color: #1565c0; }
-    .badge-scheduled { background: #ede7f6; color: #4527a0; }
-    .badge-rejected  { background: #ffebee; color: #c62828; }
-
+    /* ── Empty / loading ── */
     .empty-queue { text-align: center; padding: 3rem; color: var(--muted); font-style: italic; }
 
-    /* ── Modal ───────────────────────────────────────────────────────────── */
+    /* ── Modal ── */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(10,15,44,.5); z-index: 200;
       display: none; align-items: center; justify-content: center; padding: 1rem;
@@ -197,8 +187,7 @@
     .modal-overlay.open { display: flex; }
     .modal {
       background: var(--white); border-radius: var(--radius); width: 100%; max-width: 500px;
-      max-height: 92vh; overflow-y: auto;
-      box-shadow: 0 24px 64px rgba(10,15,44,.3);
+      max-height: 92vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(10,15,44,.3);
     }
     .modal-header {
       padding: 1rem 1.2rem; border-bottom: 1px solid rgba(10,15,44,.07);
@@ -207,8 +196,6 @@
     }
     .modal-handle { font-size: .82rem; font-weight: 700; color: var(--navy); }
     .modal-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--muted); line-height: 1; }
-
-    /* Instagram mockup inside modal */
     .ig-mockup { background: var(--white); }
     .ig-image-wrap { position: relative; aspect-ratio: 1; overflow: hidden; background: linear-gradient(135deg, #e0f7fa, #e8f5e9); }
     .ig-image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -222,11 +209,8 @@
     .ig-caption-area { padding: 1rem 1.2rem; border-bottom: 1px solid rgba(10,15,44,.06); }
     .ig-caption { font-size: .88rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
     .ig-hashtags { margin-top: .4rem; font-size: .82rem; color: var(--teal); }
-
-    /* Modal actions */
     .modal-actions { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: .7rem; }
     .modal-actions-row { display: flex; gap: .6rem; flex-wrap: wrap; }
-
     .action-btn {
       padding: .5rem 1.1rem; border-radius: 50px; border: 1.5px solid;
       background: transparent; font-size: .82rem; font-weight: 600;
@@ -243,8 +227,6 @@
     .schedule-btn { border-color: #4527a0; color: #4527a0; }
     .schedule-btn:hover { background: #4527a0; color: var(--white); }
     .action-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-    /* Schedule inline form */
     .schedule-form {
       background: var(--off); border-radius: 10px; padding: 1rem;
       display: none; flex-direction: column; gap: .7rem;
@@ -254,19 +236,22 @@
     .schedule-form input[type="datetime-local"] {
       padding: .6rem .8rem; border: 1px solid rgba(10,15,44,.14); border-radius: 8px;
       font-size: .88rem; font-family: inherit; color: var(--text); outline: none;
-      transition: border-color .2s; background: var(--white); width: 100%;
+      background: var(--white); width: 100%;
     }
-    .schedule-form input:focus { border-color: var(--cyan); }
     .schedule-form-actions { display: flex; gap: .6rem; }
-
     .ig-spinner {
       position: absolute; inset: 0; background: rgba(255,255,255,.8);
       display: none; align-items: center; justify-content: center;
     }
     .ig-spinner.show { display: flex; }
     .ig-spinner-ring { width: 36px; height: 36px; border: 3px solid rgba(0,188,212,.2); border-top-color: var(--cyan); border-radius: 50%; animation: spin .7s linear infinite; }
+    .post-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
 
-    /* Toast */
+    /* ── Toast ── */
     .toast {
       position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
       background: var(--navy); color: var(--white); padding: .75rem 1.5rem;
@@ -284,9 +269,10 @@
     }
     footer a { color: var(--teal); text-decoration: none; }
 
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     @media (max-width: 600px) {
       .form-row { grid-template-columns: 1fr; }
-      .queue-grid { grid-template-columns: 1fr; }
       .modal { max-height: 100vh; border-radius: 0; }
     }
   </style>
@@ -320,114 +306,41 @@
 
 <main>
   <div class="page-header">
-    <h1>📸 Automate Socials</h1>
-    <p>Generate AI-powered Instagram posts for your craft classes and manage your content queue.</p>
+    <h1>📸 Project 1: Basic Marketing — Instagram Staging Area</h1>
+    <p>104 posts staged on a Monday / Thursday schedule — Jun 9 2026 through Jun 4 2027.</p>
   </div>
 
   <div class="tabs">
-    <button class="tab active" data-tab="generate">Generate Post</button>
-    <button class="tab" data-tab="queue">Approval Queue</button>
+    <button class="tab active" data-tab="queue">Approval Queue</button>
     <button class="tab" data-tab="settings">Brand Settings</button>
   </div>
 
-  <!-- ── GENERATE ── -->
-  <div id="generate" class="tab-panel active">
-    <div class="card">
-      <div class="card-title">Step 1 — Generate Post Ideas</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Content Theme</label>
-          <select id="theme">
-            <option value="upcoming_class">Upcoming Class Announcement</option>
-            <option value="class_recap">Class Recap / Behind the Scenes</option>
-            <option value="student_spotlight">Student Spotlight</option>
-            <option value="seasonal">Seasonal / Holiday Craft</option>
-            <option value="tip">Craft Tip or Technique</option>
-            <option value="product">Materials &amp; Supply Spotlight</option>
-            <option value="community">Community &amp; Events</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Tone</label>
-          <select id="tone">
-            <option value="warm">Warm &amp; Welcoming</option>
-            <option value="playful">Playful &amp; Fun</option>
-            <option value="inspiring">Inspiring &amp; Uplifting</option>
-            <option value="informative">Informative &amp; Educational</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Additional Context <span style="font-weight:400;color:var(--muted)">(optional)</span></label>
-        <textarea id="extra-context" rows="2" placeholder="e.g. 'Kokedama class this Saturday at 2pm, 4 spots left'"></textarea>
-      </div>
-      <div class="generate-actions">
-        <button class="btn-primary" id="generate-ideas-btn" onclick="generateIdeas()">Generate Ideas</button>
-        <div class="spinner" id="ideas-spinner"></div>
-      </div>
-    </div>
-
-    <div id="ideas-section" style="display:none;">
-      <div class="card">
-        <div class="card-title">Step 2 — Pick an Idea</div>
-        <div class="ideas-list" id="ideas-list"></div>
-      </div>
-    </div>
-
-    <div id="content-section" style="display:none;">
-      <div class="card">
-        <div class="card-title">Step 3 — Review &amp; Edit Caption</div>
-        <div class="form-group">
-          <label>Caption</label>
-          <textarea id="caption-edit" rows="6"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Hashtags</label>
-          <input type="text" id="hashtags-edit" />
-          <span class="hint">Comma or space separated</span>
-        </div>
-
-        <div class="post-preview" id="post-preview">
-          <div class="post-preview-header">
-            <div class="post-avatar">🎨</div>
-            <div><div class="post-handle">@craftivitysf</div></div>
-          </div>
-          <div class="post-image-area">
-            <div class="post-image-placeholder" id="image-placeholder">
-              <div class="icon">🖼️</div>
-              <div>Image will be generated from the prompt below</div>
-              <div id="image-prompt-preview" style="font-size:.75rem;max-width:260px;text-align:center;margin-top:.3rem;color:var(--muted);"></div>
-            </div>
-          </div>
-          <div class="post-caption-area">
-            <div class="post-caption" id="preview-caption"></div>
-            <div class="post-hashtags" id="preview-hashtags"></div>
-          </div>
-        </div>
-
-        <div class="form-group" style="margin-top:1.2rem;">
-          <label>Image Prompt <span style="font-weight:400;color:var(--muted)">(for DALL-E image generation)</span></label>
-          <textarea id="image-prompt-edit" rows="3"></textarea>
-        </div>
-
-        <div class="generate-actions">
-          <button class="btn-primary" id="save-post-btn" onclick="savePost()">Save to Queue</button>
-          <button class="btn-secondary" onclick="regenerateContent()">Regenerate Caption</button>
-          <div class="spinner" id="content-spinner"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- ── QUEUE ── -->
-  <div id="queue" class="tab-panel">
+  <div id="queue" class="tab-panel active">
     <div class="card">
       <div class="queue-header">
-        <h2>Content Queue</h2>
+        <h2>Instagram Post Queue <span class="post-count" id="post-count"></span></h2>
         <button class="btn-secondary" onclick="loadQueue()">Refresh</button>
       </div>
-      <div id="queue-grid" class="queue-grid">
-        <div class="empty-queue">Loading…</div>
+      <div class="table-scroll">
+        <table class="queue-tbl">
+          <thead>
+            <tr>
+              <th></th>
+              <th>#</th>
+              <th>Day</th>
+              <th>Date</th>
+              <th>Post Type</th>
+              <th>Topic</th>
+              <th>Caption</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="queue-tbody">
+            <tr><td colspan="9" class="empty-queue">Loading…</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -496,7 +409,6 @@
 <!-- ── POST MODAL ── -->
 <div class="modal-overlay" id="post-modal">
   <div class="modal">
-    <!-- Header -->
     <div class="modal-header">
       <div>
         <div class="post-avatar" style="width:28px;height:28px;font-size:.8rem;display:inline-flex;vertical-align:middle;margin-right:.4rem;">🎨</div>
@@ -504,8 +416,6 @@
       </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-
-    <!-- Instagram image area -->
     <div class="ig-mockup">
       <div class="ig-image-wrap" id="modal-image-wrap">
         <div class="ig-no-image" id="modal-no-image">
@@ -521,32 +431,21 @@
         <div class="ig-hashtags" id="modal-hashtags"></div>
       </div>
     </div>
-
-    <!-- Actions -->
     <div class="modal-actions">
-      <!-- Status badge -->
       <div id="modal-status-row"></div>
-
-      <!-- Approve / Reject (pending only) -->
       <div class="modal-actions-row" id="modal-approve-row" style="display:none;">
         <button class="action-btn approve-btn" id="modal-approve-btn">✓ Approve</button>
         <button class="action-btn reject-btn"  id="modal-reject-btn">✕ Reject</button>
       </div>
-
-      <!-- Upload Image -->
       <div class="modal-actions-row" id="modal-image-row" style="display:none;">
         <button class="action-btn img-upload-btn" onclick="document.getElementById('modal-image-upload').click()">📷 Upload Photo</button>
         <input type="file" id="modal-image-upload" accept="image/*" style="display:none;" onchange="uploadImage(this)" />
       </div>
       <div id="modal-image-prompt-hint" style="display:none;font-size:.75rem;color:var(--muted);background:var(--off);padding:.6rem .8rem;border-radius:8px;line-height:1.5;"></div>
-
-      <!-- Post Now / Schedule (approved only) -->
       <div class="modal-actions-row" id="modal-publish-row" style="display:none;">
         <button class="action-btn post-now-btn" id="modal-post-now-btn" onclick="postNow()">▶ Post Now</button>
         <button class="action-btn schedule-btn" onclick="toggleScheduleForm()">🗓 Schedule</button>
       </div>
-
-      <!-- Schedule inline form -->
       <div class="schedule-form" id="schedule-form">
         <label>Pick a date &amp; time to publish</label>
         <input type="datetime-local" id="schedule-datetime" />
@@ -563,12 +462,12 @@
 
 <script>
 const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let _clientId    = null;
-let _authToken   = null;
+let _clientId   = null;
+let _authToken  = null;
 let _brandProfile = {};
-let _currentIdeas = [];
-let _selectedIdea = null;
-let _modalPost    = null;
+let _modalPost  = null;
+let _posts      = [];   // local cache for drag/edit
+let _dragSrcId  = null;
 
 // ── Auth ──────────────────────────────────────────────────────────────────
 _sb.auth.getSession().then(({ data: { session } }) => {
@@ -599,7 +498,7 @@ function toast(msg, type = '') {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.className = 'toast show' + (type ? ' ' + type : '');
-  setTimeout(() => { el.className = 'toast'; }, 3500);
+  setTimeout(() => { el.className = 'toast'; }, 3000);
 }
 
 // ── Settings ──────────────────────────────────────────────────────────────
@@ -617,7 +516,6 @@ async function loadSettings() {
   document.getElementById('booking-link').value     = data.booking_link     || '';
   document.getElementById('default-hashtags').value = data.default_hashtags || '';
 }
-
 async function saveSettings() {
   const profile = {
     client_id:        _clientId,
@@ -638,144 +536,192 @@ async function saveSettings() {
   toast('Brand profile saved!', 'success');
 }
 
-// ── Generate Ideas ────────────────────────────────────────────────────────
-async function generateIdeas() {
-  const btn = document.getElementById('generate-ideas-btn');
-  const spinner = document.getElementById('ideas-spinner');
-  btn.disabled = true; spinner.classList.add('show');
-
-  try {
-    const res = await fetch('/.netlify/functions/craftivity-generate-ideas', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
-      body: JSON.stringify({
-        theme:        document.getElementById('theme').value,
-        tone:         document.getElementById('tone').value,
-        context:      document.getElementById('extra-context').value.trim(),
-        brandProfile: _brandProfile,
-      }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const { ideas } = await res.json();
-    _currentIdeas = ideas;
-    document.getElementById('ideas-list').innerHTML = ideas.map((idea, i) => `
-      <div class="idea-item" data-index="${i}">
-        <div class="idea-num">${i + 1}</div>
-        <div class="idea-text">${escHtml(idea)}</div>
-        <button class="idea-use-btn" onclick="selectIdea(${i})">Use this →</button>
-      </div>`).join('');
-    document.getElementById('ideas-section').style.display = 'block';
-    document.getElementById('content-section').style.display = 'none';
-  } catch (e) {
-    toast('Failed to generate ideas: ' + e.message, 'error');
-  } finally {
-    btn.disabled = false; spinner.classList.remove('show');
-  }
-}
-
-async function selectIdea(index) {
-  _selectedIdea = _currentIdeas[index];
-  document.querySelectorAll('.idea-item').forEach((el, i) => el.classList.toggle('selected', i === index));
-  await generateContent(_selectedIdea);
-}
-
-// ── Generate Content ──────────────────────────────────────────────────────
-async function generateContent(idea) {
-  const spinner = document.getElementById('content-spinner');
-  spinner.classList.add('show');
-  document.getElementById('content-section').style.display = 'none';
-
-  try {
-    const res = await fetch('/.netlify/functions/craftivity-generate-content', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
-      body: JSON.stringify({ idea, tone: document.getElementById('tone').value, brandProfile: _brandProfile }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const { caption, hashtags, imagePrompt } = await res.json();
-
-    document.getElementById('caption-edit').value      = caption;
-    document.getElementById('hashtags-edit').value     = hashtags;
-    document.getElementById('image-prompt-edit').value = imagePrompt;
-    updatePreview();
-
-    document.getElementById('content-section').style.display = 'block';
-    document.getElementById('content-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  } catch (e) {
-    toast('Failed to generate content: ' + e.message, 'error');
-  } finally {
-    spinner.classList.remove('show');
-  }
-}
-
-async function regenerateContent() {
-  if (_selectedIdea) await generateContent(_selectedIdea);
-}
-
-function updatePreview() {
-  document.getElementById('preview-caption').textContent = document.getElementById('caption-edit').value;
-  document.getElementById('preview-hashtags').textContent = document.getElementById('hashtags-edit').value;
-  const p = document.getElementById('image-prompt-edit').value;
-  document.getElementById('image-prompt-preview').textContent = p ? '🎨 ' + p : '';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  ['caption-edit', 'hashtags-edit', 'image-prompt-edit'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', updatePreview);
-  });
-});
-
-// ── Save Post ─────────────────────────────────────────────────────────────
-async function savePost() {
-  const caption     = document.getElementById('caption-edit').value.trim();
-  const hashtags    = document.getElementById('hashtags-edit').value.trim();
-  const imagePrompt = document.getElementById('image-prompt-edit').value.trim();
-  if (!caption) { toast('Caption cannot be empty', 'error'); return; }
-
-  const btn = document.getElementById('save-post-btn');
-  btn.disabled = true;
-
-  const { error } = await _sb.from('craftivity_posts').insert({
-    client_id: _clientId, topic: _selectedIdea || '',
-    caption, hashtags, image_prompt: imagePrompt, status: 'pending',
-  });
-  btn.disabled = false;
-  if (error) { toast('Error saving post: ' + error.message, 'error'); return; }
-  toast('Post saved to queue!', 'success');
-  document.getElementById('content-section').style.display = 'none';
-  document.getElementById('ideas-section').style.display = 'none';
-  document.getElementById('extra-context').value = '';
-}
-
-// ── Queue Cards ───────────────────────────────────────────────────────────
+// ── Queue — load & render ─────────────────────────────────────────────────
 async function loadQueue() {
-  const { data, error } = await _sb.from('craftivity_posts')
-    .select('*').eq('client_id', _clientId).order('created_at', { ascending: false });
+  const { data, error } = await _sb
+    .from('craftivity_posts')
+    .select('*')
+    .eq('client_id', _clientId)
+    .order('schedule_at', { ascending: true });
 
-  const grid = document.getElementById('queue-grid');
-  if (error || !data) { grid.innerHTML = `<div class="empty-queue">Failed to load queue.</div>`; return; }
-  if (data.length === 0) { grid.innerHTML = `<div class="empty-queue">No posts yet — generate your first one!</div>`; return; }
+  const tbody = document.getElementById('queue-tbody');
+  if (error || !data) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-queue">Failed to load queue.</td></tr>`;
+    return;
+  }
+  _posts = data;
+  renderTable();
+}
 
-  grid.className = 'queue-grid';
-  grid.innerHTML = data.map(p => `
-    <div class="queue-card" onclick="openModal('${p.id}')">
-      ${p.image_url
-        ? `<img class="queue-card-image" src="${escHtml(p.image_url)}" alt="Post image" loading="lazy" />`
-        : `<div class="queue-card-placeholder"><div class="ph-icon">🎨</div><div>No image yet</div></div>`
-      }
-      <div class="queue-card-body">
-        <div class="queue-card-meta">
-          <div class="queue-card-topic" title="${escHtml(p.topic)}">${escHtml(p.topic || 'Untitled')}</div>
-          <span class="badge badge-${p.status}">${p.status}</span>
+function renderTable() {
+  const tbody = document.getElementById('queue-tbody');
+  const count = document.getElementById('post-count');
+  count.textContent = `(${_posts.length})`;
+
+  if (_posts.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" class="empty-queue">No posts yet.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = _posts.map((p, i) => {
+    const postType = (p.topic || '').split(' — ')[0] || '—';
+    const dt      = p.schedule_at ? new Date(p.schedule_at) : null;
+    const dayName = dt ? dt.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Los_Angeles' }) : '—';
+    const isMon   = dayName === 'Mon';
+    const dateFmt = dt ? dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/Los_Angeles' }) : '—';
+
+    return `<tr
+        draggable="true"
+        data-id="${p.id}"
+        ondragstart="onDragStart(event,'${p.id}')"
+        ondragend="onDragEnd(event)"
+        ondragover="onDragOver(event,'${p.id}')"
+        ondrop="onDrop(event,'${p.id}')"
+      >
+      <td>
+        <div class="drag-handle" title="Drag to reorder">⠿</div>
+      </td>
+      <td style="color:var(--muted);font-size:.8rem;white-space:nowrap;">${i + 1}</td>
+      <td>
+        <span class="day-badge ${isMon ? 'day-mon' : 'day-thu'}">${dayName}</span>
+      </td>
+      <td style="white-space:nowrap;font-size:.83rem;color:var(--muted);">${dateFmt}</td>
+      <td style="white-space:nowrap;font-size:.8rem;color:var(--muted);">${escHtml(postType)}</td>
+      <td class="editable" style="min-width:160px;max-width:220px;" onclick="startEdit(event,'${p.id}','topic')">
+        <span class="cell-text" data-field="topic" data-id="${p.id}">${escHtml(p.topic || '')}</span>
+      </td>
+      <td class="editable" style="min-width:200px;max-width:300px;" onclick="startEdit(event,'${p.id}','caption')">
+        <span class="cell-text caption-text" data-field="caption" data-id="${p.id}">${escHtml(p.caption || '')}</span>
+      </td>
+      <td><span class="badge badge-${p.status}">${p.status}</span></td>
+      <td>
+        <div class="tbl-actions">
+          ${p.status === 'pending' ? `
+            <button class="tbl-btn tbl-approve" onclick="quickStatus('${p.id}','approved')">✓</button>
+            <button class="tbl-btn tbl-reject"  onclick="quickStatus('${p.id}','rejected')">✕</button>
+          ` : ''}
+          <button class="tbl-btn tbl-view" onclick="openModal('${p.id}')">View</button>
         </div>
-        <div class="queue-card-caption">${escHtml(p.caption)}</div>
-        <div class="queue-card-footer">
-          <span class="queue-card-date">${p.schedule_at ? '🗓 ' + fmtDate(p.schedule_at) : p.posted_at ? '✓ Posted' : 'Draft'}</span>
-          <button class="view-link">View →</button>
-        </div>
-      </div>
-    </div>`).join('');
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Quick status toggle ───────────────────────────────────────────────────
+async function quickStatus(id, status) {
+  const { error } = await _sb.from('craftivity_posts')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) { toast('Update failed', 'error'); return; }
+  const post = _posts.find(p => p.id === id);
+  if (post) post.status = status;
+  renderTable();
+  toast(status === 'approved' ? 'Approved ✓' : 'Rejected', status === 'approved' ? 'success' : '');
+}
+
+// ── In-place editing ──────────────────────────────────────────────────────
+function startEdit(e, id, field) {
+  const span = e.currentTarget.querySelector(`[data-field="${field}"][data-id="${id}"]`);
+  if (!span) return;
+  const currentVal = _posts.find(p => p.id === id)?.[field] || '';
+  const isCaption  = field === 'caption';
+
+  const input = document.createElement(isCaption ? 'textarea' : 'input');
+  input.className = 'cell-input';
+  input.value = currentVal;
+  if (isCaption) input.rows = 3;
+  span.replaceWith(input);
+  input.focus();
+  if (!isCaption) input.select();
+
+  // stop click bubbling so we don't re-trigger
+  input.addEventListener('click', ev => ev.stopPropagation());
+
+  let saved = false;
+
+  async function save() {
+    if (saved) return;
+    saved = true;
+    const newVal = input.value.trim();
+
+    // Restore span
+    const newSpan = document.createElement('span');
+    newSpan.className = 'cell-text' + (isCaption ? ' caption-text' : '');
+    newSpan.dataset.field = field;
+    newSpan.dataset.id    = id;
+    newSpan.textContent   = newVal;
+    input.replaceWith(newSpan);
+
+    if (newVal === currentVal) return;
+
+    // Update local cache
+    const post = _posts.find(p => p.id === id);
+    if (post) post[field] = newVal;
+
+    const { error } = await _sb.from('craftivity_posts')
+      .update({ [field]: newVal, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    if (error) toast('Save failed', 'error');
+    else toast('Saved', 'success');
+  }
+
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !isCaption) { e.preventDefault(); save(); }
+    if (e.key === 'Escape') { saved = true; input.value = currentVal; save(); }
+  });
+}
+
+// ── Drag and Drop ─────────────────────────────────────────────────────────
+function onDragStart(e, id) {
+  _dragSrcId = id;
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => {
+    const row = document.querySelector(`tr[data-id="${id}"]`);
+    if (row) row.classList.add('dragging');
+  }, 0);
+}
+
+function onDragEnd(e) {
+  document.querySelectorAll('#queue-tbody tr').forEach(tr => {
+    tr.classList.remove('dragging', 'drag-over');
+  });
+  _dragSrcId = null;
+}
+
+function onDragOver(e, id) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  if (id === _dragSrcId) return;
+  document.querySelectorAll('#queue-tbody tr').forEach(tr => tr.classList.remove('drag-over'));
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  if (row) row.classList.add('drag-over');
+}
+
+async function onDrop(e, targetId) {
+  e.preventDefault();
+  document.querySelectorAll('#queue-tbody tr').forEach(tr => tr.classList.remove('drag-over', 'dragging'));
+  if (!_dragSrcId || _dragSrcId === targetId) return;
+
+  const srcIdx = _posts.findIndex(p => p.id === _dragSrcId);
+  const tgtIdx = _posts.findIndex(p => p.id === targetId);
+  if (srcIdx === -1 || tgtIdx === -1) return;
+
+  // Swap schedule_at values so dates stay on the Mon/Thu slots
+  const srcDate = _posts[srcIdx].schedule_at;
+  const tgtDate = _posts[tgtIdx].schedule_at;
+
+  _posts[srcIdx].schedule_at = tgtDate;
+  _posts[tgtIdx].schedule_at = srcDate;
+  _posts.sort((a, b) => new Date(a.schedule_at) - new Date(b.schedule_at));
+  renderTable();
+
+  const [r1, r2] = await Promise.all([
+    _sb.from('craftivity_posts').update({ schedule_at: tgtDate, updated_at: new Date().toISOString() }).eq('id', _dragSrcId),
+    _sb.from('craftivity_posts').update({ schedule_at: srcDate, updated_at: new Date().toISOString() }).eq('id', targetId),
+  ]);
+  if (r1.error || r2.error) { toast('Error saving order', 'error'); loadQueue(); }
+  else toast('Order updated', 'success');
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────
@@ -788,39 +734,32 @@ async function openModal(id) {
 }
 
 function renderModal(p) {
-  // Image
-  const wrap = document.getElementById('modal-image-wrap');
+  const wrap  = document.getElementById('modal-image-wrap');
   const noImg = document.getElementById('modal-no-image');
   const existing = wrap.querySelector('img');
   if (existing) existing.remove();
   if (p.image_url) {
     noImg.style.display = 'none';
     const img = document.createElement('img');
-    img.src = p.image_url; img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+    img.src = p.image_url;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
     wrap.insertBefore(img, wrap.firstChild);
   } else {
     noImg.style.display = 'flex';
   }
-
-  // Caption
-  document.getElementById('modal-caption').textContent  = p.caption || '';
+  document.getElementById('modal-caption').textContent  = p.caption  || '';
   document.getElementById('modal-hashtags').textContent = p.hashtags || '';
-
-  // Status badge
   document.getElementById('modal-status-row').innerHTML = `<span class="badge badge-${p.status}">${p.status}</span>`;
 
-  // Approve/Reject row (pending only)
   const approveRow = document.getElementById('modal-approve-row');
   approveRow.style.display = p.status === 'pending' ? '' : 'none';
   document.getElementById('modal-approve-btn').onclick = () => updateStatus(p.id, 'approved');
   document.getElementById('modal-reject-btn').onclick  = () => updateStatus(p.id, 'rejected');
 
-  // Upload Image button (show if no image and not rejected/posted)
-  const imgRow = document.getElementById('modal-image-row');
+  const imgRow    = document.getElementById('modal-image-row');
   const showUpload = !p.image_url && p.status !== 'rejected' && p.status !== 'posted';
   imgRow.style.display = showUpload ? '' : 'none';
 
-  // Show the AI-generated image prompt as a reference hint
   const hint = document.getElementById('modal-image-prompt-hint');
   if (showUpload && p.image_prompt) {
     hint.style.display = '';
@@ -829,11 +768,8 @@ function renderModal(p) {
     hint.style.display = 'none';
   }
 
-  // Post Now / Schedule (approved + has image)
   const publishRow = document.getElementById('modal-publish-row');
   publishRow.style.display = (p.status === 'approved' && p.image_url) ? '' : 'none';
-
-  // Hide schedule form
   document.getElementById('schedule-form').classList.remove('open');
 }
 
@@ -865,23 +801,16 @@ async function uploadImage(input) {
   const file    = input.files[0];
   const spinner = document.getElementById('modal-img-spinner');
   spinner.classList.add('show');
-
   try {
     const ext      = file.name.split('.').pop();
     const fileName = `${_modalPost.id}.${ext}`;
-
     const { error: uploadErr } = await _sb.storage
-      .from('craftivity-images')
-      .upload(fileName, file, { contentType: file.type, upsert: true });
+      .from('craftivity-images').upload(fileName, file, { contentType: file.type, upsert: true });
     if (uploadErr) throw new Error(uploadErr.message);
-
     const { data: { publicUrl } } = _sb.storage.from('craftivity-images').getPublicUrl(fileName);
-
     const { error: updateErr } = await _sb.from('craftivity_posts')
-      .update({ image_url: publicUrl, updated_at: new Date().toISOString() })
-      .eq('id', _modalPost.id);
+      .update({ image_url: publicUrl, updated_at: new Date().toISOString() }).eq('id', _modalPost.id);
     if (updateErr) throw new Error(updateErr.message);
-
     toast('Photo uploaded!', 'success');
     await reloadModalPost(_modalPost.id);
     loadQueue();
@@ -924,13 +853,10 @@ async function schedulePost() {
   if (!_modalPost) return;
   const dt = document.getElementById('schedule-datetime').value;
   if (!dt) { toast('Please pick a date and time', 'error'); return; }
-
   const scheduleAt = new Date(dt).toISOString();
-  const minTime    = new Date(Date.now() + 10 * 60 * 1000);
-  if (new Date(scheduleAt) < minTime) {
+  if (new Date(scheduleAt) < new Date(Date.now() + 10 * 60 * 1000)) {
     toast('Schedule time must be at least 10 minutes from now', 'error'); return;
   }
-
   try {
     const res = await fetch('/.netlify/functions/craftivity-publish-post', {
       method: 'POST',

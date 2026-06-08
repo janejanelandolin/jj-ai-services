@@ -179,17 +179,75 @@
     .btn-secondary:hover { border-color: var(--cyan); }
 
     /* ── Photo cell ── */
+    .photo-cell-wrap { position: relative; display: inline-block; }
     .photo-thumb {
-      width: 44px; height: 44px; border-radius: 6px; object-fit: cover;
+      width: 48px; height: 48px; border-radius: 6px; object-fit: cover;
       display: block; border: 1px solid rgba(10,15,44,.08); cursor: pointer;
     }
+    .photo-count-badge {
+      position: absolute; bottom: -4px; right: -4px;
+      background: var(--navy); color: white; font-size: .58rem; font-weight: 700;
+      border-radius: 50px; padding: .1rem .32rem; pointer-events: none;
+      border: 1.5px solid white; line-height: 1.4;
+    }
     .photo-upload-btn {
-      width: 44px; height: 44px; border-radius: 6px; border: 1.5px dashed rgba(10,15,44,.2);
+      width: 48px; height: 48px; border-radius: 6px; border: 1.5px dashed rgba(10,15,44,.2);
       background: var(--off); color: var(--muted); font-size: 1.1rem;
       display: flex; align-items: center; justify-content: center; cursor: pointer;
       transition: border-color .2s, color .2s;
     }
     .photo-upload-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    /* ── Carousel overlay ── */
+    .carousel-nav {
+      position: absolute; inset: 0; display: none;
+      align-items: center; justify-content: space-between;
+      padding: 0 .5rem; pointer-events: none;
+    }
+    .carousel-nav.visible { display: flex; }
+    .carousel-btn {
+      width: 32px; height: 32px; border-radius: 50%; border: none;
+      background: rgba(10,15,44,.5); color: white; font-size: 1.1rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      pointer-events: all; transition: background .15s; line-height: 1;
+    }
+    .carousel-btn:hover { background: rgba(10,15,44,.8); }
+    .carousel-btn:disabled { opacity: .2; cursor: default; }
+    .carousel-counter {
+      position: absolute; bottom: .55rem; left: 50%; transform: translateX(-50%);
+      background: rgba(10,15,44,.5); color: white; font-size: .7rem; font-weight: 600;
+      padding: .18rem .55rem; border-radius: 50px; pointer-events: none;
+    }
+
+    /* ── Thumbnail strip ── */
+    .thumb-strip {
+      display: flex; gap: .45rem; padding: .65rem .9rem;
+      overflow-x: auto; border-bottom: 1px solid rgba(10,15,44,.06);
+      align-items: center; background: var(--white);
+    }
+    .thumb-strip::-webkit-scrollbar { height: 4px; }
+    .thumb-strip::-webkit-scrollbar-thumb { background: rgba(10,15,44,.15); border-radius: 2px; }
+    .thumb-item { position: relative; flex-shrink: 0; cursor: pointer; }
+    .thumb-item.drag-over { outline: 2px dashed var(--cyan); border-radius: 8px; }
+    .thumb-img {
+      width: 58px; height: 58px; object-fit: cover; border-radius: 6px; display: block;
+      border: 2.5px solid transparent; transition: border-color .15s;
+    }
+    .thumb-img.active { border-color: var(--cyan); }
+    .thumb-remove {
+      position: absolute; top: -5px; right: -5px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #c62828; border: 1.5px solid white; color: white;
+      font-size: .65rem; cursor: pointer; line-height: 1;
+      display: flex; align-items: center; justify-content: center; font-weight: 700;
+    }
+    .thumb-add {
+      width: 58px; height: 58px; border-radius: 6px; border: 1.5px dashed rgba(10,15,44,.22);
+      background: var(--off); color: var(--muted); font-size: 1.4rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0; transition: border-color .15s, color .15s;
+    }
+    .thumb-add:hover { border-color: var(--cyan); color: var(--cyan); }
 
     /* ── Empty / loading ── */
     .empty-queue { text-align: center; padding: 3rem; color: var(--muted); font-style: italic; }
@@ -436,12 +494,22 @@
       <div class="ig-image-wrap" id="modal-image-wrap">
         <div class="ig-no-image" id="modal-no-image">
           <div class="ni-icon">🖼️</div>
-          <div class="ni-label">No image yet</div>
+          <div class="ni-label">No photos yet — add below</div>
         </div>
+        <!-- Carousel prev / next -->
+        <div class="carousel-nav" id="carousel-nav">
+          <button class="carousel-btn" id="carousel-prev" onclick="goSlide(-1)">‹</button>
+          <button class="carousel-btn" id="carousel-next" onclick="goSlide(1)">›</button>
+        </div>
+        <div class="carousel-counter" id="carousel-counter" style="display:none;"></div>
         <div class="ig-spinner" id="modal-img-spinner">
           <div class="ig-spinner-ring"></div>
         </div>
       </div>
+
+      <!-- Thumbnail strip (shown when ≥1 photo) -->
+      <div class="thumb-strip" id="thumb-strip" style="display:none;"></div>
+
       <div class="ig-caption-area">
         <div class="ig-caption" id="modal-caption"></div>
         <div class="ig-hashtags" id="modal-hashtags"></div>
@@ -453,9 +521,12 @@
         <button class="action-btn approve-btn" id="modal-approve-btn">✓ Approve</button>
         <button class="action-btn reject-btn"  id="modal-reject-btn">✕ Reject</button>
       </div>
-      <div class="modal-actions-row" id="modal-image-row" style="display:none;">
-        <button class="action-btn img-upload-btn" onclick="document.getElementById('modal-image-upload').click()">📷 Upload Photo</button>
-        <input type="file" id="modal-image-upload" accept="image/*" style="display:none;" onchange="uploadImage(this)" />
+      <!-- Always-visible photo upload row -->
+      <div class="modal-actions-row" id="modal-image-row">
+        <label class="action-btn img-upload-btn" style="cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;">
+          📷 Add Photo(s)
+          <input type="file" id="modal-image-upload" accept="image/*" multiple style="display:none;" onchange="uploadImages(this)" />
+        </label>
       </div>
       <div id="modal-image-prompt-hint" style="display:none;font-size:.75rem;color:var(--muted);background:var(--off);padding:.6rem .8rem;border-radius:8px;line-height:1.5;"></div>
       <div class="modal-actions-row" id="modal-publish-row" style="display:none;">
@@ -481,9 +552,31 @@ const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let _clientId   = null;
 let _authToken  = null;
 let _brandProfile = {};
-let _modalPost  = null;
-let _posts      = [];   // local cache for drag/edit
-let _dragSrcId  = null;
+let _modalPost    = null;
+let _modalImages  = [];   // array of image URLs for current modal post
+let _modalSlide   = 0;    // current carousel index
+let _thumbDragSrc = null; // index being dragged in thumbnail strip
+let _posts        = [];   // local cache for drag/edit
+let _dragSrcId    = null;
+
+// ── Image helpers ─────────────────────────────────────────────────────────
+function getImages(post) {
+  const raw = post?.image_url || '';
+  if (!raw) return [];
+  if (raw.startsWith('[')) { try { return JSON.parse(raw); } catch(e) {} }
+  return [raw];
+}
+async function saveImages(postId, urls) {
+  const value = urls.length === 0 ? null
+    : urls.length === 1 ? urls[0]
+    : JSON.stringify(urls);
+  const post = _posts.find(p => p.id === postId);
+  if (post) post.image_url = value;
+  const { error } = await _sb.from('craftivity_posts')
+    .update({ image_url: value, updated_at: new Date().toISOString() }).eq('id', postId);
+  if (error) toast('Failed to save photos', 'error');
+  return !error;
+}
 
 // ── Auth ──────────────────────────────────────────────────────────────────
 _sb.auth.getSession().then(({ data: { session } }) => {
@@ -605,13 +698,17 @@ function renderTable() {
         <span class="cell-text" style="font-size:.83rem;color:var(--muted);">${dateFmt}</span>
       </td>
       <td>
-        ${p.image_url
-          ? `<img class="photo-thumb" src="${escHtml(p.image_url)}" alt="Post photo" onclick="openModal('${p.id}')" />`
-          : `<label class="photo-upload-btn" title="Upload photo">
-               📷
-               <input type="file" accept="image/*" style="display:none;" onchange="uploadRowImage('${p.id}',this)" />
-             </label>`
-        }
+        ${(() => {
+          const imgs = getImages(p);
+          if (imgs.length === 0) return `
+            <label class="photo-upload-btn" title="Upload photo">
+              📷<input type="file" accept="image/*" multiple style="display:none;" onchange="uploadRowImage('${p.id}',this)" />
+            </label>`;
+          return `<div class="photo-cell-wrap" onclick="openModal('${p.id}')" style="cursor:pointer;">
+            <img class="photo-thumb" src="${escHtml(imgs[0])}" alt="Post photo" />
+            ${imgs.length > 1 ? `<span class="photo-count-badge">+${imgs.length - 1}</span>` : ''}
+          </div>`;
+        })()}
       </td>
       <td style="white-space:nowrap;font-size:.8rem;color:var(--muted);">${escHtml(postType)}</td>
       <td class="editable" style="min-width:160px;max-width:220px;" onclick="startEdit(event,'${p.id}','topic')">
@@ -686,33 +783,30 @@ function startDateEdit(e, id, currentScheduleAt) {
   input.addEventListener('change', save);
 }
 
-// ── Row photo upload ──────────────────────────────────────────────────────
+// ── Row quick-upload (📷 button in table) ────────────────────────────────
 async function uploadRowImage(id, input) {
-  const file = input.files[0];
-  if (!file) return;
-  const label = input.closest('label');
-  if (label) label.textContent = '⏳';
+  if (!input.files.length) return;
+  const files = Array.from(input.files);
+  const post  = _posts.find(p => p.id === id);
+  const imgs  = getImages(post);
 
   try {
-    const ext      = file.name.split('.').pop();
-    const fileName = `${id}.${ext}`;
-    const { error: uploadErr } = await _sb.storage
-      .from('craftivity-images').upload(fileName, file, { contentType: file.type, upsert: true });
-    if (uploadErr) throw new Error(uploadErr.message);
-
-    const { data: { publicUrl } } = _sb.storage.from('craftivity-images').getPublicUrl(fileName);
-    const { error: updateErr } = await _sb.from('craftivity_posts')
-      .update({ image_url: publicUrl, updated_at: new Date().toISOString() }).eq('id', id);
-    if (updateErr) throw new Error(updateErr.message);
-
-    const post = _posts.find(p => p.id === id);
-    if (post) post.image_url = publicUrl;
+    for (const file of files) {
+      const ext      = file.name.split('.').pop();
+      const fileName = `${id}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadErr } = await _sb.storage
+        .from('craftivity-images').upload(fileName, file, { contentType: file.type, upsert: false });
+      if (uploadErr) throw new Error(uploadErr.message);
+      const { data: { publicUrl } } = _sb.storage.from('craftivity-images').getPublicUrl(fileName);
+      imgs.push(publicUrl);
+    }
+    await saveImages(id, imgs);
     renderTable();
-    toast('Photo uploaded!', 'success');
+    toast(`${files.length} photo${files.length > 1 ? 's' : ''} uploaded!`, 'success');
   } catch (err) {
     toast('Upload failed: ' + err.message, 'error');
-    renderTable();
   }
+  input.value = '';
 }
 
 // ── In-place editing ──────────────────────────────────────────────────────
@@ -824,25 +918,14 @@ async function onDrop(e, targetId) {
 async function openModal(id) {
   const { data } = await _sb.from('craftivity_posts').select('*').eq('id', id).single();
   if (!data) return;
-  _modalPost = data;
+  _modalPost   = data;
+  _modalImages = getImages(data);
+  _modalSlide  = 0;
   renderModal(data);
   document.getElementById('post-modal').classList.add('open');
 }
 
 function renderModal(p) {
-  const wrap  = document.getElementById('modal-image-wrap');
-  const noImg = document.getElementById('modal-no-image');
-  const existing = wrap.querySelector('img');
-  if (existing) existing.remove();
-  if (p.image_url) {
-    noImg.style.display = 'none';
-    const img = document.createElement('img');
-    img.src = p.image_url;
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-    wrap.insertBefore(img, wrap.firstChild);
-  } else {
-    noImg.style.display = 'flex';
-  }
   document.getElementById('modal-caption').textContent  = p.caption  || '';
   document.getElementById('modal-hashtags').textContent = p.hashtags || '';
   document.getElementById('modal-status-row').innerHTML = `<span class="badge badge-${p.status}">${p.status}</span>`;
@@ -852,12 +935,9 @@ function renderModal(p) {
   document.getElementById('modal-approve-btn').onclick = () => updateStatus(p.id, 'approved');
   document.getElementById('modal-reject-btn').onclick  = () => updateStatus(p.id, 'rejected');
 
-  const imgRow    = document.getElementById('modal-image-row');
-  const showUpload = !p.image_url && p.status !== 'rejected' && p.status !== 'posted';
-  imgRow.style.display = showUpload ? '' : 'none';
-
+  // Show image prompt hint if no photos yet
   const hint = document.getElementById('modal-image-prompt-hint');
-  if (showUpload && p.image_prompt) {
+  if (_modalImages.length === 0 && p.image_prompt) {
     hint.style.display = '';
     hint.textContent = '💡 Photo idea: ' + p.image_prompt;
   } else {
@@ -865,13 +945,149 @@ function renderModal(p) {
   }
 
   const publishRow = document.getElementById('modal-publish-row');
-  publishRow.style.display = (p.status === 'approved' && p.image_url) ? '' : 'none';
+  publishRow.style.display = (p.status === 'approved' && _modalImages.length > 0) ? '' : 'none';
   document.getElementById('schedule-form').classList.remove('open');
+
+  renderCarousel();
+}
+
+// ── Carousel ──────────────────────────────────────────────────────────────
+function renderCarousel() {
+  const imgs  = _modalImages;
+  const idx   = Math.max(0, Math.min(_modalSlide, imgs.length - 1));
+  _modalSlide = idx;
+
+  const wrap    = document.getElementById('modal-image-wrap');
+  const noImg   = document.getElementById('modal-no-image');
+  const nav     = document.getElementById('carousel-nav');
+  const counter = document.getElementById('carousel-counter');
+
+  // Remove previous slide img
+  wrap.querySelectorAll('img.slide-img').forEach(el => el.remove());
+
+  if (imgs.length === 0) {
+    noImg.style.display = 'flex';
+    nav.classList.remove('visible');
+    counter.style.display = 'none';
+  } else {
+    noImg.style.display = 'none';
+    const img = document.createElement('img');
+    img.className = 'slide-img';
+    img.src = imgs[idx];
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+    wrap.insertBefore(img, wrap.firstChild);
+
+    // Nav arrows — only when >1 photo
+    if (imgs.length > 1) {
+      nav.classList.add('visible');
+      document.getElementById('carousel-prev').disabled = idx === 0;
+      document.getElementById('carousel-next').disabled = idx === imgs.length - 1;
+      counter.style.display = '';
+      counter.textContent   = `${idx + 1} / ${imgs.length}`;
+    } else {
+      nav.classList.remove('visible');
+      counter.style.display = 'none';
+    }
+  }
+
+  renderThumbStrip();
+}
+
+function goSlide(dir) {
+  _modalSlide = Math.max(0, Math.min(_modalSlide + dir, _modalImages.length - 1));
+  renderCarousel();
+}
+
+function renderThumbStrip() {
+  const strip = document.getElementById('thumb-strip');
+  const imgs  = _modalImages;
+
+  if (imgs.length === 0) { strip.style.display = 'none'; return; }
+  strip.style.display = 'flex';
+
+  strip.innerHTML = imgs.map((url, i) => `
+    <div class="thumb-item" draggable="true"
+      ondragstart="thumbDragStart(${i})"
+      ondragover="thumbDragOver(event,${i})"
+      ondrop="thumbDrop(event,${i})"
+      ondragleave="this.classList.remove('drag-over')">
+      <img class="thumb-img ${i === _modalSlide ? 'active' : ''}"
+        src="${escHtml(url)}" onclick="goToThumb(${i})" />
+      <button class="thumb-remove" onclick="removePhoto(${i})" title="Remove">×</button>
+    </div>`).join('') + `
+    <label class="thumb-add" title="Add more photos">
+      +<input type="file" accept="image/*" multiple style="display:none;" onchange="uploadImages(this)" />
+    </label>`;
+}
+
+function goToThumb(i) { _modalSlide = i; renderCarousel(); }
+
+// ── Remove a photo ────────────────────────────────────────────────────────
+async function removePhoto(idx) {
+  if (!_modalPost) return;
+  _modalImages.splice(idx, 1);
+  _modalSlide = Math.max(0, Math.min(_modalSlide, _modalImages.length - 1));
+  renderCarousel();
+  renderTable();
+  await saveImages(_modalPost.id, _modalImages);
+  toast('Photo removed', '');
+}
+
+// ── Thumbnail drag-to-reorder ─────────────────────────────────────────────
+function thumbDragStart(i) { _thumbDragSrc = i; }
+function thumbDragOver(e, i) {
+  e.preventDefault();
+  document.querySelectorAll('.thumb-item').forEach(el => el.classList.remove('drag-over'));
+  e.currentTarget.classList.add('drag-over');
+}
+async function thumbDrop(e, targetIdx) {
+  e.preventDefault();
+  document.querySelectorAll('.thumb-item').forEach(el => el.classList.remove('drag-over'));
+  if (_thumbDragSrc === null || _thumbDragSrc === targetIdx) return;
+  const [moved] = _modalImages.splice(_thumbDragSrc, 1);
+  _modalImages.splice(targetIdx, 0, moved);
+  _modalSlide = targetIdx;
+  _thumbDragSrc = null;
+  renderCarousel();
+  renderTable();
+  await saveImages(_modalPost.id, _modalImages);
+  toast('Order saved', 'success');
+}
+
+// ── Upload photos (modal — multiple files) ────────────────────────────────
+async function uploadImages(input) {
+  if (!_modalPost || !input.files.length) return;
+  const files   = Array.from(input.files);
+  const spinner = document.getElementById('modal-img-spinner');
+  spinner.classList.add('show');
+
+  try {
+    for (const file of files) {
+      const ext      = file.name.split('.').pop();
+      const fileName = `${_modalPost.id}-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadErr } = await _sb.storage
+        .from('craftivity-images').upload(fileName, file, { contentType: file.type, upsert: false });
+      if (uploadErr) throw new Error(uploadErr.message);
+      const { data: { publicUrl } } = _sb.storage.from('craftivity-images').getPublicUrl(fileName);
+      _modalImages.push(publicUrl);
+    }
+    // Go to last newly added photo
+    _modalSlide = _modalImages.length - 1;
+    renderCarousel();
+    renderTable();
+    await saveImages(_modalPost.id, _modalImages);
+    toast(`${files.length} photo${files.length > 1 ? 's' : ''} added!`, 'success');
+  } catch (err) {
+    toast('Upload failed: ' + err.message, 'error');
+  } finally {
+    spinner.classList.remove('show');
+    input.value = '';
+  }
 }
 
 function closeModal() {
   document.getElementById('post-modal').classList.remove('open');
-  _modalPost = null;
+  _modalPost = null; _modalImages = []; _modalSlide = 0;
 }
 document.getElementById('post-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
@@ -888,34 +1104,7 @@ async function updateStatus(id, status) {
 
 async function reloadModalPost(id) {
   const { data } = await _sb.from('craftivity_posts').select('*').eq('id', id).single();
-  if (data) { _modalPost = data; renderModal(data); }
-}
-
-// ── Upload Image ──────────────────────────────────────────────────────────
-async function uploadImage(input) {
-  if (!_modalPost || !input.files[0]) return;
-  const file    = input.files[0];
-  const spinner = document.getElementById('modal-img-spinner');
-  spinner.classList.add('show');
-  try {
-    const ext      = file.name.split('.').pop();
-    const fileName = `${_modalPost.id}.${ext}`;
-    const { error: uploadErr } = await _sb.storage
-      .from('craftivity-images').upload(fileName, file, { contentType: file.type, upsert: true });
-    if (uploadErr) throw new Error(uploadErr.message);
-    const { data: { publicUrl } } = _sb.storage.from('craftivity-images').getPublicUrl(fileName);
-    const { error: updateErr } = await _sb.from('craftivity_posts')
-      .update({ image_url: publicUrl, updated_at: new Date().toISOString() }).eq('id', _modalPost.id);
-    if (updateErr) throw new Error(updateErr.message);
-    toast('Photo uploaded!', 'success');
-    await reloadModalPost(_modalPost.id);
-    loadQueue();
-  } catch (e) {
-    toast('Upload failed: ' + e.message, 'error');
-  } finally {
-    spinner.classList.remove('show');
-    input.value = '';
-  }
+  if (data) { _modalPost = data; _modalImages = getImages(data); renderModal(data); }
 }
 
 // ── Publish ───────────────────────────────────────────────────────────────

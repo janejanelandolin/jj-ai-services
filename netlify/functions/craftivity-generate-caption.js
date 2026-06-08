@@ -5,7 +5,7 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const { createClient } = require('@supabase/supabase-js');
 
-const BOOKING_PREFIX = 'BOOK NOW: https://craftivity.co/classes\n\n';
+const BOOKING_SUFFIX = '\n\nBOOK NOW: https://craftivity.co/classes';
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
@@ -65,7 +65,7 @@ Return ONLY the caption text — no preamble, no quotes.`;
       messages:   [{ role: 'user', content }],
     });
 
-    const caption = BOOKING_PREFIX + message.content[0].text.trim();
+    const caption = message.content[0].text.trim() + BOOKING_SUFFIX;
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },

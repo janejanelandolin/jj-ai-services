@@ -282,6 +282,24 @@
     .ig-caption-area { padding: 1rem 1.2rem; border-bottom: 1px solid rgba(10,15,44,.06); }
     .ig-caption { font-size: .88rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; }
     .ig-hashtags { margin-top: .4rem; font-size: .82rem; color: var(--teal); }
+    .ig-edit-caption {
+      width: 100%; padding: .55rem .7rem; border: 1.5px solid rgba(10,15,44,.15); border-radius: 8px;
+      font-size: .88rem; font-family: inherit; color: var(--text); line-height: 1.6;
+      resize: vertical; outline: none; min-height: 90px; transition: border-color .2s;
+    }
+    .ig-edit-caption:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,188,212,.1); }
+    .ig-edit-hashtags {
+      width: 100%; padding: .45rem .7rem; border: 1.5px solid rgba(10,15,44,.15); border-radius: 8px;
+      font-size: .82rem; font-family: inherit; color: var(--teal); outline: none;
+      transition: border-color .2s; margin-top: .5rem;
+    }
+    .ig-edit-hashtags:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,188,212,.1); }
+    .rejected-notice {
+      font-size: .75rem; color: #c62828; background: #fff5f5; border: 1px solid #ffc8c8;
+      border-radius: 8px; padding: .5rem .8rem; margin-bottom: .5rem;
+    }
+    .resubmit-btn { border-color: var(--cyan); color: var(--cyan); }
+    .resubmit-btn:hover { background: var(--cyan); color: var(--white); }
     .modal-actions { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: .7rem; }
     .modal-actions-row { display: flex; gap: .6rem; flex-wrap: wrap; }
     .action-btn {
@@ -510,7 +528,7 @@
       <!-- Thumbnail strip (shown when ≥1 photo) -->
       <div class="thumb-strip" id="thumb-strip" style="display:none;"></div>
 
-      <div class="ig-caption-area">
+      <div class="ig-caption-area" id="modal-caption-area">
         <div class="ig-caption" id="modal-caption"></div>
         <div class="ig-hashtags" id="modal-hashtags"></div>
       </div>
@@ -520,6 +538,14 @@
       <div class="modal-actions-row" id="modal-approve-row" style="display:none;">
         <button class="action-btn approve-btn" id="modal-approve-btn">✓ Approve</button>
         <button class="action-btn reject-btn"  id="modal-reject-btn">✕ Reject</button>
+      </div>
+      <!-- Edit + resubmit row (rejected posts only) -->
+      <div id="modal-rejected-row" style="display:none;">
+        <p class="rejected-notice">This post was rejected. Edit the caption or photos below, then resubmit.</p>
+        <div class="modal-actions-row">
+          <button class="action-btn resubmit-btn" onclick="saveAndResubmit()">✏️ Save &amp; Resubmit</button>
+          <button class="action-btn" style="border-color:rgba(10,15,44,.18);color:var(--muted);" onclick="cancelEdit()">Cancel</button>
+        </div>
       </div>
       <!-- Always-visible photo upload row -->
       <div class="modal-actions-row" id="modal-image-row">
@@ -926,12 +952,26 @@ async function openModal(id) {
 }
 
 function renderModal(p) {
-  document.getElementById('modal-caption').textContent  = p.caption  || '';
-  document.getElementById('modal-hashtags').textContent = p.hashtags || '';
   document.getElementById('modal-status-row').innerHTML = `<span class="badge badge-${p.status}">${p.status}</span>`;
 
-  const approveRow = document.getElementById('modal-approve-row');
-  approveRow.style.display = p.status === 'pending' ? '' : 'none';
+  const isRejected = p.status === 'rejected';
+
+  // Caption area: editable textarea for rejected posts, plain div otherwise
+  const captionArea = document.getElementById('modal-caption-area');
+  if (isRejected) {
+    captionArea.innerHTML = `
+      <textarea class="ig-edit-caption" id="modal-caption-edit" rows="5">${escHtml(p.caption || '')}</textarea>
+      <input class="ig-edit-hashtags" id="modal-hashtags-edit" type="text" placeholder="#hashtags" value="${escHtml(p.hashtags || '')}" />`;
+  } else {
+    captionArea.innerHTML = `
+      <div class="ig-caption" id="modal-caption"></div>
+      <div class="ig-hashtags" id="modal-hashtags"></div>`;
+    document.getElementById('modal-caption').textContent  = p.caption  || '';
+    document.getElementById('modal-hashtags').textContent = p.hashtags || '';
+  }
+
+  document.getElementById('modal-approve-row').style.display  = p.status === 'pending' ? '' : 'none';
+  document.getElementById('modal-rejected-row').style.display = isRejected ? '' : 'none';
   document.getElementById('modal-approve-btn').onclick = () => updateStatus(p.id, 'approved');
   document.getElementById('modal-reject-btn').onclick  = () => updateStatus(p.id, 'rejected');
 
@@ -1105,6 +1145,38 @@ async function updateStatus(id, status) {
 async function reloadModalPost(id) {
   const { data } = await _sb.from('craftivity_posts').select('*').eq('id', id).single();
   if (data) { _modalPost = data; _modalImages = getImages(data); renderModal(data); }
+}
+
+// ── Rejected post — edit & resubmit ──────────────────────────────────────
+async function saveAndResubmit() {
+  if (!_modalPost) return;
+  const captionEl  = document.getElementById('modal-caption-edit');
+  const hashtagsEl = document.getElementById('modal-hashtags-edit');
+  if (!captionEl) return;
+
+  const newCaption  = captionEl.value.trim();
+  const newHashtags = hashtagsEl ? hashtagsEl.value.trim() : (_modalPost.hashtags || '');
+
+  const { error } = await _sb.from('craftivity_posts').update({
+    caption:    newCaption,
+    hashtags:   newHashtags,
+    status:     'pending',
+    updated_at: new Date().toISOString(),
+  }).eq('id', _modalPost.id);
+
+  if (error) { toast('Failed to save', 'error'); return; }
+
+  // Update local cache
+  const post = _posts.find(p => p.id === _modalPost.id);
+  if (post) { post.caption = newCaption; post.hashtags = newHashtags; post.status = 'pending'; }
+
+  toast('Post updated & resubmitted for review ✓', 'success');
+  await reloadModalPost(_modalPost.id);
+  renderTable();
+}
+
+function cancelEdit() {
+  if (_modalPost) reloadModalPost(_modalPost.id);
 }
 
 // ── Publish ───────────────────────────────────────────────────────────────

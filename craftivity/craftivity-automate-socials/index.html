@@ -559,8 +559,8 @@
       </div>
       <div id="modal-image-prompt-hint" style="display:none;font-size:.75rem;color:var(--muted);background:var(--off);padding:.6rem .8rem;border-radius:8px;line-height:1.5;"></div>
       <div class="modal-actions-row" id="modal-publish-row" style="display:none;">
-        <button class="action-btn post-now-btn" id="modal-post-now-btn" onclick="postNow()">▶ Post Now</button>
         <button class="action-btn schedule-btn" onclick="toggleScheduleForm()">🗓 Schedule</button>
+        <button class="action-btn reject-btn" id="modal-unapprove-btn">✕ Reject</button>
       </div>
       <div class="schedule-form" id="schedule-form">
         <label>Pick a date &amp; time to publish</label>
@@ -754,6 +754,8 @@ function renderTable() {
           ${p.status === 'pending' ? `
             <button class="tbl-btn tbl-approve" onclick="quickStatus('${p.id}','approved')">✓</button>
             <button class="tbl-btn tbl-reject"  onclick="quickStatus('${p.id}','rejected')">✕</button>
+          ` : p.status === 'approved' ? `
+            <button class="tbl-btn tbl-reject"  onclick="quickStatus('${p.id}','pending')" title="Reset to pending">✕</button>
           ` : ''}
           <button class="tbl-btn tbl-generate" id="gen-btn-${p.id}" onclick="generateCaption('${p.id}')">✨ Generate Caption</button>
           <button class="tbl-btn tbl-view" onclick="openModal('${p.id}')">View</button>
@@ -772,7 +774,9 @@ async function quickStatus(id, status) {
   const post = _posts.find(p => p.id === id);
   if (post) post.status = status;
   renderTable();
-  toast(status === 'approved' ? 'Approved ✓' : 'Rejected', status === 'approved' ? 'success' : '');
+  const msg  = status === 'approved' ? 'Approved ✓' : status === 'pending' ? 'Reset to pending' : 'Rejected';
+  const type = status === 'approved' ? 'success' : '';
+  toast(msg, type);
 }
 
 // ── Date editing ─────────────────────────────────────────────────────────
@@ -1025,8 +1029,9 @@ function renderModal(p) {
 
   document.getElementById('modal-approve-row').style.display  = p.status === 'pending' ? '' : 'none';
   document.getElementById('modal-rejected-row').style.display = isRejected ? '' : 'none';
-  document.getElementById('modal-approve-btn').onclick = () => updateStatus(p.id, 'approved');
-  document.getElementById('modal-reject-btn').onclick  = () => updateStatus(p.id, 'rejected');
+  document.getElementById('modal-approve-btn').onclick  = () => updateStatus(p.id, 'approved');
+  document.getElementById('modal-reject-btn').onclick   = () => updateStatus(p.id, 'rejected');
+  document.getElementById('modal-unapprove-btn').onclick = () => updateStatus(p.id, 'pending');
 
   // Show image prompt hint if no photos yet
   const hint = document.getElementById('modal-image-prompt-hint');
@@ -1037,8 +1042,9 @@ function renderModal(p) {
     hint.style.display = 'none';
   }
 
+  // Approved posts show Schedule + Reject (to reset workflow)
   const publishRow = document.getElementById('modal-publish-row');
-  publishRow.style.display = (p.status === 'approved' && _modalImages.length > 0) ? '' : 'none';
+  publishRow.style.display = p.status === 'approved' ? '' : 'none';
   document.getElementById('schedule-form').classList.remove('open');
 
   renderCarousel();

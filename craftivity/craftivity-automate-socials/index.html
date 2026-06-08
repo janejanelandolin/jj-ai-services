@@ -739,9 +739,11 @@ function renderTable() {
           </div>`;
         })()}
       </td>
-      <td style="white-space:nowrap;font-size:.8rem;color:var(--muted);">${escHtml(postType)}</td>
+      <td class="editable" style="white-space:nowrap;font-size:.8rem;" onclick="startEditPostType(event,'${p.id}')">
+        <span class="cell-text" data-field="posttype" data-id="${p.id}">${escHtml(postType)}</span>
+      </td>
       <td class="editable" style="min-width:160px;max-width:220px;" onclick="startEdit(event,'${p.id}','topic')">
-        <span class="cell-text" data-field="topic" data-id="${p.id}">${escHtml(p.topic || '')}</span>
+        <span class="cell-text" data-field="topic" data-id="${p.id}">${escHtml((p.topic || '').split(' — ').slice(1).join(' — ') || p.topic || '')}</span>
       </td>
       <td class="editable" style="min-width:200px;max-width:300px;" onclick="startEdit(event,'${p.id}','caption')">
         <span class="cell-text caption-text" data-field="caption" data-id="${p.id}">${escHtml(p.caption || '')}</span>
@@ -753,7 +755,7 @@ function renderTable() {
             <button class="tbl-btn tbl-approve" onclick="quickStatus('${p.id}','approved')">✓</button>
             <button class="tbl-btn tbl-reject"  onclick="quickStatus('${p.id}','rejected')">✕</button>
           ` : ''}
-          <button class="tbl-btn tbl-generate" id="gen-btn-${p.id}" onclick="generateCaption('${p.id}')">✨ Generate</button>
+          <button class="tbl-btn tbl-generate" id="gen-btn-${p.id}" onclick="generateCaption('${p.id}')">✨ Generate Caption</button>
           <button class="tbl-btn tbl-view" onclick="openModal('${p.id}')">View</button>
         </div>
       </td>
@@ -837,6 +839,53 @@ async function uploadRowImage(id, input) {
     toast('Upload failed: ' + err.message, 'error');
   }
   input.value = '';
+}
+
+// ── Post Type in-place edit ───────────────────────────────────────────────
+function startEditPostType(e, id) {
+  const span = e.currentTarget.querySelector(`[data-field="posttype"][data-id="${id}"]`);
+  if (!span) return;
+  const post = _posts.find(p => p.id === id);
+  const currentType  = (post?.topic || '').split(' — ')[0] || '';
+  const craftPart    = (post?.topic || '').split(' — ').slice(1).join(' — ');
+
+  const input = document.createElement('input');
+  input.className = 'cell-input';
+  input.value = currentType;
+  input.style.width = '150px';
+  span.replaceWith(input);
+  input.focus();
+  input.select();
+  input.addEventListener('click', ev => ev.stopPropagation());
+
+  let saved = false;
+  async function save() {
+    if (saved) return;
+    saved = true;
+    const newType = input.value.trim() || currentType;
+    const newTopic = craftPart ? `${newType} — ${craftPart}` : newType;
+
+    const newSpan = document.createElement('span');
+    newSpan.className = 'cell-text';
+    newSpan.dataset.field = 'posttype';
+    newSpan.dataset.id    = id;
+    newSpan.textContent   = newType;
+    input.replaceWith(newSpan);
+
+    if (newType === currentType) return;
+    if (post) post.topic = newTopic;
+
+    const { error } = await _sb.from('craftivity_posts')
+      .update({ topic: newTopic, updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) toast('Save failed', 'error');
+    else toast('Post type saved', 'success');
+  }
+
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); save(); }
+    if (e.key === 'Escape') { saved = true; input.value = currentType; save(); }
+  });
 }
 
 // ── In-place editing ──────────────────────────────────────────────────────
@@ -1268,7 +1317,7 @@ async function generateCaption(postId) {
     toast('Caption generated! ✨', 'success');
   } catch (err) {
     toast('Generation failed: ' + err.message, 'error');
-    if (btn) { btn.disabled = false; btn.textContent = '✨ Generate'; }
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Generate Caption'; }
   }
 }
 

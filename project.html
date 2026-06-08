@@ -191,6 +191,44 @@
     .toast.error   { background: #c62828; }
 
     .notes-empty { color: var(--muted); font-size: .9rem; font-style: italic; cursor: text; }
+
+    /* ── Comments ── */
+    .comments-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.2rem; }
+    .comment {
+      display: flex; gap: .8rem; align-items: flex-start;
+    }
+    .comment-avatar {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      display: flex; align-items: center; justify-content: center;
+      font-size: .82rem; font-weight: 700; color: var(--white);
+    }
+    .comment-body { flex: 1; min-width: 0; }
+    .comment-meta {
+      display: flex; align-items: baseline; gap: .5rem; margin-bottom: .25rem;
+    }
+    .comment-author { font-size: .82rem; font-weight: 700; color: var(--navy); }
+    .comment-time   { font-size: .72rem; color: var(--muted); }
+    .comment-text   { font-size: .9rem; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
+
+    .comment-form { display: flex; gap: .6rem; align-items: flex-end; }
+    .comment-input {
+      flex: 1; padding: .65rem .85rem; border: 1.5px solid rgba(10,15,44,.14);
+      border-radius: 10px; font-size: .9rem; font-family: inherit; color: var(--text);
+      outline: none; resize: none; transition: border-color .2s, box-shadow .2s;
+      line-height: 1.5; overflow-y: hidden;
+    }
+    .comment-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,188,212,.1); }
+    .comment-submit {
+      padding: .65rem 1.3rem; border: none; border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); font-weight: 700; font-size: .88rem;
+      cursor: pointer; transition: opacity .2s; white-space: nowrap; flex-shrink: 0;
+    }
+    .comment-submit:hover { opacity: .88; }
+    .comment-submit:disabled { opacity: .5; cursor: not-allowed; }
+    .comments-empty { color: var(--muted); font-size: .9rem; font-style: italic; margin-bottom: 1rem; }
+
     .loading { text-align: center; padding: 5rem 2rem; color: var(--muted); }
     footer { text-align: center; padding: 2rem 5%; font-size: .82rem; color: var(--muted); border-top: 1px solid rgba(10,15,44,.07); }
     footer a { color: var(--teal); text-decoration: none; }
@@ -273,6 +311,7 @@ async function loadProject(clientId) {
   }
   _project = data;
   renderProject();
+  loadComments();
 }
 
 // ── Render ─────────────────────────────────────────────────────────────
@@ -352,6 +391,22 @@ function renderProject() {
              title="Click to edit">
           ${p.notes ? esc(p.notes) : '<span class="notes-empty">Click to add notes…</span>'}
           <span class="edit-hint">✏️</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">Comments</div>
+        </div>
+        <div id="comments-list" class="comments-list">
+          <p class="comments-empty">Loading comments…</p>
+        </div>
+        <div class="comment-form">
+          <textarea id="comment-input" class="comment-input" rows="1"
+            placeholder="Add a comment…"
+            oninput="autoResize(this)"
+            onkeydown="commentKeydown(event)"></textarea>
+          <button class="comment-submit" id="comment-submit" onclick="postComment()">Post</button>
         </div>
       </div>
     </main>`;
@@ -576,6 +631,77 @@ function toast(msg, type = '') {
   setTimeout(() => el.className = 'toast', 2500);
 }
 
+// ── Comments ───────────────────────────────────────────────────────────
+async function loadComments() {
+  const res = await fetch(`/.netlify/functions/project-comments?project_id=${projectId}`, {
+    headers: { 'Authorization': `Bearer ${_authToken}` },
+  });
+  if (!res.ok) { document.getElementById('comments-list').innerHTML = ''; return; }
+  const comments = await res.json();
+  renderComments(comments);
+}
+
+function renderComments(comments) {
+  const list = document.getElementById('comments-list');
+  if (!comments.length) {
+    list.innerHTML = '<p class="comments-empty">No comments yet — be the first to add one.</p>';
+    return;
+  }
+  list.innerHTML = comments.map(c => {
+    const initials = (c.user_name || 'C').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const dt = new Date(c.created_at);
+    const dateStr = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const timeStr = dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    return `<div class="comment">
+      <div class="comment-avatar">${initials}</div>
+      <div class="comment-body">
+        <div class="comment-meta">
+          <span class="comment-author">${esc(c.user_name)}</span>
+          <span class="comment-time">${dateStr} at ${timeStr}</span>
+        </div>
+        <div class="comment-text">${esc(c.text)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  // Scroll to bottom of comments
+  list.scrollTop = list.scrollHeight;
+}
+
+async function postComment() {
+  const input = document.getElementById('comment-input');
+  const btn   = document.getElementById('comment-submit');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  btn.disabled = true;
+  const res = await fetch('/.netlify/functions/project-comments', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
+    body:    JSON.stringify({ project_id: projectId, text }),
+  });
+
+  btn.disabled = false;
+  if (!res.ok) { toast('Failed to post comment', 'error'); return; }
+
+  input.value = '';
+  input.style.height = '';
+  await loadComments();
+}
+
+function commentKeydown(e) {
+  // Cmd/Ctrl + Enter submits
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
+    postComment();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }

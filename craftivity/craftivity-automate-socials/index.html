@@ -145,8 +145,11 @@
     .tbl-approve:hover { background: var(--teal); color: var(--white); }
     .tbl-reject  { border-color: rgba(10,15,44,.18); color: var(--muted); }
     .tbl-reject:hover  { border-color: #c62828; color: #c62828; }
-    .tbl-view    { border-color: rgba(0,188,212,.4); color: var(--cyan); }
-    .tbl-view:hover    { background: rgba(0,188,212,.1); }
+    .tbl-view     { border-color: rgba(0,188,212,.4); color: var(--cyan); }
+    .tbl-view:hover     { background: rgba(0,188,212,.1); }
+    .tbl-generate { border-color: #6d28d9; color: #6d28d9; }
+    .tbl-generate:hover { background: #6d28d9; color: var(--white); }
+    .tbl-generate:disabled { opacity: .45; cursor: not-allowed; }
 
     /* ── Forms (settings) ── */
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
@@ -750,6 +753,7 @@ function renderTable() {
             <button class="tbl-btn tbl-approve" onclick="quickStatus('${p.id}','approved')">✓</button>
             <button class="tbl-btn tbl-reject"  onclick="quickStatus('${p.id}','rejected')">✕</button>
           ` : ''}
+          <button class="tbl-btn tbl-generate" id="gen-btn-${p.id}" onclick="generateCaption('${p.id}')">✨ Generate</button>
           <button class="tbl-btn tbl-view" onclick="openModal('${p.id}')">View</button>
         </div>
       </td>
@@ -1228,6 +1232,43 @@ async function schedulePost() {
     toggleScheduleForm();
   } catch (e) {
     toast('Scheduling failed: ' + e.message, 'error');
+  }
+}
+
+// ── AI Caption Generator ─────────────────────────────────────────────────
+async function generateCaption(postId) {
+  const post = _posts.find(p => p.id === postId);
+  if (!post) return;
+
+  const btn = document.getElementById(`gen-btn-${postId}`);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Generating…'; }
+
+  try {
+    const imageUrls = getImages(post);
+    const res = await fetch('/.netlify/functions/craftivity-generate-caption', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
+      body:    JSON.stringify({ topic: post.topic, imageUrls }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || res.statusText);
+
+    const { caption } = data;
+
+    // Save to Supabase
+    const { error } = await _sb.from('craftivity_posts')
+      .update({ caption, updated_at: new Date().toISOString() })
+      .eq('id', postId);
+    if (error) throw new Error(error.message);
+
+    // Update local cache & re-render
+    post.caption = caption;
+    renderTable();
+    toast('Caption generated! ✨', 'success');
+  } catch (err) {
+    toast('Generation failed: ' + err.message, 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Generate'; }
   }
 }
 

@@ -38,88 +38,163 @@
     }
     .btn-logout:hover { border-color: var(--cyan); }
 
-    /* Cover banner */
     .cover { height: 10px; width: 100%; }
-
     main { max-width: 860px; margin: 0 auto; padding: 2.5rem 5% 5rem; }
 
-    /* Project header */
+    /* ── Project header ── */
     .project-header { margin-bottom: 2rem; }
+    .project-status-wrap { display: flex; align-items: center; gap: .6rem; margin-bottom: .8rem; }
     .project-status {
       display: inline-flex; align-items: center; gap: .4rem;
       font-size: .72rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .08em; padding: .25rem .7rem; border-radius: 50px;
-      margin-bottom: .8rem;
+      letter-spacing: .08em; padding: .25rem .7rem; border-radius: 50px; cursor: pointer;
+      transition: opacity .15s;
     }
+    .project-status:hover { opacity: .8; }
     .status-planning    { background: #e3f2fd; color: #1565c0; }
     .status-in-progress { background: #e0f7fa; color: #00695c; }
     .status-review      { background: #fff8e1; color: #f57f17; }
     .status-completed   { background: #e8f5e9; color: #2e7d32; }
     .status-on-hold     { background: #f5f5f5; color: #616161; }
-
-    .project-name { font-size: 2rem; font-weight: 800; color: var(--navy); letter-spacing: -.03em; margin-bottom: .6rem; }
+    .status-select {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+      padding: .2rem .5rem; border-radius: 50px; border: 1.5px solid var(--cyan);
+      outline: none; cursor: pointer; background: var(--white);
+    }
+    .project-name {
+      font-size: 2rem; font-weight: 800; color: var(--navy); letter-spacing: -.03em;
+      margin-bottom: .6rem; cursor: text;
+    }
+    .project-name:hover .edit-hint { opacity: 1; }
     .project-meta { font-size: .82rem; color: var(--muted); }
 
-    /* Sections */
+    /* ── Sections ── */
     .section {
       background: var(--white); border-radius: var(--radius);
       border: 1px solid rgba(10,15,44,.07); box-shadow: var(--shadow);
       padding: 1.8rem; margin-bottom: 1.4rem;
     }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1rem;
+    }
     .section-title {
       font-size: .72rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .1em; color: var(--cyan); margin-bottom: 1rem;
+      letter-spacing: .1em; color: var(--cyan);
     }
-    .section-body { font-size: .95rem; color: var(--muted); line-height: 1.7; white-space: pre-wrap; }
+    .section-body { font-size: .95rem; color: var(--muted); line-height: 1.7; white-space: pre-wrap; cursor: text; }
 
-    /* Milestones */
-    .milestones { display: flex; flex-direction: column; gap: .7rem; }
-    .milestone {
-      display: flex; align-items: flex-start; gap: .8rem;
+    /* ── Editable fields ── */
+    .editable { position: relative; }
+    .editable:hover { outline: none; }
+    .edit-hint {
+      opacity: 0; font-size: .7rem; color: var(--cyan); margin-left: .5rem;
+      transition: opacity .15s; pointer-events: none; vertical-align: middle;
     }
+    .editable:hover .edit-hint { opacity: 1; }
+
+    .field-input {
+      width: 100%; padding: .55rem .75rem;
+      border: 1.5px solid var(--cyan); border-radius: 8px;
+      font-family: inherit; font-size: inherit; color: var(--text);
+      outline: none; box-shadow: 0 0 0 3px rgba(0,188,212,.1);
+      background: var(--white); transition: border-color .2s;
+    }
+    .field-input.name-input {
+      font-size: 1.8rem; font-weight: 800; color: var(--navy);
+      letter-spacing: -.03em; padding: .3rem .5rem;
+    }
+    textarea.field-input { resize: vertical; min-height: 100px; line-height: 1.7; }
+
+    /* ── Milestones ── */
+    .milestones { display: flex; flex-direction: column; gap: .7rem; }
+    .milestone { display: flex; align-items: flex-start; gap: .8rem; }
     .milestone-check {
-      flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+      flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
       border: 2px solid; display: flex; align-items: center; justify-content: center;
-      margin-top: 1px;
+      margin-top: 2px; cursor: pointer; transition: background .15s, border-color .15s;
     }
     .milestone-check.done  { background: var(--teal); border-color: var(--teal); }
     .milestone-check.open  { background: transparent; border-color: rgba(10,15,44,.2); }
+    .milestone-check.open:hover  { border-color: var(--teal); }
     .milestone-check.done svg { width: 10px; height: 10px; }
-    .milestone-info { flex: 1; }
-    .milestone-title { font-size: .92rem; font-weight: 600; color: var(--navy); }
+    .milestone-info { flex: 1; min-width: 0; }
+    .milestone-title {
+      font-size: .92rem; font-weight: 600; color: var(--navy); cursor: text;
+    }
     .milestone-title.done { text-decoration: line-through; color: var(--muted); font-weight: 400; }
-    .milestone-date { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+    .milestone-date { font-size: .78rem; color: var(--muted); margin-top: .15rem; cursor: text; }
+    .milestone-date-empty { font-size: .78rem; color: rgba(10,15,44,.2); margin-top: .15rem; font-style: italic; cursor: text; }
+    .milestone-remove {
+      flex-shrink: 0; background: none; border: none; color: rgba(10,15,44,.2);
+      font-size: 1rem; cursor: pointer; padding: .1rem .2rem; line-height: 1;
+      transition: color .15s; margin-top: 1px;
+    }
+    .milestone-remove:hover { color: #c62828; }
 
-    /* Links */
-    .links-list { display: flex; flex-wrap: wrap; gap: .7rem; }
+    .btn-add {
+      margin-top: .8rem; padding: .4rem .9rem; border: 1.5px dashed rgba(10,15,44,.2);
+      border-radius: 8px; background: none; font-size: .82rem; color: var(--muted);
+      cursor: pointer; width: 100%; transition: border-color .15s, color .15s;
+    }
+    .btn-add:hover { border-color: var(--cyan); color: var(--teal); }
+
+    /* ── Links ── */
+    .links-list { display: flex; flex-wrap: wrap; gap: .7rem; align-items: flex-start; }
     .link-item {
       display: inline-flex; align-items: center; gap: .5rem;
       padding: .6rem 1.2rem; border-radius: 50px;
       background: linear-gradient(135deg, var(--cyan), var(--teal));
       color: var(--white); text-decoration: none; font-size: .88rem; font-weight: 700;
       box-shadow: 0 4px 14px rgba(0,188,212,.25); transition: opacity .2s, transform .2s;
+      position: relative;
     }
     .link-item:hover { opacity: .88; transform: translateY(-1px); }
-    .link-icon { font-size: .95rem; flex-shrink: 0; }
-    .link-label { color: var(--white); }
-    .link-arrow { font-size: .85rem; }
+    .link-item .link-remove {
+      background: rgba(255,255,255,.25); border: none; border-radius: 50%; color: var(--white);
+      width: 18px; height: 18px; font-size: .7rem; cursor: pointer; line-height: 1;
+      display: flex; align-items: center; justify-content: center; margin-left: .2rem;
+      transition: background .15s;
+    }
+    .link-item .link-remove:hover { background: rgba(198,40,40,.6); }
+    .link-edit-form {
+      background: var(--off); border-radius: 10px; padding: 1rem;
+      display: flex; flex-direction: column; gap: .5rem; width: 100%;
+    }
+    .link-edit-form input {
+      padding: .45rem .7rem; border: 1.5px solid rgba(10,15,44,.14); border-radius: 7px;
+      font-size: .88rem; font-family: inherit; color: var(--text); outline: none;
+      background: var(--white); transition: border-color .2s;
+    }
+    .link-edit-form input:focus { border-color: var(--cyan); }
+    .link-edit-row { display: flex; gap: .5rem; }
+    .link-save-btn {
+      padding: .4rem 1rem; border: none; border-radius: 50px;
+      background: linear-gradient(135deg, var(--cyan), var(--teal));
+      color: var(--white); font-size: .8rem; font-weight: 700; cursor: pointer;
+    }
+    .link-cancel-btn {
+      padding: .4rem 1rem; border: 1.5px solid rgba(10,15,44,.14); border-radius: 50px;
+      background: none; color: var(--muted); font-size: .8rem; font-weight: 600; cursor: pointer;
+    }
 
-    /* Notes */
-    .notes-empty { color: var(--muted); font-size: .9rem; font-style: italic; }
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--navy); color: var(--white); padding: .75rem 1.5rem;
+      border-radius: 50px; font-size: .88rem; font-weight: 600;
+      box-shadow: 0 8px 24px rgba(10,15,44,.2); transition: transform .3s, opacity .3s;
+      opacity: 0; pointer-events: none; z-index: 300;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.success { background: var(--teal); }
+    .toast.error   { background: #c62828; }
 
-    /* Loading / error */
+    .notes-empty { color: var(--muted); font-size: .9rem; font-style: italic; cursor: text; }
     .loading { text-align: center; padding: 5rem 2rem; color: var(--muted); }
-
-    footer {
-      text-align: center; padding: 2rem 5%;
-      font-size: .82rem; color: var(--muted);
-      border-top: 1px solid rgba(10,15,44,.07);
-    }
+    footer { text-align: center; padding: 2rem 5%; font-size: .82rem; color: var(--muted); border-top: 1px solid rgba(10,15,44,.07); }
     footer a { color: var(--teal); text-decoration: none; }
-
-    @media (max-width: 600px) {
-      .project-name { font-size: 1.5rem; }
-    }
+    @media (max-width: 600px) { .project-name, .field-input.name-input { font-size: 1.4rem; } }
   </style>
 </head>
 <body>
@@ -150,126 +225,360 @@
 </header>
 
 <div class="cover" id="cover-bar"></div>
-
 <div id="page-content" class="loading">Loading project…</div>
+<div id="toast" class="toast"></div>
 
 <footer>
   <p>&copy; 2026 <a href="/">JJAIServices.com</a> &nbsp;|&nbsp; <a href="/privacy.html">Privacy</a> &nbsp;|&nbsp; <a href="/terms.html">Terms</a></p>
 </footer>
 
 <script>
-  const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let _project = null;
+let _authToken = null;
 
-  const STATUS_LABELS = {
-    planning:      'Planning',
-    'in-progress': 'In Progress',
-    review:        'Review',
-    completed:     'Completed',
-    'on-hold':     'On Hold',
-  };
+const STATUS_LABELS = {
+  planning: 'Planning', 'in-progress': 'In Progress',
+  review: 'Review', completed: 'Completed', 'on-hold': 'On Hold',
+};
+const STATUS_OPTIONS = Object.entries(STATUS_LABELS);
 
-  const projectId = new URLSearchParams(window.location.search).get('id');
-  if (!projectId) window.location.href = '/client-portal.html';
+const projectId = new URLSearchParams(window.location.search).get('id');
+if (!projectId) window.location.href = '/client-portal.html';
 
-  _sb.auth.getSession().then(({ data: { session } }) => {
-    if (!session) { window.location.href = '/client-login.html'; return; }
-    loadProject(session.user.id);
-  });
+_sb.auth.getSession().then(({ data: { session } }) => {
+  if (!session) { window.location.href = '/client-login.html'; return; }
+  _authToken = session.access_token;
+  loadProject(session.user.id);
+});
 
-  async function doLogout() {
-    await _sb.auth.signOut();
-    window.location.href = '/client-login.html';
+async function doLogout() {
+  await _sb.auth.signOut();
+  window.location.href = '/client-login.html';
+}
+
+// ── Load ───────────────────────────────────────────────────────────────
+async function loadProject(clientId) {
+  const { data, error } = await _sb.from('projects').select('*')
+    .eq('id', projectId).eq('client_id', clientId).single();
+
+  const content = document.getElementById('page-content');
+  if (error || !data) {
+    content.innerHTML = `<main style="text-align:center;padding:5rem 2rem;color:#5c6480;">
+      <h2 style="color:#0a0f2c;margin-bottom:.5rem;">Project not found</h2>
+      <p>This project doesn't exist or you don't have access.</p>
+      <a href="/client-portal.html" style="color:#00897b;text-decoration:none;font-weight:600;">← Back to My Projects</a>
+    </main>`;
+    return;
   }
+  _project = data;
+  renderProject();
+}
 
-  async function loadProject(clientId) {
-    const { data: project, error } = await _sb
-      .from('projects')
-      .select('*')
-      .eq('id', projectId)
-      .eq('client_id', clientId)
-      .single();
+// ── Render ─────────────────────────────────────────────────────────────
+function renderProject() {
+  const p = _project;
+  document.title = `${p.name} — JJAIServices.com`;
+  document.getElementById('cover-bar').style.background = p.cover_color || '#00bcd4';
 
-    const content = document.getElementById('page-content');
+  const status   = p.status || 'planning';
+  const updated  = new Date(p.updated_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const milestones = Array.isArray(p.milestones) ? p.milestones : [];
+  const links      = Array.isArray(p.links) ? p.links : [];
 
-    if (error || !project) {
-      content.innerHTML = `<main style="text-align:center;padding:5rem 2rem;color:#5c6480;">
-        <h2 style="color:#0a0f2c;margin-bottom:.5rem;">Project not found</h2>
-        <p>This project doesn't exist or you don't have access.</p>
-        <a href="/client-portal.html" style="color:#00897b;text-decoration:none;font-weight:600;">← Back to My Projects</a>
-      </main>`;
-      return;
-    }
-
-    document.title = `${project.name} — JJAIServices.com`;
-    document.getElementById('cover-bar').style.background = project.cover_color || '#00bcd4';
-    document.getElementById('cover-bar').style.height = '10px';
-
-    const status     = project.status || 'planning';
-    const statusLabel = STATUS_LABELS[status] || status;
-    const updated    = new Date(project.updated_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-    const milestones = Array.isArray(project.milestones) ? project.milestones : [];
-    const links      = Array.isArray(project.links) ? project.links : [];
-
-    const milestonesHtml = milestones.length === 0
-      ? '<p class="notes-empty">No milestones added yet.</p>'
-      : `<div class="milestones">${milestones.map(m => `
-          <div class="milestone">
-            <div class="milestone-check ${m.completed ? 'done' : 'open'}">
-              ${m.completed ? `<svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
-            </div>
-            <div class="milestone-info">
-              <div class="milestone-title ${m.completed ? 'done' : ''}">${esc(m.title)}</div>
-              ${m.date ? `<div class="milestone-date">${esc(m.date)}</div>` : ''}
-            </div>
-          </div>`).join('')}
-        </div>`;
-
-    const linksHtml = links.length === 0
-      ? '<p class="notes-empty">No links added yet.</p>'
-      : `<div class="links-list">${links.map(l => `
-          <a class="link-item" href="${esc(l.url)}" target="_blank" rel="noopener">
-            <span class="link-icon">🔗</span>
-            <span class="link-label">${esc(l.label)}</span>
-            <span class="link-arrow">↗</span>
-          </a>`).join('')}
-        </div>`;
-
-    content.className = '';
-    content.innerHTML = `
-      <main>
-        <div class="project-header">
-          <span class="project-status status-${status}">${statusLabel}</span>
-          <div class="project-name">${esc(project.name)}</div>
-          <div class="project-meta">Last updated ${updated}</div>
+  document.getElementById('page-content').className = '';
+  document.getElementById('page-content').innerHTML = `
+    <main>
+      <div class="project-header">
+        <div class="project-status-wrap">
+          <span class="project-status status-${status}" onclick="editStatus(this)" title="Click to change status">
+            ${STATUS_LABELS[status] || status}
+          </span>
         </div>
+        <div class="project-name editable" onclick="editName(this)" title="Click to edit">
+          ${esc(p.name)}<span class="edit-hint">✏️</span>
+        </div>
+        <div class="project-meta" id="project-meta">Last updated ${updated}</div>
+      </div>
 
-        ${project.description ? `
-        <div class="section">
+      <div class="section">
+        <div class="section-header">
           <div class="section-title">About this project</div>
-          <div class="section-body">${esc(project.description)}</div>
-        </div>` : ''}
+        </div>
+        <div class="section-body editable" id="about-body"
+             onclick="editTextarea(this,'description')"
+             title="Click to edit">
+          ${p.description ? esc(p.description) : '<span class="notes-empty">Click to add a description…</span>'}
+          <span class="edit-hint">✏️</span>
+        </div>
+      </div>
 
-        <div class="section">
+      <div class="section">
+        <div class="section-header">
           <div class="section-title">Milestones</div>
-          ${milestonesHtml}
         </div>
+        <div id="milestones-container">
+          ${renderMilestonesHtml(milestones)}
+        </div>
+        <button class="btn-add" onclick="addMilestone()">+ Add milestone</button>
+      </div>
 
-        <div class="section">
+      <div class="section">
+        <div class="section-header">
           <div class="section-title">Links &amp; Resources</div>
-          ${linksHtml}
         </div>
+        <div id="links-container">
+          ${renderLinksHtml(links)}
+        </div>
+        <button class="btn-add" onclick="showAddLink()">+ Add link</button>
+        <div id="add-link-form" style="display:none;margin-top:.8rem;">
+          <div class="link-edit-form">
+            <input id="new-link-label" type="text" placeholder="Button label" />
+            <input id="new-link-url" type="url" placeholder="https://…" />
+            <div class="link-edit-row">
+              <button class="link-save-btn" onclick="saveNewLink()">Add</button>
+              <button class="link-cancel-btn" onclick="hideAddLink()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        ${project.notes ? `
-        <div class="section">
+      <div class="section">
+        <div class="section-header">
           <div class="section-title">Notes &amp; Updates</div>
-          <div class="section-body">${esc(project.notes)}</div>
-        </div>` : ''}
-      </main>`;
-  }
+        </div>
+        <div class="section-body editable" id="notes-body"
+             onclick="editTextarea(this,'notes')"
+             title="Click to edit">
+          ${p.notes ? esc(p.notes) : '<span class="notes-empty">Click to add notes…</span>'}
+          <span class="edit-hint">✏️</span>
+        </div>
+      </div>
+    </main>`;
+}
 
-  function esc(s) {
-    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function renderMilestonesHtml(milestones) {
+  if (!milestones.length) return '<p class="notes-empty">No milestones yet — add one below.</p>';
+  return `<div class="milestones">${milestones.map((m, i) => `
+    <div class="milestone" data-idx="${i}">
+      <div class="milestone-check ${m.completed ? 'done' : 'open'}"
+           onclick="toggleMilestone(${i})" title="${m.completed ? 'Mark incomplete' : 'Mark complete'}">
+        ${m.completed ? `<svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+      </div>
+      <div class="milestone-info">
+        <div class="milestone-title ${m.completed ? 'done' : ''} editable"
+             onclick="editMilestoneField(${i},'title',this)"
+             title="Click to edit">${esc(m.title)}<span class="edit-hint">✏️</span></div>
+        <div class="${m.date ? 'milestone-date' : 'milestone-date-empty'} editable"
+             onclick="editMilestoneField(${i},'date',this)"
+             title="Click to edit">
+          ${m.date ? esc(m.date) : 'Add date or note…'}<span class="edit-hint">✏️</span>
+        </div>
+      </div>
+      <button class="milestone-remove" onclick="removeMilestone(${i})" title="Remove">×</button>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderLinksHtml(links) {
+  if (!links.length) return '<p class="notes-empty" id="links-empty">No links yet — add one below.</p>';
+  return `<div class="links-list">${links.map((l, i) => `
+    <a class="link-item" href="${esc(l.url)}" target="_blank" rel="noopener">
+      <span class="link-icon">🔗</span>
+      <span class="link-label">${esc(l.label)}</span>
+      <span class="link-arrow">↗</span>
+      <button class="link-remove" onclick="removeLink(event,${i})" title="Remove">×</button>
+    </a>`).join('')}
+  </div>`;
+}
+
+// ── Save helper ────────────────────────────────────────────────────────
+async function save(fields) {
+  const res = await fetch('/.netlify/functions/client-update-project', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${_authToken}` },
+    body:    JSON.stringify({ id: projectId, ...fields }),
+  });
+  const data = await res.json();
+  if (!res.ok) { toast(data.error || 'Save failed', 'error'); return false; }
+  Object.assign(_project, data);
+  document.getElementById('project-meta').textContent =
+    'Last updated ' + new Date(data.updated_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  toast('Saved', 'success');
+  return true;
+}
+
+// ── Status ─────────────────────────────────────────────────────────────
+function editStatus(span) {
+  const sel = document.createElement('select');
+  sel.className = 'status-select';
+  STATUS_OPTIONS.forEach(([val, label]) => {
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = label;
+    if (val === (_project.status || 'planning')) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  span.replaceWith(sel);
+  sel.focus();
+  sel.addEventListener('change', async () => {
+    const newStatus = sel.value;
+    const badge = document.createElement('span');
+    badge.className = `project-status status-${newStatus}`;
+    badge.onclick = function() { editStatus(this); };
+    badge.title = 'Click to change status';
+    badge.textContent = STATUS_LABELS[newStatus];
+    sel.replaceWith(badge);
+    await save({ status: newStatus });
+  });
+  sel.addEventListener('blur', () => {
+    if (sel.parentNode) {
+      const badge = document.createElement('span');
+      badge.className = `project-status status-${_project.status || 'planning'}`;
+      badge.onclick = function() { editStatus(this); };
+      badge.title = 'Click to change status';
+      badge.textContent = STATUS_LABELS[_project.status || 'planning'];
+      sel.replaceWith(badge);
+    }
+  });
+}
+
+// ── Project name ───────────────────────────────────────────────────────
+function editName(div) {
+  if (div.querySelector('input')) return;
+  const current = _project.name || '';
+  const input = document.createElement('input');
+  input.className = 'field-input name-input';
+  input.value = current;
+  div.innerHTML = '';
+  div.appendChild(input);
+  input.focus(); input.select();
+
+  let saved = false;
+  async function save_name() {
+    if (saved) return; saved = true;
+    const val = input.value.trim() || current;
+    div.innerHTML = esc(val) + '<span class="edit-hint">✏️</span>';
+    div.onclick = function() { editName(this); };
+    if (val !== current) { document.title = `${val} — JJAIServices.com`; await save({ name: val }); }
   }
+  input.addEventListener('blur', save_name);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); save_name(); }
+    if (e.key === 'Escape') { saved = true; input.value = current; save_name(); }
+  });
+}
+
+// ── Generic textarea (description / notes) ────────────────────────────
+function editTextarea(div, field) {
+  if (div.querySelector('textarea')) return;
+  const current = _project[field] || '';
+  const ta = document.createElement('textarea');
+  ta.className = 'field-input';
+  ta.rows = 6; ta.value = current;
+  div.innerHTML = ''; div.appendChild(ta);
+  ta.focus();
+  ta.addEventListener('click', e => e.stopPropagation());
+
+  let saved = false;
+  async function save_ta() {
+    if (saved) return; saved = true;
+    const val = ta.value.trim();
+    div.innerHTML = (val ? esc(val) : `<span class="notes-empty">Click to add…</span>`) + '<span class="edit-hint">✏️</span>';
+    div.onclick = function() { editTextarea(this, field); };
+    if (val !== current) await save({ [field]: val || null });
+  }
+  ta.addEventListener('blur', save_ta);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { saved = true; ta.value = current; save_ta(); }
+  });
+}
+
+// ── Milestones ─────────────────────────────────────────────────────────
+function toggleMilestone(idx) {
+  _project.milestones[idx].completed = !_project.milestones[idx].completed;
+  document.getElementById('milestones-container').innerHTML = renderMilestonesHtml(_project.milestones);
+  save({ milestones: _project.milestones });
+}
+
+function editMilestoneField(idx, field, el) {
+  if (el.querySelector('input')) return;
+  const current = _project.milestones[idx][field] || '';
+  const input = document.createElement('input');
+  input.className = 'field-input';
+  input.style.fontSize = field === 'title' ? '.92rem' : '.78rem';
+  input.value = current;
+  el.innerHTML = ''; el.appendChild(input);
+  input.focus(); input.select();
+  input.addEventListener('click', e => e.stopPropagation());
+
+  let saved = false;
+  async function save_m() {
+    if (saved) return; saved = true;
+    const val = input.value.trim();
+    _project.milestones[idx][field] = val;
+    document.getElementById('milestones-container').innerHTML = renderMilestonesHtml(_project.milestones);
+    if (val !== current) await save({ milestones: _project.milestones });
+  }
+  input.addEventListener('blur', save_m);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); save_m(); }
+    if (e.key === 'Escape') { saved = true; input.value = current; save_m(); }
+  });
+}
+
+function addMilestone() {
+  _project.milestones = [...(_project.milestones || []), { title: 'New milestone', date: '', completed: false }];
+  document.getElementById('milestones-container').innerHTML = renderMilestonesHtml(_project.milestones);
+  save({ milestones: _project.milestones });
+  // Auto-open the title for immediate editing
+  const rows = document.querySelectorAll('.milestone');
+  const lastTitle = rows[rows.length - 1]?.querySelector('.milestone-title');
+  if (lastTitle) setTimeout(() => editMilestoneField(_project.milestones.length - 1, 'title', lastTitle), 50);
+}
+
+function removeMilestone(idx) {
+  _project.milestones.splice(idx, 1);
+  document.getElementById('milestones-container').innerHTML = renderMilestonesHtml(_project.milestones);
+  save({ milestones: _project.milestones });
+}
+
+// ── Links ──────────────────────────────────────────────────────────────
+function showAddLink() {
+  document.getElementById('add-link-form').style.display = 'block';
+  document.getElementById('new-link-label').focus();
+}
+function hideAddLink() {
+  document.getElementById('add-link-form').style.display = 'none';
+  document.getElementById('new-link-label').value = '';
+  document.getElementById('new-link-url').value = '';
+}
+async function saveNewLink() {
+  const label = document.getElementById('new-link-label').value.trim();
+  const url   = document.getElementById('new-link-url').value.trim();
+  if (!url) { toast('URL is required', 'error'); return; }
+  _project.links = [...(_project.links || []), { label: label || url, url }];
+  document.getElementById('links-container').innerHTML = renderLinksHtml(_project.links);
+  hideAddLink();
+  await save({ links: _project.links });
+}
+async function removeLink(e, idx) {
+  e.preventDefault(); e.stopPropagation();
+  _project.links.splice(idx, 1);
+  document.getElementById('links-container').innerHTML = renderLinksHtml(_project.links);
+  await save({ links: _project.links });
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => el.className = 'toast', 2500);
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 </script>
 </body>
 </html>

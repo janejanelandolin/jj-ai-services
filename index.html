@@ -216,17 +216,24 @@
       background: linear-gradient(90deg, var(--cyan), var(--teal));
     }
 
+    .step-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+
     .step-number {
       display: inline-flex; align-items: center; justify-content: center;
       width: 42px; height: 42px; border-radius: 12px;
-      font-size: 1rem; font-weight: 800; margin-bottom: 1.2rem;
+      font-size: 1rem; font-weight: 800;
     }
     .step-card:nth-child(1) .step-number { background: rgba(0,188,212,.12); color: var(--cyan); }
     .step-card:nth-child(2) .step-number { background: rgba(21,101,192,.12); color: var(--blue); }
     .step-card:nth-child(3) .step-number { background: rgba(0,137,123,.12);  color: var(--teal); }
-    .step-card:nth-child(4) .step-number { background: rgba(26,35,126,.12);  color: var(--indigo); }
 
-    .step-card h3  { font-size: 1.2rem; font-weight: 700; color: var(--navy); margin-bottom: .3rem; }
+    .step-duration {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .78rem; font-weight: 600; color: var(--muted);
+      background: rgba(10,15,44,.04); border-radius: 999px; padding: .3rem .7rem .3rem .6rem;
+    }
+
+    .step-card h3  { display: flex; align-items: center; gap: .45rem; font-size: 1.2rem; font-weight: 700; color: var(--navy); margin-bottom: .3rem; }
     .step-card .step-tag { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); margin-bottom: 1rem; }
     .step-card p   { color: var(--muted); font-size: .9rem; margin-bottom: 1.2rem; }
 
@@ -522,13 +529,16 @@
   <!-- SERVICES -->
   <section id="services">
     <div class="section-label">Our Process</div>
-    <h2 class="section-title">Four steps to AI success</h2>
+    <h2 class="section-title">Three steps to AI success</h2>
     <p class="section-sub">A structured, end-to-end methodology that takes your organization from zero to production-ready AI — without the guesswork.</p>
 
     <div class="steps">
 
       <div class="step-card">
-        <div class="step-number">01</div>
+        <div class="step-head">
+          <div class="step-number">01</div>
+          <div class="step-duration"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>~2 weeks</div>
+        </div>
         <div class="step-tag">AI Readiness Assessment</div>
         <h3>Assess</h3>
         <p>Understand your starting point so we build the right solution for your unique situation.</p>
@@ -539,36 +549,33 @@
       </div>
 
       <div class="step-card">
-        <div class="step-number">02</div>
-        <div class="step-tag">Strategy &amp; Planning</div>
-        <h3>Design</h3>
-        <p>Turn insights into a clear blueprint with defined scope, milestones, and realistic timelines.</p>
+        <div class="step-head">
+          <div class="step-number">02</div>
+          <div class="step-duration"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>~4 weeks</div>
+        </div>
+        <div class="step-tag">Strategy, Build &amp; Validation</div>
+        <h3>Design + Build + Test <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cyan);flex-shrink:0;"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M8 16H3v5"/></svg></h3>
+        <p>Turn insight into a working solution — cycling through design, development, and validation until it's ready.</p>
         <ul class="sub-items">
-          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>What to do</strong> — Prioritize use cases by impact &amp; achievability</span></li>
-          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>How long</strong> — Roadmap with phases, owners &amp; delivery dates</span></li>
-        </ul>
-      </div>
-
-      <div class="step-card">
-        <div class="step-number">03</div>
-        <div class="step-tag">Validation &amp; Enablement</div>
-        <h3>Test</h3>
-        <p>Ensure everything works — and that your people are ready to use it with confidence.</p>
-        <ul class="sub-items">
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Roadmap</strong> — Prioritized use cases with phases, owners &amp; delivery dates</span></li>
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Build</strong> — Iterative development sprints with regular check-ins</span></li>
           <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Staff testing</strong> — Real users validate in real workflows</span></li>
-          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Training</strong> — Hands-on enablement for your team</span></li>
           <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Bug fixes</strong> — Rapid iteration until quality meets your bar</span></li>
         </ul>
       </div>
 
       <div class="step-card">
-        <div class="step-number">04</div>
-        <div class="step-tag">Go Live</div>
-        <h3>Deliver</h3>
-        <p>Launch into production with a smooth transition and your team fully in control.</p>
+        <div class="step-head">
+          <div class="step-number">03</div>
+          <div class="step-duration"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>~4 weeks</div>
+        </div>
+        <div class="step-tag">Go Live &amp; Ongoing Care</div>
+        <h3>Deliver + Monitor</h3>
+        <p>Launch into production with a smooth transition, then keep watch to ensure it keeps performing.</p>
         <ul class="sub-items">
           <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Deployment</strong> — Secure, scalable zero-disruption go-live</span></li>
           <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Handover</strong> — Full docs &amp; a trained team that owns the solution</span></li>
+          <li><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span><strong>Monitoring</strong> — Ongoing performance tracking &amp; proactive support</span></li>
         </ul>
       </div>
 
@@ -628,7 +635,7 @@
         <div class="plan-divider"></div>
         <div class="plan-desc">Our fully supported, end-to-end concierge experience. We handle every step alongside you — from assessment through live deployment.</div>
         <ul class="plan-features">
-          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Full Assess → Design → Test → Deliver</span></li>
+          <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Full Assess → Design/Build/Test → Deliver/Monitor</span></li>
           <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Dedicated expert team throughout</span></li>
           <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Staff training &amp; change management</span></li>
           <li class="plan-feature"><span class="check"><svg viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Production deployment &amp; handover</span></li>
@@ -705,7 +712,6 @@
         </span>
       </label>
       <p style="font-size:.76rem;color:rgba(10,15,44,.45);line-height:1.6;margin-top:.5rem;padding:.65rem .8rem;background:rgba(10,15,44,.03);border-radius:8px;border:1px solid rgba(10,15,44,.07);">
-        By checking the box above, you consent to receive SMS/text messages from JJAIServices.com. Message frequency varies.
         Message &amp; data rates may apply. Reply <strong>STOP</strong> to opt out at any time. Reply <strong>HELP</strong> for support.
         Consent is not a condition of purchase or service. Mobile numbers and consent data are never shared with third parties for marketing.
         View our <a href="/privacy.html" style="color:#00897b;">Privacy Policy</a> and <a href="/terms.html" style="color:#00897b;">Terms &amp; Conditions</a>.

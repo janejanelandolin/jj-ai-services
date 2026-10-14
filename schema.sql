@@ -37,9 +37,9 @@ CREATE POLICY "admin_select" ON public.sms_subscribers
 
 ALTER TABLE public.signups ENABLE ROW LEVEL SECURITY;
 
--- Public visitors can submit the contact form
+-- Anyone can submit the contact form, including signed-in clients/admins
 CREATE POLICY "public_insert" ON public.signups
-  FOR INSERT TO anon WITH CHECK (true);
+  FOR INSERT TO anon, authenticated WITH CHECK (true);
 
 -- Only authenticated admins can read the signups
 CREATE POLICY "admin_select" ON public.signups

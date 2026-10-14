@@ -36,7 +36,7 @@ test('sends an email for a new signup', async () => {
   const sent = JSON.parse(opts.body);
   expect(sent.to).toEqual(['owner@example.com']);
   expect(sent.reply_to).toBe('ada@example.com');
-  expect(sent.subject).toBe('New enquiry: Ada Lovelace (Strategy Session — $50)');
+  expect(sent.subject).toBe('New enquiry: Ada Lovelace (Strategy Session — $100)');
 });
 
 test('rejects a wrong secret', async () => {

@@ -13,9 +13,9 @@ const crypto = require('crypto');
 
 const PLAN_LABELS = {
   discovery:  'Free Discovery Call',
-  strategy:   'Strategy Session — $50',
-  standalone: 'Standalone Project — $1,000',
-  full:       'Expert Led — $5,000',
+  strategy:   'Strategy Session — $100',
+  standalone: 'Standalone Project — $5,000',
+  full:       'Expert Led — $10,000',
   unsure:     'Not sure yet',
 };
 

@@ -756,19 +756,25 @@
     btn.disabled = true;
     msgEl.textContent = '';
 
-    const { error } = await _sb.from('signups').insert({
-      first_name:  form.first_name.value.trim(),
-      last_name:   form.last_name.value.trim(),
-      email:       form.email.value.trim(),
-      phone:       form.phone.value.trim() || null,
-      company:     form.company.value.trim() || null,
-      plan:        form.plan.value || 'unsure',
-      challenge:   form.challenge ? form.challenge.value : null,
-      message:     form.message.value.trim() || null,
-      sms_consent: form.sms_consent.checked,
-    });
+    let error;
+    try {
+      ({ error } = await _sb.from('signups').insert({
+        first_name:  form.first_name.value.trim(),
+        last_name:   form.last_name.value.trim(),
+        email:       form.email.value.trim(),
+        phone:       form.phone.value.trim() || null,
+        company:     form.company.value.trim() || null,
+        plan:        form.plan.value || 'unsure',
+        challenge:   form.challenge ? form.challenge.value : null,
+        message:     form.message.value.trim() || null,
+        sms_consent: form.sms_consent.checked,
+      }));
+    } catch (err) {
+      error = err;
+    }
 
     if (error) {
+      console.error('Contact form submission failed:', error);
       msgEl.textContent = 'Something went wrong. Please try again or email us directly.';
       msgEl.style.color = '#c62828';
       btn.textContent = 'Try Again';
